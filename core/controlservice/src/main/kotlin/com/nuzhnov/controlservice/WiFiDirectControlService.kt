@@ -1,153 +1,130 @@
 package com.nuzhnov.controlservice
 
-import android.content.Context
-import android.content.Intent
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.NEARBY_WIFI_DEVICES
 import android.content.IntentFilter
-import android.net.*
+import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.content.pm.PackageManager.FEATURE_WIFI_DIRECT
+import android.net.wifi.WifiManager
 import android.net.wifi.p2p.WifiP2pGroup
-import android.net.wifi.p2p.WifiP2pInfo
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
-import android.os.IBinder
 import androidx.annotation.RequiresApi
+import com.nuzhnov.controlservice.data.StopReason
+import com.nuzhnov.controlservice.data.WiFiDirectControlServiceRepository
+import com.nuzhnov.controlservice.data.toStopReason
 import com.nuzhnov.controlservice.wifidirect.WiFiDirectBroadcastReceiver
 import com.nuzhnov.controlservice.wifidirect.WiFiDirectAction
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-/* TODO: check Wi-Fi direct compatibility and dangerous permissions in separate function,
-   that starts service. Also this function responsible to enable Wi-Fi Direct (moving user to
-   Settings app).
+// TODO: think about handling connection breaks
 
-   Send messages of service using intent and broadcast
-*/
+@AndroidEntryPoint
+class WiFiDirectControlService @Inject constructor(
+    override val repository: WiFiDirectControlServiceRepository
+) : ControlService() {
 
-class WiFiDirectControlService : ControlBaseService(),
-    WifiP2pManager.ConnectionInfoListener,
-    WifiP2pManager.GroupInfoListener {
+    internal var wifiDirectManager: WifiP2pManager? = null
+    internal var wifiDirectChannel: WifiP2pManager.Channel? = null
+    private var wifiDirectReceiver: WiFiDirectBroadcastReceiver? = null
 
-    private lateinit var connectivityManager: ConnectivityManager
-    private lateinit var networkListener: WifiDirectNetworkListener
-
-    internal lateinit var wifiP2pManager: WifiP2pManager
-    internal lateinit var channel: WifiP2pManager.Channel
-    private lateinit var receiver: WiFiDirectBroadcastReceiver
-
-    private var isInitialized = false
-    private var isStarted = false
-
-    private val receiverIntentFilter = IntentFilter().apply {
-        WiFiDirectAction.values().forEach { action -> addAction(action.string) }
-    }
+    internal var thisWifiDirectDevice
+        get() = repository.wifiDirectDevice.value
+        set(value) = repository.setThisDevice(value)
 
 
-    override fun onCreate() {
-        wifiP2pManager = getSystemService(Context.WIFI_P2P_SERVICE) as? WifiP2pManager ?: return
-        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return
-        channel = wifiP2pManager.initialize(
-            /* srcContext = */ this,
-            /* srcLooper = */ mainLooper,
-            /* listener = */ null
-        )
-        receiver = WiFiDirectBroadcastReceiver(service = this)
+    override fun onInitService() {
+        super.onInitService()
 
-        isInitialized = true
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!isInitialized) {
-            stopSelf()
-            return START_NOT_STICKY
+        if (!isWiFiDirectSupported()) {
+            onInitServiceFailed(StopReason.TECHNOLOGY_UNSUPPORTED)
+            return
         }
 
-        if (!isStarted) {
-            startService()
+        if (Build.VERSION.SDK_INT >= 21 && !isWiFiDirectEnabled()) {
+            onInitServiceFailed(StopReason.TECHNOLOGY_DISABLED)
+            return
         }
 
-        return START_STICKY
-    }
-
-    /**
-     * This service doesn't support binding, so this method always returns null
-     */
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
-
-    override fun onDestroy() {
-        if (isStarted) {
-            stopService()
+        if (Build.VERSION.SDK_INT >= 23 && !isPermissionsGranted()) {
+            onInitServiceFailed(StopReason.PERMISSION_DENIED)
+            return
         }
 
-        isInitialized = false
-    }
-
-    override fun onConnectionInfoAvailable(wifiP2pInfo: WifiP2pInfo) {
-        if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
-            val groupOwnerAddress = wifiP2pInfo.groupOwnerAddress
-            // TODO: Start listening for clients and requesting group info
-            // TODO: Requesting group info
-        }
-    }
-
-    override fun onGroupInfoAvailable(wifiP2pGroup: WifiP2pGroup) {
-        TODO("Not yet implemented")
-    }
-
-    private fun startService() {
-        isStarted = true
-
-        if (Build.VERSION.SDK_INT >= 21) {
-            registerNetworkListener()
+        val manager = getSystemService(WIFI_P2P_SERVICE) as? WifiP2pManager
+        if (manager == null) {
+            onInitServiceFailed(StopReason.TECHNOLOGY_DISABLED)
+            return
+        } else {
+            wifiDirectManager = manager
         }
 
-        registerReceiver(receiver, receiverIntentFilter)
-        wifiP2pManager.createGroup(channel, object : WifiP2pManager.ActionListener {
+        val channel = manager.initialize(this, mainLooper, null)
+        if (channel == null) {
+            onInitServiceFailed(StopReason.TECHNOLOGY_DISABLED)
+            return
+        } else {
+            wifiDirectChannel = channel
+        }
+
+        wifiDirectReceiver = WiFiDirectBroadcastReceiver(service = this)
+    }
+
+    override fun onStartService(startId: Int) {
+        super.onStartService(startId)
+
+        val receiverIntentFilter = IntentFilter().apply {
+            WiFiDirectAction.values().forEach { action -> addAction(action.string) }
+        }
+
+        registerReceiver(wifiDirectReceiver!!, receiverIntentFilter)
+        wifiDirectManager!!.createGroup(wifiDirectChannel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
-                // P2P group successfully created
+                // TODO: notify user about successfully created p2p group
             }
 
             override fun onFailure(reason: Int) {
-                TODO("Stop service and report about disconnected")
+                // TODO: notify user about failed to create p2p group
+                // TODO: maybe recreate group N times with interval M seconds
+                onStopService(reason.toStopReason())
             }
         })
     }
 
-    private fun stopService() {
-        isStarted = false
+    override fun onStopService(stopReason: StopReason) {
+        super.onStopService(stopReason)
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            unregisterNetworkListener()
+        wifiDirectReceiver?.apply { unregisterReceiver(/* receiver = */ this) }
+
+        val manager = wifiDirectManager ?: return
+        val channel = wifiDirectChannel ?: return
+
+        manager.removeGroup(channel, /* listener = */ null)
+    }
+
+    internal fun onPeerGroupUpdated(peerGroup: WifiP2pGroup) {
+        // TODO: update information about peers
+    }
+
+    private fun isWiFiDirectSupported() = packageManager.hasSystemFeature(FEATURE_WIFI_DIRECT)
+
+    @RequiresApi(api = 21)
+    private fun isWiFiDirectEnabled(): Boolean {
+        val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as? WifiManager
+        return wifiManager != null && wifiManager.isP2pSupported
+    }
+
+    @RequiresApi(api = 23)
+    private fun isPermissionsGranted() = when {
+        Build.VERSION.SDK_INT < 33 -> {
+            checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED &&
+            checkSelfPermission(ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED
         }
 
-        unregisterReceiver(receiver)
-        wifiP2pManager.removeGroup(channel, /* listener = */ null)
-        stopSelf()
-    }
-
-    @RequiresApi(api = 21)
-    private fun registerNetworkListener() {
-        val networkRequest = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_WIFI_P2P)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .build()
-
-        networkListener = WifiDirectNetworkListener()
-        connectivityManager.registerNetworkCallback(networkRequest, networkListener)
-    }
-
-    @RequiresApi(api = 21)
-    private fun unregisterNetworkListener() {
-        connectivityManager.unregisterNetworkCallback(networkListener)
-    }
-
-
-    @RequiresApi(api = 21)
-    private inner class WifiDirectNetworkListener : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) {
-            wifiP2pManager.requestConnectionInfo(channel, ::onConnectionInfoAvailable)
-        }
-
-        override fun onLost(network: Network) {
-            TODO("Stop service and report error")
+        else -> {
+            checkSelfPermission(NEARBY_WIFI_DEVICES) == PERMISSION_GRANTED
         }
     }
 }

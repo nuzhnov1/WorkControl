@@ -8,15 +8,15 @@ import android.content.Intent
 import android.net.NetworkInfo
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
-import android.os.Build
 import com.nuzhnov.controlservice.WiFiDirectControlService
+import com.nuzhnov.controlservice.data.StopReason
 
 internal class WiFiDirectBroadcastReceiver(
     private val service: WiFiDirectControlService
 ) : BroadcastReceiver() {
 
-    private val wifiP2pManager get() = service.wifiP2pManager
-    private val channel get() = service.channel
+    private val wifiDirectManager get() = service.wifiDirectManager
+    private val wifiDirectChannel get() = service.wifiDirectChannel
 
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -32,36 +32,41 @@ internal class WiFiDirectBroadcastReceiver(
                 )
 
                 if (state == WifiP2pManager.WIFI_P2P_STATE_DISABLED) {
-                    TODO("Stop service and report about disabled p2p")
+                    // TODO: notify user about disabled p2p status
+                    service.onStopService(StopReason.TECHNOLOGY_DISABLED)
                 }
             }
 
             WiFiDirectAction.THIS_DEVICE_CHANGED -> {
                 // When this device's configuration details have changed
 
-                val thisWifiP2pDevice: WifiP2pDevice = intent.getParcelable(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE)!!
-                TODO("Send this p2p device information by broadcast using intent")
+                val thisWifiP2pDevice: WifiP2pDevice = intent
+                    .getParcelable(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE)!!
+
+                service.thisWifiDirectDevice = thisWifiP2pDevice
             }
 
             WiFiDirectAction.CONNECTION_CHANGED -> {
                 // When state of Wi-Fi Direct connectivity has changed on this device
 
-                // On device's running on Android 5 or higher we using ConnectivityManager.NetworkCallback
-                if (Build.VERSION.SDK_INT < 21) {
-                    val networkInfo: NetworkInfo = intent.getParcelable(WifiP2pManager.EXTRA_NETWORK_INFO)!!
+                val networkInfo: NetworkInfo = intent
+                    .getParcelable(WifiP2pManager.EXTRA_NETWORK_INFO)!!
 
-                    if (networkInfo.isConnected) {
-                        wifiP2pManager.requestConnectionInfo(channel, service::onConnectionInfoAvailable)
-                    } else {
-                        TODO("Stop service and report about disconnected")
-                    }
+                // TODO: check network info
+                if (!networkInfo.isConnected) {
+                    // TODO: notify user about disconnected
+                    // TODO: Maybe just suspend the service instead of stopping it completely
+                    service.onStopService(StopReason.DISCONNECTED)
                 }
             }
 
             WiFiDirectAction.PEERS_CHANGED -> {
                 // When available peers list has changed
 
-                wifiP2pManager.requestGroupInfo(channel, service::onGroupInfoAvailable)
+                val manager = wifiDirectManager ?: return
+                val channel = wifiDirectChannel ?: return
+
+                manager.requestGroupInfo(channel, service::onPeerGroupUpdated)
             }
         }
     }

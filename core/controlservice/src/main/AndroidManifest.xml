@@ -21,7 +21,7 @@
         android:maxSdkVersion="32" />
 
     <!-- Google play filtering -->
-    <uses-feature android:name="android.hardware.wifi.direct" />
+    <uses-feature android:name="android.hardware.wifi.direct" android:required="false" />
 
     <application>
         <receiver
