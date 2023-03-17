@@ -24,16 +24,13 @@
     <uses-feature android:name="android.hardware.wifi.direct" android:required="false" />
 
     <application>
-        <receiver
-            android:name="com.nuzhnov.controlservice.wifidirect.WiFiDirectBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"></receiver>
         <!-- TODO: add description, label? and icon? -->
         <service
-            android:name="com.nuzhnov.controlservice.WiFiDirectControlService"
+            android:name="com.nuzhnov.controlservice.service.wifidirect.WiFiDirectControlService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="connectedDevice" />
+            android:foregroundServiceType="connectedDevice" >
+        </service>
     </application>
 
 </manifest>

@@ -1,26 +1,40 @@
-package com.nuzhnov.controlservice
+package com.nuzhnov.controlservice.service
 
 import android.app.Service
 import android.content.Intent
 import android.os.Build
-import com.nuzhnov.controlservice.data.ControlServiceRepository
-import com.nuzhnov.controlservice.data.ControlServiceState.*
-import com.nuzhnov.controlservice.data.StopReason
+import com.nuzhnov.controlservice.data.model.Role
+import com.nuzhnov.controlservice.data.model.ServiceState
+import com.nuzhnov.controlservice.data.repository.ServiceRepository
+import com.nuzhnov.controlservice.data.model.ServiceState.*
+import com.nuzhnov.controlservice.data.model.StopReason
+import com.nuzhnov.controlservice.service.wifidirect.getSerializable
 import javax.annotation.OverridingMethodsMustInvokeSuper
 
-// TODO: implement the Notification
+// TODO: implement user notifications about service status changes
 
-sealed class ControlService : Service() {
+abstract class ControlService : Service() {
 
-    protected abstract val repository: ControlServiceRepository
+    protected abstract val repository: ServiceRepository
+
+    protected var role: Role
+        get() = repository.role.value!!
+        set(value) = repository.setRole(value)
+
+    private var state: ServiceState
+        get() = repository.serviceState.value!!
+        set(value) = repository.updateServiceState(value)
+
+    protected val clients get() = repository.clients.value
 
 
     final override fun onCreate() {
+        state = Initialized
         onInitService()
     }
 
     final override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val serviceState = repository.serviceState.value
+        val serviceState = state
 
         // If initialization failed
         if (serviceState is Stopped) {
@@ -29,6 +43,7 @@ sealed class ControlService : Service() {
         }
 
         if (serviceState !is Running) {
+            role = intent?.getSerializable(EXTRA_ROLE) ?: Role.CLIENT
             onStartService(startId)
         }
 
@@ -41,38 +56,36 @@ sealed class ControlService : Service() {
     final override fun onBind(intent: Intent?) = null
 
     final override fun onDestroy() {
-        val serviceState = repository.serviceState.value
+        val serviceState = state
 
         if (serviceState is Initialized || serviceState is Running) {
             onStopService(StopReason.SERVICE_DESTROYED)
         }
     }
 
-    @OverridingMethodsMustInvokeSuper
-    open fun onInitService() {
-         repository.setServiceState(Initialized)
-    }
+    open fun onInitService() = Unit
 
     @OverridingMethodsMustInvokeSuper
     open fun onInitServiceFailed(stopReason: StopReason) {
-        repository.setServiceState(Stopped(stopReason))
+        state = Stopped(stopReason)
     }
 
     @OverridingMethodsMustInvokeSuper
     open fun onStartService(startId: Int) {
-        repository.setServiceState(Running)
+        state = Running
         addToForeground(startId)
     }
 
     @OverridingMethodsMustInvokeSuper
     open fun onStopService(stopReason: StopReason) {
-        repository.setServiceState(Stopped(stopReason))
+        state = Stopped(stopReason)
+        repository.removeAllClients()
         removeFromForeground()
         stopSelf()
     }
 
     private fun addToForeground(startId: Int) {
-        // TODO: startForeground(...)
+        // TODO: startForeground(startId, ...)
     }
 
     private fun removeFromForeground() {
@@ -81,5 +94,10 @@ sealed class ControlService : Service() {
         } else {
             stopForeground(STOP_FOREGROUND_REMOVE)
         }
+    }
+
+
+    companion object {
+        const val EXTRA_ROLE = "extraRole"
     }
 }

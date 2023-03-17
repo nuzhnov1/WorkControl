@@ -1,4 +1,4 @@
-package com.nuzhnov.controlservice.data
+package com.nuzhnov.controlservice.data.model
 
 import android.net.wifi.p2p.WifiP2pManager
 
