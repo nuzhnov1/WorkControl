@@ -1,4 +1,4 @@
-package com.nuzhnov.controlservice.data.api.util
+package com.nuzhnov.controlservice.data.api.common
 
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector

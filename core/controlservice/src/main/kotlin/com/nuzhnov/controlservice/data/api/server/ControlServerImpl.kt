@@ -5,7 +5,7 @@ import com.nuzhnov.controlservice.data.api.server.ControlServerState.*
 import com.nuzhnov.controlservice.data.api.server.ControlServerError.*
 import com.nuzhnov.controlservice.data.api.model.ClientApiModel
 import com.nuzhnov.controlservice.data.api.model.ControlServerResponse
-import com.nuzhnov.controlservice.data.api.util.*
+import com.nuzhnov.controlservice.data.api.common.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.yield
@@ -92,7 +92,7 @@ internal class ControlServerImpl : IControlServer {
         )
 
         is MaxAcceptConnectionAttemptsReachedException -> Stopped(
-            error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED_ERROR,
+            error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
             cause = cause
         )
     }
@@ -142,18 +142,16 @@ internal class ControlServerImpl : IControlServer {
             while (iterator.hasNext()) {
                 val key = iterator.next().also { iterator.remove() }
 
-                when {
-                    key.isAcceptable -> key.server?.apply {
+                if (key.isAcceptable) {
+                    key.server?.apply {
                         onAcceptClient(selector)
                             .onSuccess { acceptConnectionAttempts = 0 }
                             .onFailure { cause -> onFailedAcceptClient(cause) }
                     }
+                }
 
-                    key.isReadable -> key.client?.apply {
-                        onReadClient().onFailure { disconnectClient() }
-                    }
-
-                    key.isWritable -> Unit
+                if (key.isReadable) {
+                    key.client?.apply { onClientRead().onFailure { disconnectClient() } }
                 }
             }
         }
@@ -165,6 +163,8 @@ internal class ControlServerImpl : IControlServer {
         clientConnections.disconnectAll()
         runCatching { selector?.close() }
         runCatching { serverSocketChannel?.close() }
+
+        Unit
     }
 
     private fun ServerSocketChannel.onAcceptClient(selector: Selector) = runCatching {
@@ -182,27 +182,27 @@ internal class ControlServerImpl : IControlServer {
     private fun ServerSocketChannel.onStoppedAcceptConnections(cause: Throwable) = runCatching {
         close()
         _serverState.value = StoppedAcceptConnections(
-            error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED_ERROR,
+            error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
             cause = MaxAcceptConnectionAttemptsReachedException(cause)
         )
     }
 
-    private fun SocketChannel.onReadClient() = runCatching {
+    private fun SocketChannel.onClientRead() = runCatching {
         val clientSocket = socket()
         val clientAddress = clientSocket.remoteSocketAddress
         val clientID = clientConnections[clientAddress]?.id
 
-        val readBytesCount = readData()
+        val readBytesCount = readClientID()
 
         when {
             readBytesCount < 0 -> {
-                updateClient(clientID, isActiveNow = false)
+                updateClientActivity(clientID, isActiveNow = false)
                 disconnectClient()
             }
 
             readBytesCount != inputBufferSize -> {
-                updateClient(clientID, isActiveNow = false)
-                writeData(ControlServerResponse.BAD_REQUEST)
+                updateClientActivity(clientID, isActiveNow = false)
+                writeResponse(ControlServerResponse.BAD_REQUEST)
             }
 
             else -> {
@@ -210,16 +210,16 @@ internal class ControlServerImpl : IControlServer {
 
                 if (clientID == null) {
                     clientConnections[clientAddress] = ClientConnection(channel = this, id = id)
-                    updateClient(id, isActiveNow = true)
+                    updateClientActivity(id, isActiveNow = true)
                 } else {
-                    updateClient(clientID, isActiveNow = true)
+                    updateClientActivity(clientID, isActiveNow = true)
                 }
 
-                writeData(ControlServerResponse.OK)
+                writeResponse(ControlServerResponse.OK)
             }
         }
 
-        readBytesCount
+        Unit
     }
 
     private fun SocketChannel.connectClient(selector: Selector) {
@@ -249,18 +249,18 @@ internal class ControlServerImpl : IControlServer {
     private fun MutableMap<SocketAddress, ClientConnection>.disconnectAll() {
         values.map { it.channel }.forEach { channel ->
             channel.apply {
-                safeWriteData(ControlServerResponse.SHUTDOWN_SERVER)
+                safeWriteResponse(ControlServerResponse.SHUTDOWN_SERVER)
                 disconnectClient()
             }
         }
     }
 
-    private fun SocketChannel.readData(): Int {
+    private fun SocketChannel.readClientID(): Int {
         inputBuffer.clear()
         return read(inputBuffer)
     }
 
-    private fun SocketChannel.writeData(serverResponse: ControlServerResponse): Int {
+    private fun SocketChannel.writeResponse(serverResponse: ControlServerResponse): Int {
         outputBuffer.apply {
             clear()
             putInt(serverResponse.ordinal)
@@ -270,13 +270,15 @@ internal class ControlServerImpl : IControlServer {
         return write(outputBuffer)
     }
 
-    private fun SocketChannel.safeWriteData(serverResponse: ControlServerResponse) = runCatching {
-        writeData(serverResponse)
+    private fun SocketChannel.safeWriteResponse(serverResponse: ControlServerResponse) = runCatching {
+        writeResponse(serverResponse)
     }
 
-    private fun updateClient(clientID: Long?, isActiveNow: Boolean) {
+    private fun updateClientActivity(clientID: Long?, isActiveNow: Boolean) {
         if (clientID != null) {
-            _clients.update { clients -> clients.apply { updateClient(clientID, isActiveNow) } }
+            _clients.update { clients ->
+                clients.apply { updateClientActivity(clientID, isActiveNow) }
+            }
         }
     }
 
@@ -285,16 +287,16 @@ internal class ControlServerImpl : IControlServer {
     }
 
     // TODO: replace time methods with those that support api below 26
-    private fun MutableMap<Long, ClientApiModel>.updateClient(
-        uniqueID: Long,
+    private fun MutableMap<Long, ClientApiModel>.updateClientActivity(
+        clientID: Long,
         isActiveNow: Boolean
     ) {
-        val client = this[uniqueID]
+        val client = this[clientID]
         val now = LocalTime.now()
 
         if (client?.lastVisit == null) {
-            this[uniqueID] = ClientApiModel(
-                uniqueID = uniqueID,
+            this[clientID] = ClientApiModel(
+                id = clientID,
                 isActive = isActiveNow,
                 lastVisit = if (isActiveNow) { now } else { null },
                 totalVisitDuration = Duration.ZERO
@@ -305,8 +307,8 @@ internal class ControlServerImpl : IControlServer {
             val duration = client.totalVisitDuration
             val delta = Duration.between(previouslyVisit, now)
 
-            this[uniqueID] = ClientApiModel(
-                uniqueID = uniqueID,
+            this[clientID] = ClientApiModel(
+                id = clientID,
                 isActive = isActiveNow,
                 lastVisit = if (isActiveNow) { now } else { previouslyVisit },
                 totalVisitDuration = if (isPreviouslyActive) { duration + delta } else { duration }
