@@ -18,3 +18,4 @@ rootProject.name = "WorkControl"
 
 include(":app")
 include(":core:controlservice")
+include(":shared:visitcontrol")
