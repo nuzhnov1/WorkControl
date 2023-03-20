@@ -7,4 +7,8 @@ interface IControlClient {
     val clientState: StateFlow<ControlClientState>
 
     suspend fun start(serverAddress: InetAddress, serverPort: Int, clientID: Long)
+
+    companion object {
+        fun getDefaultControlClient(): IControlClient = ControlClientImpl()
+    }
 }

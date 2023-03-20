@@ -18,5 +18,7 @@ interface IControlServer {
     companion object {
         const val DEFAULT_BACKLOG = 512
         const val DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS = 16
+
+        fun getDefaultControlServer(): IControlServer = ControlServerImpl()
     }
 }
