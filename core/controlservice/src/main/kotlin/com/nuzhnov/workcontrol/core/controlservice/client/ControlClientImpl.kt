@@ -1,10 +1,10 @@
 package com.nuzhnov.workcontrol.core.controlservice.client
 
-import com.nuzhnov.controlservice.data.api.client.ControlClientException.*
-import com.nuzhnov.controlservice.data.api.client.ControlClientState.*
-import com.nuzhnov.controlservice.data.api.client.ControlClientError.*
-import com.nuzhnov.controlservice.data.api.model.ControlServerResponse
-import com.nuzhnov.controlservice.data.api.common.*
+import com.nuzhnov.workcontrol.core.controlservice.client.ControlClientException.*
+import com.nuzhnov.workcontrol.core.controlservice.client.ControlClientState.*
+import com.nuzhnov.workcontrol.core.controlservice.client.ControlClientError.*
+import com.nuzhnov.workcontrol.core.controlservice.model.ControlServerResponse
+import com.nuzhnov.workcontrol.core.controlservice.common.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,16 +16,19 @@ import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey.*
 import java.nio.channels.Selector
 import java.nio.channels.SocketChannel
+import kotlin.properties.Delegates
 
 internal class ControlClientImpl : IControlClient {
 
     private val _clientState = MutableStateFlow<ControlClientState>(value = NotRunning)
     override val clientState get() = _clientState.asStateFlow()
 
+    private var serverAddress by Delegates.notNull<InetAddress>()
+    private var serverPort by Delegates.notNull<Int>()
+    private var clientID by Delegates.notNull<Long>()
+
     private var selector: Selector? = null
     private var clientSocketChannel: SocketChannel? = null
-
-    private var clientID = 0L
 
     private val inputBufferSize = Int.SIZE_BYTES
     private val inputBuffer = ByteBuffer.allocate(inputBufferSize)
@@ -34,10 +37,10 @@ internal class ControlClientImpl : IControlClient {
 
 
     override suspend fun start(serverAddress: InetAddress, serverPort: Int, clientID: Long) {
-        this.clientID = clientID
+        initProperties(serverAddress, serverPort, clientID)
 
         try {
-            connect(serverAddress, serverPort)
+            connect()
                 .onSuccess { runClient() }
                 .onFailure { cause -> onConnectionFailed(cause) }
         } catch (exception: CancellationException) {
@@ -45,14 +48,38 @@ internal class ControlClientImpl : IControlClient {
         } catch (exception: ControlClientException) {
             _clientState.value = exception.toControlClientState()
         } catch (exception: IOException) {
-            _clientState.value = Stopped(error = IO_ERROR, cause = exception)
+            _clientState.value = Stopped(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                clientID = clientID,
+                error = IO_ERROR,
+                cause = exception
+            )
         } catch (exception: SecurityException) {
-            _clientState.value = Stopped(error = SECURITY_ERROR, cause = exception)
+            _clientState.value = Stopped(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                clientID = clientID,
+                error = SECURITY_ERROR,
+                cause = exception
+            )
         } catch (exception: Throwable) {
-            _clientState.value = Stopped(error = UNKNOWN_ERROR, cause = exception)
+            _clientState.value = Stopped(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                clientID = clientID,
+                error = UNKNOWN_ERROR,
+                cause = exception
+            )
         } finally {
             finishClient()
         }
+    }
+
+    private fun initProperties(serverAddress: InetAddress, serverPort: Int, clientID: Long) {
+        this.serverAddress = serverAddress
+        this.serverPort = serverPort
+        this.clientID = clientID
     }
 
     private fun ControlClientState.toNextStateWhenCancelled() = when (this) {
@@ -61,35 +88,50 @@ internal class ControlClientImpl : IControlClient {
     }
 
     private fun ControlClientException.toControlClientState() = when (this) {
-        is ConnectionFailedException -> Stopped(error = CONNECTION_FAILED, cause = cause)
-        is BreakConnectionException -> Stopped(error = BREAK_CONNECTION, cause = cause)
-        is BadConnectionException -> Stopped(error = BAD_CONNECTION, cause = cause)
+        is ConnectionFailedException -> Stopped(
+            serverAddress = serverAddress,
+            serverPort = serverPort,
+            clientID = clientID,
+            error = CONNECTION_FAILED,
+            cause = cause
+        )
+
+        is BreakConnectionException -> Stopped(
+            serverAddress = serverAddress,
+            serverPort = serverPort,
+            clientID = clientID,
+            error = BREAK_CONNECTION,
+            cause = cause
+        )
+
+        is BadConnectionException -> Stopped(
+            serverAddress = serverAddress,
+            serverPort = serverPort,
+            clientID = clientID,
+            error = BAD_CONNECTION,
+            cause = cause
+        )
+
         is ServerShutdownException -> NotRunning
     }
 
-    private suspend fun connect(serverAddress: InetAddress, serverPort: Int) = runCatching {
+    private suspend fun connect() = runCatching {
         selector = Selector.open()
         clientSocketChannel = SocketChannel.open().apply {
             val selector = selector!!
+            val socket = socket()
             val serverSocketAddress = InetSocketAddress(serverAddress, serverPort)
 
             configureBlocking(/* block = */ false)
             connect(serverSocketAddress)
             register(selector, /* ops = */ OP_READ or OP_WRITE)
 
-            _clientState.value = Connecting(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                clientID = clientID
-            )
+            serverAddress = socket.inetAddress
+            serverPort = socket.port
 
+            _clientState.value = Connecting(serverAddress, serverPort, clientID)
             awaitConnection()
-
-            _clientState.value = Running(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                clientID = clientID
-            )
+            _clientState.value = Running(serverAddress, serverPort, clientID)
         }
     }
 

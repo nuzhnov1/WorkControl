@@ -20,21 +20,25 @@ import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 import java.time.Duration
 import java.time.LocalTime
+import kotlin.properties.Delegates
 
 internal class ControlServerImpl : IControlServer {
 
-    private val _clients = MutableStateFlow(value = mutableMapOf<Long, ClientApiModel>())
-    override val clients: Flow<List<ClientApiModel>> get() = _clients.map { it.values.toList() }
+    private val _clients = MutableStateFlow(value = mutableSetOf<ClientApiModel>())
+    override val clients: StateFlow<Set<ClientApiModel>> get() = _clients.asStateFlow()
 
     private val _serverState = MutableStateFlow<ControlServerState>(value = NotRunning)
     override val serverState = _serverState.asStateFlow()
 
+    private lateinit var address: InetAddress
+    private var port by Delegates.notNull<Int>()
+    private var backlog by Delegates.notNull<Int>()
+    private var maxAcceptConnectionAttempts by Delegates.notNull<Int>()
+
     private val clientConnections = mutableMapOf<SocketAddress, ClientConnection>()
     private var selector: Selector? = null
     private var serverSocketChannel: ServerSocketChannel? = null
-
     private var acceptConnectionAttempts = 0
-    private var maxAcceptConnectionAttempts = 0
 
     private val inputBufferSize = Long.SIZE_BYTES
     private val inputBuffer = ByteBuffer.allocate(inputBufferSize)
@@ -46,16 +50,15 @@ internal class ControlServerImpl : IControlServer {
 
 
     override suspend fun start(
-        serverAddress: InetAddress,
+        address: InetAddress,
+        port: Int,
         backlog: Int,
         maxAcceptConnectionAttempts: Int
     ) {
-        checkArguments(maxAcceptConnectionAttempts)
-
-        this.maxAcceptConnectionAttempts = maxAcceptConnectionAttempts
+        initProperties(address, port, backlog, maxAcceptConnectionAttempts)
 
         try {
-            initControlServer(serverAddress, backlog)
+            initControlServer()
                 .onSuccess { runControlServer() }
                 .onFailure { cause -> onInitFailed(cause) }
         } catch (exception: CancellationException) {
@@ -63,55 +66,71 @@ internal class ControlServerImpl : IControlServer {
         } catch (exception: ControlServerException) {
             _serverState.value = exception.toControlServerState()
         } catch (exception: IOException) {
-            _serverState.value = Stopped(error = IO_ERROR, cause = exception)
+            _serverState.value = Stopped(address, port, error = IO_ERROR, cause = exception)
         } catch (exception: SecurityException) {
-            _serverState.value = Stopped(error = SECURITY_ERROR, cause = exception)
+            _serverState.value = Stopped(address, port, error = SECURITY_ERROR, cause = exception)
         } catch (exception: Throwable) {
-            _serverState.value = Stopped(error = UNKNOWN_ERROR, cause =  exception)
+            _serverState.value = Stopped(address, port, error = UNKNOWN_ERROR, cause =  exception)
         } finally {
             finishControlServer()
         }
     }
 
-    private fun checkArguments(maxAcceptConnectionAttempts: Int) {
+    private fun initProperties(
+        address: InetAddress,
+        port: Int,
+        backlog: Int,
+        maxAcceptConnectionAttempts: Int
+    ) {
         if (maxAcceptConnectionAttempts < 0) {
             throw IllegalArgumentException("maxAcceptConnectionAttempts < 0")
         }
+
+        this.address = address
+        this.port = port
+        this.backlog = backlog
+        this.maxAcceptConnectionAttempts = maxAcceptConnectionAttempts
     }
 
     private fun ControlServerState.toNextStateWhenCancelled() = when (this) {
         is Running -> NotRunning
-        is StoppedAcceptConnections -> Stopped(error, cause)
+        is StoppedAcceptConnections -> Stopped(address, port, error, cause)
         else -> this
     }
 
     private fun ControlServerException.toControlServerState() = when (this) {
         is InitException -> Stopped(
+            address = address,
+            port = port,
             error = INIT_ERROR,
             cause = cause
         )
 
         is MaxAcceptConnectionAttemptsReachedException -> Stopped(
+            address = address,
+            port = port,
             error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
             cause = cause
         )
     }
 
-    private fun initControlServer(serverAddress: InetAddress, backlog: Int) = runCatching {
+    private fun initControlServer() = runCatching {
+        removeAllClients()
+
         selector = Selector.open()
         serverSocketChannel = ServerSocketChannel.open().apply {
             val selector = selector!!
-            val serverSocket = socket()
-            val serverSocketAddress = InetSocketAddress(serverAddress, /* port = */ 0)
+            val socket = socket()
+            val serverSocketAddress = InetSocketAddress(address, port)
 
             configureBlocking(/* block = */ false)
-            serverSocket.bind(serverSocketAddress, backlog)
+            socket.bind(serverSocketAddress, backlog)
             register(selector, OP_ACCEPT)
 
-            _serverState.value = Running(
-                serverAddress = serverSocket.inetAddress,
-                serverPort = serverSocket.localPort
-            )
+            address = socket.inetAddress
+            port = socket.localPort
+
+            _serverState.value = Running(address, port)
         }
     }
 
@@ -158,8 +177,6 @@ internal class ControlServerImpl : IControlServer {
     }
 
     private fun finishControlServer() = runCatching {
-        removeAllClients()
-
         clientConnections.disconnectAll()
         runCatching { selector?.close() }
         runCatching { serverSocketChannel?.close() }
@@ -182,6 +199,8 @@ internal class ControlServerImpl : IControlServer {
     private fun ServerSocketChannel.onStoppedAcceptConnections(cause: Throwable) = runCatching {
         close()
         _serverState.value = StoppedAcceptConnections(
+            address = address,
+            port = port,
             error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
             cause = MaxAcceptConnectionAttemptsReachedException(cause)
         )
@@ -195,10 +214,7 @@ internal class ControlServerImpl : IControlServer {
         val readBytesCount = readClientID()
 
         when {
-            readBytesCount < 0 -> {
-                updateClientActivity(clientID, isActiveNow = false)
-                disconnectClient()
-            }
+            readBytesCount < 0 -> disconnectClient()
 
             readBytesCount != inputBufferSize -> {
                 updateClientActivity(clientID, isActiveNow = false)
@@ -229,10 +245,7 @@ internal class ControlServerImpl : IControlServer {
         configureBlocking(/* block = */ false)
         register(selector, /* ops = */ OP_READ or OP_WRITE)
 
-        clientConnections[clientAddress] = ClientConnection(
-            channel = this,
-            id = null
-        )
+        clientConnections[clientAddress] = ClientConnection(channel = this, id = null)
     }
 
     private fun SocketChannel.disconnectClient() = runCatching {
@@ -240,6 +253,7 @@ internal class ControlServerImpl : IControlServer {
         val clientAddress = clientSocket.remoteSocketAddress
 
         clientConnections.remove(clientAddress)?.also { clientConnection ->
+            updateClientActivity(clientID = clientConnection.id, isActiveNow = false)
             clientConnection.channel.apply { close() }
         }
 
@@ -270,9 +284,8 @@ internal class ControlServerImpl : IControlServer {
         return write(outputBuffer)
     }
 
-    private fun SocketChannel.safeWriteResponse(serverResponse: ControlServerResponse) = runCatching {
-        writeResponse(serverResponse)
-    }
+    private fun SocketChannel.safeWriteResponse(serverResponse: ControlServerResponse) =
+        runCatching { writeResponse(serverResponse) }
 
     private fun updateClientActivity(clientID: Long?, isActiveNow: Boolean) {
         if (clientID != null) {
@@ -286,7 +299,7 @@ internal class ControlServerImpl : IControlServer {
         _clients.update { clients -> clients.apply { clear() } }
     }
 
-    private fun MutableMap<Long, ClientApiModel>.updateClientActivity(
+    private fun MutableSet<ClientApiModel>.updateClientActivity(
         clientID: Long,
         isActiveNow: Boolean
     ) {
@@ -314,6 +327,14 @@ internal class ControlServerImpl : IControlServer {
             )
         }
     }
+
+    private operator fun MutableSet<ClientApiModel>.get(clientID: Long) =
+        find { model -> model.id == clientID }
+
+    private operator fun MutableSet<ClientApiModel>.set(
+        clientID: Long,
+        addedModel: ClientApiModel
+    ) = removeIf { model -> model.id == clientID }.also { add(addedModel) }
 
 
     private data class ClientConnection(

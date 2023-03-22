@@ -18,6 +18,9 @@ sealed interface ControlClientState {
     ) : ControlClientState
 
     data class Stopped(
+        val serverAddress: InetAddress,
+        val serverPort: Int,
+        val clientID: Long,
         val error: ControlClientError,
         val cause: Throwable
     ) : ControlClientState

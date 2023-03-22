@@ -6,16 +6,20 @@ sealed interface ControlServerState {
     object NotRunning : ControlServerState
 
     data class Running(
-        val serverAddress: InetAddress,
-        val serverPort: Int
+        val address: InetAddress,
+        val port: Int
     ) : ControlServerState
 
     data class StoppedAcceptConnections(
+        val address: InetAddress,
+        val port: Int,
         val error: ControlServerError,
         val cause: Throwable
     ) : ControlServerState
 
     data class Stopped(
+        val address: InetAddress,
+        val port: Int,
         val error: ControlServerError,
         val cause: Throwable
     ) : ControlServerState
