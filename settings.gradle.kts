@@ -18,4 +18,5 @@ rootProject.name = "WorkControl"
 
 include(":app")
 include(":core:controlservice")
+include(":core:controlservice:debug")
 include(":shared:visitcontrol")
