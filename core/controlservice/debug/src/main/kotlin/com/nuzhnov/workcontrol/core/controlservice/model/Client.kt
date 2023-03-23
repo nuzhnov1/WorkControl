@@ -3,7 +3,7 @@ package com.nuzhnov.workcontrol.core.controlservice.model
 import java.time.Duration
 import java.time.LocalTime
 
-data class Client(
+internal data class Client(
     val id: Long,
     val isActive: Boolean,
     val lastVisit: LocalTime?,

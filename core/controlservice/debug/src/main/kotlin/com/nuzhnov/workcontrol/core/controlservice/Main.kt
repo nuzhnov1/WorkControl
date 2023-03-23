@@ -1,218 +1,191 @@
 package com.nuzhnov.workcontrol.core.controlservice
 
+import com.nuzhnov.workcontrol.core.controlservice.testcase.*
 import com.nuzhnov.workcontrol.core.controlservice.model.Client
 import com.nuzhnov.workcontrol.core.controlservice.mapper.toClient
-import com.nuzhnov.workcontrol.core.controlservice.server.ControlServerError
-import com.nuzhnov.workcontrol.core.controlservice.server.ControlServerState
-import com.nuzhnov.workcontrol.core.controlservice.client.ControlClientError
-import com.nuzhnov.workcontrol.core.controlservice.client.ControlClientState
 import kotlin.random.Random
+import kotlin.random.nextInt
 import kotlin.random.nextLong
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.map
-import java.net.InetAddress
 import java.util.*
 
 
-const val RANDOM_SEED = 0
-const val DELAY_AFTER_FINISH_MS = 1_000L
-const val SERVER_WORK_TIME_MS = 10_000L
-const val CLIENT_MIN_ID = 0L
-const val CLIENT_MAX_ID = 1000L
-const val CLIENT_MIN_WORK_TIME_MS = 2_000L
-const val CLIENT_MAX_WORK_TIME_MS = 5_000L
-const val CLIENT_MIN_APPEARANCE_DELAY_TIME_MS = 0L
-const val CLIENT_MAX_APPEARANCE_DELAY_TIME_MS = 1_000L
-
+private const val RANDOM_SEED = 0
+private const val DELAY_AFTER_FINISH_MS = 1_000L
 
 private val random = Random(RANDOM_SEED)
-
 private val Client.isNotActive get() = !isActive
 
 
 fun main() {
-    val controlServer = ControlServiceApi.getDefaultControlServer()
-
-    repeat(1) {
-        controlServer.testCase(clientsCount = 5)
-        println()
-    }
+    ControlServiceApi.getDefaultControlServer().testCase(testData = testCaseData)
 }
 
-private fun ControlServiceApi.testCase(clientsCount: Int) {
-    println("Start testing...")
-    println("-".repeat(n = 80))
+private fun ControlServiceApi.testCase(testData: Iterable<TestCaseData>) {
+    testData.forEachIndexed { index, data ->
+        println("Start test case #${index + 1}...")
+        println("-".repeat(n = 80))
 
-    runBlocking(Dispatchers.IO) {
-        val serverAddress = InetAddress.getLocalHost()
-        val serverPort = 48791
-
-        launch { startServerTask(address = serverAddress, port = serverPort) }
-        launch { startClients(count = clientsCount, serverAddress, serverPort) }
-    }
-
-    println("End testing.")
-    println("Clients info:")
-    logClientsInfo()
-    println("-".repeat( n = 80))
-}
-
-private suspend fun ControlServiceApi.startServerTask(
-    address: InetAddress,
-    port: Int
-) = coroutineScope {
-    launch {
-        var isCreated = false
-
-        serverState.collect { state ->
-            if (!isCreated) {
-                println("Control Server: created.")
-                isCreated = true
-            }
-
-            println("Control Server: ${state.toLog()}.")
+        runBlocking(Dispatchers.IO) {
+            launch { startServerTask(testData = data) }
+            launch { startClientTasks(testData = data) }
         }
+
+        println("End testing.")
+        println("Clients info:")
+        logClientsInfo()
+        println("-".repeat(n = 80))
     }
 
-    launch {
-        var currentClientSet: SortedSet<Client> = sortedSetOf()
+    println()
+}
 
-        clients
-            .map { modelsSet -> modelsSet.map { model -> model.toClient() }.toSortedSet() }
-            .collect { clientSet ->
-                onUpdateClients(currentClientSet, clientSet)
-                currentClientSet = clientSet
-            }
-    }
+private suspend fun ControlServiceApi.startServerTask(testData: TestCaseData) = coroutineScope {
+    launchServerStateObserver(service = this@startServerTask)
+    launchClientsObserver(service = this@startServerTask)
 
-    runCatching { withTimeout(SERVER_WORK_TIME_MS) { startServer(address, port) } }
-
+    startServer(testData)
     delay(DELAY_AFTER_FINISH_MS)
     cancel()
 }
 
-private suspend fun startClients(
-    count: Int,
-    serverAddress: InetAddress,
-    serverPort: Int
-) = coroutineScope {
-    repeat(count) {
-        val controlClient = ControlServiceApi.getDefaultControlServer()
-        val clientID = random.nextLong(range = CLIENT_MIN_ID..CLIENT_MAX_ID)
+private fun CoroutineScope.launchServerStateObserver(service: ControlServiceApi) = launch {
+    var isCreated = false
 
-        val clientWorkTimeMillis = random.nextLong(
-            range = CLIENT_MIN_WORK_TIME_MS..CLIENT_MAX_WORK_TIME_MS
-        )
-
-        val clientAppearanceDelayTimeMillis = random.nextLong(
-            range = CLIENT_MIN_APPEARANCE_DELAY_TIME_MS..CLIENT_MAX_APPEARANCE_DELAY_TIME_MS
-        )
-
-
-        delay(timeMillis = clientAppearanceDelayTimeMillis)
-
-        launch {
-            launch {
-                var isCreated = false
-
-                controlClient.clientState.collect { state ->
-                    if (!isCreated) {
-                        println("Client#$clientID: created.")
-                        isCreated = true
-                    }
-
-                    println("Client#$clientID: ${state.toLog()}.")
-                }
-            }
-
-            runCatching {
-                withTimeout(timeMillis = clientWorkTimeMillis) {
-                    controlClient.startClient(serverAddress, serverPort, clientID)
-                }
-            }
-
-            delay(DELAY_AFTER_FINISH_MS)
-            cancel()
+    service.serverState.collect { state ->
+        if (!isCreated) {
+            log("Control Server: created.")
+            isCreated = true
         }
+
+        log("Control Server: ${state.toLog()}.")
     }
 }
 
-private fun ControlServiceApi.logClientsInfo() = clients.value
-    .map { model -> model.toClient() }
-    .forEach { client -> println(client.toLog()) }
+private fun CoroutineScope.launchClientsObserver(service: ControlServiceApi) = launch {
+    var currentClientSet: SortedSet<Client> = sortedSetOf()
+
+    service.clients
+        .map { modelsSet -> modelsSet.map { model -> model.toClient() }.toSortedSet() }
+        .collect { clientSet ->
+            onUpdateClients(currentClientSet, clientSet)
+            currentClientSet = clientSet
+        }
+}
+
+private suspend fun ControlServiceApi.startServer(testData: TestCaseData) = runCatching {
+    withTimeout(timeMillis = testData.serverWorkTimeMillis) {
+        startServer(address = testData.serverAddress, port = testData.serverPort)
+    }
+}
 
 private fun onUpdateClients(oldClientSet: SortedSet<Client>, newClientSet: SortedSet<Client>) {
     infix fun Boolean.but(other: Boolean) = this && other
 
     val newClients = newClientSet - oldClientSet
 
-    newClients.forEach { client -> println("Control Server: new client with id = ${client.id}!") }
+    newClients.forEach { client -> log("Control Server: new client with id = ${client.id}!") }
     oldClientSet.zip(newClientSet).forEach { (oldInfo, newInfo) ->
         if (oldInfo.isActive but newInfo.isNotActive) {
-            println("Control Server: the client with id = ${newInfo.id} is not active now.")
+            log("Control Server: the client with id = ${newInfo.id} is not active now.")
         } else if (oldInfo.isNotActive but newInfo.isActive) {
-            println("Control Server: the client with id = ${newInfo.id} is active now.")
+            log("Control Server: the client with id = ${newInfo.id} is active now.")
         }
     }
 }
 
-private fun Client.toLog() =
-    "Client#$id: is active - ${isActive.toLog()}; " +
-    "total visit duration - $totalVisitDuration"
-
-private fun ControlServerState.toLog() = when (this) {
-    is ControlServerState.NotRunning -> "not running"
-
-    is ControlServerState.Running -> "running on address '${address}' and port '${port}'"
-
-    is ControlServerState.StoppedAcceptConnections ->
-        "stopped accepting new connections for the reason: ${error.toLog()}; " +
-        "Detailed message: ${cause.toLog()}"
-
-    is ControlServerState.Stopped ->
-        "stopped for the reason: ${error.toLog()}; Detailed message: ${cause.toLog()}"
+private suspend fun startClientTasks(testData: TestCaseData) = coroutineScope {
+    testData
+        .generateClientTestData()
+        .forEach { clientTestData -> startClientTask(testData, clientTestData) }
 }
 
-private fun ControlClientState.toLog() = when (this) {
-    is ControlClientState.NotRunning -> "not running"
-
-    is ControlClientState.Connecting ->
-        "connecting to the server with address '$serverAddress' and port '$serverPort'"
-
-    is ControlClientState.Running ->
-        "has successfully connected to the server with address " +
-        "'$serverAddress' and port '$serverPort'"
-
-    is ControlClientState.Stopped ->
-        "connection to the server with address '$serverAddress' and port '$serverPort' " +
-        "has benn stopped for the reason: ${error.toLog()}; Detailed message: ${cause.toLog()}"
+private fun TestCaseData.generateClientTestData() = buildList {
+    repeat(clientsCount) {
+        add(ClientTestData(
+            id = random.nextLong(range = 0L..(clientsCount * 1000)),
+            workTimeMillis = random.nextLong(
+                range = clientMinWorkTimeMillis..clientMaxWorkTimeMillis
+            ),
+            delayTimeMillis = random.nextLong(
+                range = clientMinAppearanceDelayTimeMillis..clientMaxAppearanceDelayTimeMillis
+            ),
+            interruptionsCount = random.nextInt(
+                range = clientMinInterruptionCount..clientMaxInterruptionCount
+            )
+        ))
+    }
 }
 
-private fun ControlServerError.toLog() = when (this) {
-    ControlServerError.INIT_ERROR -> "initialization failed"
-    ControlServerError.MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED -> "failed to accept new connections"
-    ControlServerError.IO_ERROR -> "an I/O error has occurred"
-    ControlServerError.SECURITY_ERROR -> "permission denied to accept a new connection"
-    ControlServerError.UNKNOWN_ERROR -> "an unknown error has occurred"
+private fun CoroutineScope.startClientTask(
+    testData: TestCaseData,
+    clientTestData: ClientTestData
+) = launch {
+    val controlClient = ControlServiceApi.getDefaultControlServer()
+
+    launchClientStateObserver(service = controlClient, clientTestData = clientTestData)
+
+    delay(timeMillis = clientTestData.delayTimeMillis)
+    controlClient.startClient(testData, clientTestData)
+    delay(DELAY_AFTER_FINISH_MS)
+    cancel()
 }
 
-private fun ControlClientError.toLog() =
-    when (this) {
-        ControlClientError.CONNECTION_FAILED -> "failed to connect to the server"
-        ControlClientError.BREAK_CONNECTION -> "the connection to the server has been broken"
-        ControlClientError.BAD_CONNECTION -> "bad connection to the server"
-        ControlClientError.IO_ERROR -> "an I/O error has occurred when connecting to the server"
-        ControlClientError.SECURITY_ERROR -> "permission denied to connect to the server"
-        ControlClientError.UNKNOWN_ERROR ->
-            "an unknown error has occurred when connecting to the server"
+private fun CoroutineScope.launchClientStateObserver(
+    service: ControlServiceApi,
+    clientTestData: ClientTestData
+) = launch {
+    var isCreated = false
+
+    service.clientState.collect { state ->
+        if (!isCreated) {
+            log("Client#${clientTestData.id}: created.")
+            isCreated = true
+        }
+
+        log("Client#${clientTestData.id}: ${state.toLog()}.")
+    }
 }
 
-private fun Throwable.toLog() = when (localizedMessage) {
-    null -> "<empty>"
-    else -> localizedMessage
+private suspend fun ControlServiceApi.startClient(
+    testData: TestCaseData,
+    clientTestData: ClientTestData
+) {
+    val id = clientTestData.id
+    val workTimeMillis = clientTestData.workTimeMillis
+    val delayTimeMillis = clientTestData.delayTimeMillis
+    val interruptionsCount = clientTestData.interruptionsCount
+
+    val totalWorkTimeMillis = workTimeMillis - delayTimeMillis * interruptionsCount
+    val partWorkTimeMillis = totalWorkTimeMillis / (interruptionsCount + 1)
+
+    repeat(times = interruptionsCount + 1) {
+        runCatching {
+            withTimeout(timeMillis = partWorkTimeMillis) {
+                startClient(
+                    serverAddress = testData.serverAddress,
+                    serverPort = testData.serverPort,
+                    clientID = id
+                )
+            }
+        }
+
+        delay(delayTimeMillis)
+    }
 }
 
-private fun Boolean.toLog() = when (this) {
-    true -> "yes"
-    false -> "no"
+private fun ControlServiceApi.logClientsInfo() {
+    println("Clients count: ${clients.value.size}.")
+    clients.value
+        .map { model -> model.toClient() }
+        .forEach { client -> println(client.toLog()) }
 }
+
+
+private data class ClientTestData(
+    val id: Long,
+    val workTimeMillis: Long,
+    val delayTimeMillis: Long,
+    val interruptionsCount: Int
+)
