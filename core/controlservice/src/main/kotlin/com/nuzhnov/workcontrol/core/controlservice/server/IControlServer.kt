@@ -6,7 +6,7 @@ import java.net.InetAddress
 
 interface IControlServer {
     val clients: StateFlow<Set<ClientApiModel>>
-    val serverState: StateFlow<ControlServerState>
+    val state: StateFlow<ControlServerState>
 
     suspend fun start(
         address: InetAddress,

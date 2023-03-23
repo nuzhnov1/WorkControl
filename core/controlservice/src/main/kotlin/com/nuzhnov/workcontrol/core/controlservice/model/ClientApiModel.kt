@@ -9,11 +9,4 @@ data class ClientApiModel(
     val isActive: Boolean,
     val lastVisit: LocalTime?,
     val totalVisitDuration: Duration
-) {
-    override fun equals(other: Any?) = when (other) {
-        is ClientApiModel -> id == other.id
-        else -> false
-    }
-
-    override fun hashCode() = id.hashCode()
-}
+)

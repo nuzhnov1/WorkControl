@@ -14,9 +14,9 @@ interface ControlServiceApi {
     val client: IControlClient
 
     val clients: StateFlow<Set<ClientApiModel>> get() = server.clients
-    val serverState: StateFlow<ControlServerState> get() = server.serverState
+    val serverState: StateFlow<ControlServerState> get() = server.state
 
-    val clientState: StateFlow<ControlClientState> get() = client.clientState
+    val clientState: StateFlow<ControlClientState> get() = client.state
 
 
     suspend fun startServer(

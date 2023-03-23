@@ -5,6 +5,7 @@ import com.nuzhnov.workcontrol.core.controlservice.client.ControlClientState.*
 import com.nuzhnov.workcontrol.core.controlservice.client.ControlClientError.*
 import com.nuzhnov.workcontrol.core.controlservice.model.ControlServerResponse
 import com.nuzhnov.workcontrol.core.controlservice.common.*
+import kotlin.properties.Delegates
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,12 +17,11 @@ import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey.*
 import java.nio.channels.Selector
 import java.nio.channels.SocketChannel
-import kotlin.properties.Delegates
 
 internal class ControlClientImpl : IControlClient {
 
-    private val _clientState = MutableStateFlow<ControlClientState>(value = NotRunning)
-    override val clientState get() = _clientState.asStateFlow()
+    private val _state = MutableStateFlow<ControlClientState>(value = NotRunning)
+    override val state = _state.asStateFlow()
 
     private var serverAddress by Delegates.notNull<InetAddress>()
     private var serverPort by Delegates.notNull<Int>()
@@ -40,15 +40,15 @@ internal class ControlClientImpl : IControlClient {
         initProperties(serverAddress, serverPort, clientID)
 
         try {
-            connect()
+            initiateConnection()
                 .onSuccess { runClient() }
                 .onFailure { cause -> onConnectionFailed(cause) }
         } catch (exception: CancellationException) {
-            _clientState.value = _clientState.value.toNextStateWhenCancelled()
+            _state.value = _state.value.toNextStateWhenCancelled()
         } catch (exception: ControlClientException) {
-            _clientState.value = exception.toControlClientState()
+            _state.value = exception.toControlClientState()
         } catch (exception: IOException) {
-            _clientState.value = Stopped(
+            _state.value = Stopped(
                 serverAddress = serverAddress,
                 serverPort = serverPort,
                 clientID = clientID,
@@ -56,7 +56,7 @@ internal class ControlClientImpl : IControlClient {
                 cause = exception
             )
         } catch (exception: SecurityException) {
-            _clientState.value = Stopped(
+            _state.value = Stopped(
                 serverAddress = serverAddress,
                 serverPort = serverPort,
                 clientID = clientID,
@@ -64,7 +64,7 @@ internal class ControlClientImpl : IControlClient {
                 cause = exception
             )
         } catch (exception: Throwable) {
-            _clientState.value = Stopped(
+            _state.value = Stopped(
                 serverAddress = serverAddress,
                 serverPort = serverPort,
                 clientID = clientID,
@@ -115,7 +115,7 @@ internal class ControlClientImpl : IControlClient {
         is ServerShutdownException -> NotRunning
     }
 
-    private suspend fun connect() = runCatching {
+    private suspend fun initiateConnection() = applyCatching {
         selector = Selector.open()
         clientSocketChannel = SocketChannel.open().apply {
             val selector = selector!!
@@ -129,9 +129,9 @@ internal class ControlClientImpl : IControlClient {
             serverAddress = socket.inetAddress
             serverPort = socket.port
 
-            _clientState.value = Connecting(serverAddress, serverPort, clientID)
+            _state.value = Connecting(serverAddress, serverPort, clientID)
             awaitConnection()
-            _clientState.value = Running(serverAddress, serverPort, clientID)
+            _state.value = Running(serverAddress, serverPort, clientID)
         }
     }
 
@@ -152,8 +152,9 @@ internal class ControlClientImpl : IControlClient {
         val selector = selector!!
 
         while (true) {
+            yield()
+
             if (selector.isEventsNotOccurred) {
-                yield()
                 continue
             }
 
@@ -164,24 +165,22 @@ internal class ControlClientImpl : IControlClient {
                 val key = iterator.next().also { iterator.remove() }
 
                 if (key.isWritable) {
-                    key.client?.onClientWrite()
+                    key.client?.sendID()
                 }
 
                 if (key.isReadable) {
-                    key.client?.onClientRead()
+                    key.client?.receiveResponse()
                 }
             }
         }
     }
 
-    private fun finishClient() = runCatching {
-        runCatching { selector?.close() }
-        runCatching { clientSocketChannel?.close() }
-
-        Unit
+    private fun finishClient() = applyCatching {
+        selector?.safeClose()
+        clientSocketChannel?.safeClose()
     }
 
-    private fun SocketChannel.onClientRead() {
+    private fun SocketChannel.receiveResponse() {
         val readBytesCount = readResponse()
 
         when {
@@ -205,16 +204,20 @@ internal class ControlClientImpl : IControlClient {
                     )
                 }
             }
+
+            else -> throw BadConnectionException(
+                cause = IOException(/* message = */ "bad connection")
+            )
         }
     }
 
-    private fun SocketChannel.onClientWrite() {
+    private fun SocketChannel.sendID() {
         writeClientID()
     }
 
     private fun SocketChannel.readResponse(): Int {
         inputBuffer.clear()
-        return read(inputBuffer)
+        return read(inputBuffer).also { inputBuffer.flip() }
     }
 
     private fun SocketChannel.writeClientID(): Int {
