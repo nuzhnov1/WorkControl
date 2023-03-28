@@ -1,0 +1,25 @@
+package com.nuzhnov.workcontrol.core.visitcontrol.server
+
+import com.nuzhnov.workcontrol.core.visitcontrol.model.Visitor
+import kotlinx.coroutines.flow.StateFlow
+import java.net.InetAddress
+
+interface IServer {
+    val visitors: StateFlow<Set<Visitor>>
+    val state: StateFlow<ServerState>
+
+    suspend fun start(
+        address: InetAddress,
+        port: Int = DEFAULT_PORT,
+        backlog: Int = DEFAULT_BACKLOG,
+        maxAcceptConnectionAttempts: Int = DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS
+    )
+
+    companion object {
+        const val DEFAULT_PORT = 0
+        const val DEFAULT_BACKLOG = 512
+        const val DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS = 16
+
+        fun getDefaultControlServer(): IServer = ServerImpl()
+    }
+}

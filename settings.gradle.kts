@@ -17,6 +17,6 @@ dependencyResolutionManagement {
 rootProject.name = "WorkControl"
 
 include(":app")
-include(":core:controlservice")
-include(":core:controlservice:debug")
+include(":core:visitcontrol")
+include(":core:visitcontrol:debug")
 include(":shared:visitcontrol")
