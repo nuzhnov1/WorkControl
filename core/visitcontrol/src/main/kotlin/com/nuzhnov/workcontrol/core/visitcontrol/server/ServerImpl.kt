@@ -22,7 +22,7 @@ import java.nio.channels.SocketChannel
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
-internal class ServerImpl : IServer {
+internal class ServerImpl : Server {
 
     private val _visitorsMap = mutableMapOf<Long, Visitor>()
     private val _visitors = MutableStateFlow(value = _visitorsMap.values.toSet())

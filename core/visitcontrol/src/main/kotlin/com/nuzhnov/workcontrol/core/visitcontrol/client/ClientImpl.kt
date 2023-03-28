@@ -18,7 +18,7 @@ import java.nio.channels.SelectionKey.*
 import java.nio.channels.Selector
 import java.nio.channels.SocketChannel
 
-internal class ClientImpl : IClient {
+internal class ClientImpl : Client {
 
     private val _state = MutableStateFlow<ClientState>(value = NotRunning)
     override val state = _state.asStateFlow()

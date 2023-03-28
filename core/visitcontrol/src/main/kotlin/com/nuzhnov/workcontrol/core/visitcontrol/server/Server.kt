@@ -4,7 +4,7 @@ import com.nuzhnov.workcontrol.core.visitcontrol.model.Visitor
 import kotlinx.coroutines.flow.StateFlow
 import java.net.InetAddress
 
-interface IServer {
+interface Server {
     val visitors: StateFlow<Set<Visitor>>
     val state: StateFlow<ServerState>
 
@@ -20,6 +20,6 @@ interface IServer {
         const val DEFAULT_BACKLOG = 512
         const val DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS = 16
 
-        fun getDefaultControlServer(): IServer = ServerImpl()
+        fun getDefaultServer(): Server = ServerImpl()
     }
 }
