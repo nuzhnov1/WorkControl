@@ -25,6 +25,7 @@ fun main() {
 private fun ControlServiceApi.testCase(testData: Iterable<TestCaseData>) {
     testData.forEachIndexed { index, data ->
         println("Start test case #${index + 1}...")
+        println("Test case info:\n$data")
         println("-".repeat(n = 80))
 
         runBlocking(Dispatchers.IO) {

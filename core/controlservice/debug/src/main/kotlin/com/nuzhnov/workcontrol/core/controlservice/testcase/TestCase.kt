@@ -13,7 +13,19 @@ internal data class TestCaseData(
     val clientMaxAppearanceDelayTimeMillis: Long,
     val clientMinInterruptionCount: Int,
     val clientMaxInterruptionCount: Int
-)
+) {
+    override fun toString() =
+        "Server working time in seconds: ${serverWorkTimeMillis / 1000};\n" +
+        "Clients count: $clientsCount;\n" +
+        "Server address: $serverAddress;\n" +
+        "Server port: $serverPort;\n" +
+        "Client minimum working time in seconds: ${clientMinWorkTimeMillis / 1000};\n" +
+        "Client maximum working time in seconds: ${clientMaxWorkTimeMillis / 1000};\n" +
+        "Client minimum appearance time delay in seconds: ${clientMinAppearanceDelayTimeMillis / 1000};\n" +
+        "Client maximum appearance time delay in seconds: ${clientMaxAppearanceDelayTimeMillis / 1000};\n" +
+        "Client minimum interruption count: $clientMinInterruptionCount;\n" +
+        "Client maximum interruption count: $clientMaxInterruptionCount;"
+}
 
 
 internal val testCaseData = listOf(

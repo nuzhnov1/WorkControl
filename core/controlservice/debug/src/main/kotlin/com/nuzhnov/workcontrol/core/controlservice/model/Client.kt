@@ -1,12 +1,12 @@
 package com.nuzhnov.workcontrol.core.controlservice.model
 
-import java.time.Duration
-import java.time.LocalTime
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 internal data class Client(
     val id: Long,
     val isActive: Boolean,
-    val lastVisit: LocalTime?,
+    val lastVisit: DateTime?,
     val totalVisitDuration: Duration
 ) : Comparable<Client> {
     override fun equals(other: Any?) = when (other) {

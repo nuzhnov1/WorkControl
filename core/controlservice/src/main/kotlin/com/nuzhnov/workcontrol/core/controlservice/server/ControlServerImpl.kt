@@ -19,8 +19,8 @@ import java.nio.channels.SelectionKey.*
 import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
-import java.time.Duration
-import java.time.LocalTime
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 internal class ControlServerImpl : IControlServer {
 
@@ -315,7 +315,7 @@ internal class ControlServerImpl : IControlServer {
         isActiveNow: Boolean
     ) {
         val client = this[clientID]
-        val now = LocalTime.now()
+        val now = DateTime.now()
 
         if (client?.lastVisit == null) {
             this[clientID] = ClientApiModel(
@@ -328,7 +328,7 @@ internal class ControlServerImpl : IControlServer {
             val isPreviouslyActive = client.isActive
             val previouslyVisit = client.lastVisit
             val duration = client.totalVisitDuration
-            val delta = Duration.between(previouslyVisit, now)
+            val delta = Duration(previouslyVisit, now)
 
             this[clientID] = ClientApiModel(
                 id = clientID,

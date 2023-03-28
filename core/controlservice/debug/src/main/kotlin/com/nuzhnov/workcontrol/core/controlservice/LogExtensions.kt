@@ -5,7 +5,7 @@ import com.nuzhnov.workcontrol.core.controlservice.client.ControlClientState
 import com.nuzhnov.workcontrol.core.controlservice.model.Client
 import com.nuzhnov.workcontrol.core.controlservice.server.ControlServerError
 import com.nuzhnov.workcontrol.core.controlservice.server.ControlServerState
-import java.time.LocalTime
+import org.joda.time.LocalTime
 
 
 internal fun log(message: String) {
