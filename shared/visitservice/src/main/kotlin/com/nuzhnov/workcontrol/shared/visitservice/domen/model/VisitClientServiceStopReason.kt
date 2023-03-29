@@ -1,0 +1,15 @@
+package com.nuzhnov.workcontrol.shared.visitservice.domen.model
+
+enum class VisitClientServiceStopReason {
+    TECHNOLOGY_UNSUPPORTED_ERROR,
+    TECHNOLOGY_DISABLED_ERROR,
+    PERMISSION_DENIED_ERROR,
+    DISCONNECTED_ERROR,
+    CONNECTION_FAILED_ERROR,
+    BREAK_CONNECTION_ERROR,
+    BAD_CONNECTION_ERROR,
+    IO_ERROR_ERROR,
+    SECURITY_ERROR,
+    UNKNOWN_ERROR,
+    SERVICE_DESTROYED
+}
