@@ -15,6 +15,8 @@ interface Server {
         maxAcceptConnectionAttempts: Int = DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS
     )
 
+    fun clearVisitors()
+
     companion object {
         const val DEFAULT_PORT = 0
         const val DEFAULT_BACKLOG = 512

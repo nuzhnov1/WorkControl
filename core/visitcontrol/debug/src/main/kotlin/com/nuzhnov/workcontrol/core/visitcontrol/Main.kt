@@ -38,6 +38,7 @@ private fun Server.testCase(testData: Iterable<TestCaseData>) {
         println("End testing.")
         println("Visitors info:")
         logVisitorsInfo()
+        clearVisitors()
         println("-".repeat(n = 80))
     }
 

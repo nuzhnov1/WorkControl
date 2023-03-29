@@ -77,6 +77,11 @@ internal class ServerImpl : Server {
         }
     }
 
+    override fun clearVisitors() {
+        _visitorsMap.clear()
+        _visitors.value = setOf()
+    }
+
     private fun initProperties(
         address: InetAddress,
         port: Int,
@@ -116,8 +121,6 @@ internal class ServerImpl : Server {
     }
 
     private fun initServer() = applyCatching {
-        removeAllVisitors()
-
         selector = Selector.open()
         serverSocketChannel = ServerSocketChannel.open().apply {
             val selector = selector!!
@@ -306,11 +309,6 @@ internal class ServerImpl : Server {
     private fun updateVisitorActivity(visitorID: Long, isActiveNow: Boolean) {
         _visitorsMap.updateVisitorActivity(visitorID, isActiveNow)
         _visitors.value = _visitorsMap.values.toSet()
-    }
-
-    private fun removeAllVisitors() {
-        _visitorsMap.clear()
-        _visitors.value = setOf()
     }
 
     private fun MutableMap<Long, Visitor>.updateVisitorActivity(
