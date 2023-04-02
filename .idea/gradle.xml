@@ -16,7 +16,7 @@
             <option value="$PROJECT_DIR$/core/visitcontrol" />
             <option value="$PROJECT_DIR$/core/visitcontrol/debug" />
             <option value="$PROJECT_DIR$/shared" />
-            <option value="$PROJECT_DIR$/shared/visitcontrol" />
+            <option value="$PROJECT_DIR$/shared/visitservice" />
           </set>
         </option>
       </GradleProjectSettings>

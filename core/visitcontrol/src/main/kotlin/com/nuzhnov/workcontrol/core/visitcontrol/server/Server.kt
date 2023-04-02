@@ -9,7 +9,7 @@ interface Server {
     val state: StateFlow<ServerState>
 
     suspend fun start(
-        address: InetAddress,
+        address: InetAddress = DEFAULT_ADDRESS,
         port: Int = DEFAULT_PORT,
         backlog: Int = DEFAULT_BACKLOG,
         maxAcceptConnectionAttempts: Int = DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS
@@ -18,6 +18,7 @@ interface Server {
     fun clearVisitors()
 
     companion object {
+        val DEFAULT_ADDRESS: InetAddress = InetAddress.getLocalHost()
         const val DEFAULT_PORT = 0
         const val DEFAULT_BACKLOG = 512
         const val DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS = 16

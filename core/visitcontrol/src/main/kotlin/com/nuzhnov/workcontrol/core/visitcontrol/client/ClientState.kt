@@ -20,6 +20,12 @@ sealed interface ClientState {
     data class Stopped(
         val serverAddress: InetAddress,
         val serverPort: Int,
+        val visitorID: Long
+    ) : ClientState
+
+    data class StoppedByError(
+        val serverAddress: InetAddress,
+        val serverPort: Int,
         val visitorID: Long,
         val error: ClientError,
         val cause: Throwable

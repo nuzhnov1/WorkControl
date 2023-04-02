@@ -48,7 +48,7 @@ internal class ClientImpl : Client {
         } catch (exception: ClientException) {
             _state.value = exception.toControlClientState()
         } catch (exception: IOException) {
-            _state.value = Stopped(
+            _state.value = StoppedByError(
                 serverAddress = serverAddress,
                 serverPort = serverPort,
                 visitorID = visitorID,
@@ -56,7 +56,7 @@ internal class ClientImpl : Client {
                 cause = exception
             )
         } catch (exception: SecurityException) {
-            _state.value = Stopped(
+            _state.value = StoppedByError(
                 serverAddress = serverAddress,
                 serverPort = serverPort,
                 visitorID = visitorID,
@@ -64,7 +64,7 @@ internal class ClientImpl : Client {
                 cause = exception
             )
         } catch (exception: Throwable) {
-            _state.value = Stopped(
+            _state.value = StoppedByError(
                 serverAddress = serverAddress,
                 serverPort = serverPort,
                 visitorID = visitorID,
@@ -83,12 +83,13 @@ internal class ClientImpl : Client {
     }
 
     private fun ClientState.toNextStateWhenCancelled() = when (this) {
-        is Running, is Connecting -> NotRunning
+        is Connecting -> Stopped(serverAddress, serverPort, visitorID)
+        is Running -> Stopped(serverAddress, serverPort, visitorID)
         else -> this
     }
 
     private fun ClientException.toControlClientState() = when (this) {
-        is ConnectionFailedException -> Stopped(
+        is ConnectionFailedException -> StoppedByError(
             serverAddress = serverAddress,
             serverPort = serverPort,
             visitorID = visitorID,
@@ -96,7 +97,7 @@ internal class ClientImpl : Client {
             cause = cause
         )
 
-        is BreakConnectionException -> Stopped(
+        is BreakConnectionException -> StoppedByError(
             serverAddress = serverAddress,
             serverPort = serverPort,
             visitorID = visitorID,
@@ -104,7 +105,7 @@ internal class ClientImpl : Client {
             cause = cause
         )
 
-        is BadConnectionException -> Stopped(
+        is BadConnectionException -> StoppedByError(
             serverAddress = serverAddress,
             serverPort = serverPort,
             visitorID = visitorID,
@@ -112,7 +113,11 @@ internal class ClientImpl : Client {
             cause = cause
         )
 
-        is ServerShutdownException -> NotRunning
+        is ServerShutdownException -> Stopped(
+            serverAddress = serverAddress,
+            serverPort = serverPort,
+            visitorID
+        )
     }
 
     private suspend fun initiateConnection() = applyCatching {

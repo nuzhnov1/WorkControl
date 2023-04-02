@@ -19,6 +19,11 @@ sealed interface ServerState {
 
     data class Stopped(
         val address: InetAddress,
+        val port: Int
+    ) : ServerState
+
+    data class StoppedByError(
+        val address: InetAddress,
         val port: Int,
         val error: ServerError,
         val cause: Throwable

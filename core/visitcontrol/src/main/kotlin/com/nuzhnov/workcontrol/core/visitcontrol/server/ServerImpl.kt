@@ -67,11 +67,11 @@ internal class ServerImpl : Server {
         } catch (exception: ServerException) {
             _state.value = exception.toControlServerState()
         } catch (exception: IOException) {
-            _state.value = Stopped(address, port, error = IO_ERROR, cause = exception)
+            _state.value = StoppedByError(address, port, error = IO_ERROR, cause = exception)
         } catch (exception: SecurityException) {
-            _state.value = Stopped(address, port, error = SECURITY_ERROR, cause = exception)
+            _state.value = StoppedByError(address, port, error = SECURITY_ERROR, cause = exception)
         } catch (exception: Throwable) {
-            _state.value = Stopped(address, port, error = UNKNOWN_ERROR, cause =  exception)
+            _state.value = StoppedByError(address, port, error = UNKNOWN_ERROR, cause =  exception)
         } finally {
             finishServer()
         }
@@ -99,20 +99,20 @@ internal class ServerImpl : Server {
     }
 
     private fun ServerState.toNextStateWhenCancelled() = when (this) {
-        is Running -> NotRunning
-        is StoppedAcceptConnections -> Stopped(address, port, error, cause)
+        is Running -> Stopped(address, port)
+        is StoppedAcceptConnections -> StoppedByError(address, port, error, cause)
         else -> this
     }
 
     private fun ServerException.toControlServerState() = when (this) {
-        is InitException -> Stopped(
+        is InitException -> StoppedByError(
             address = address,
             port = port,
             error = INIT_ERROR,
             cause = cause
         )
 
-        is MaxAcceptConnectionAttemptsReachedException -> Stopped(
+        is MaxAcceptConnectionAttemptsReachedException -> StoppedByError(
             address = address,
             port = port,
             error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,

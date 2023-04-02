@@ -27,8 +27,10 @@ internal fun ServerState.toLog() = when (this) {
         "stopped accepting new connections for the reason: ${error.toLog()}; " +
         "Detailed message: ${cause.toLog()}"
 
-    is ServerState.Stopped ->
-        "stopped for the reason: ${error.toLog()}; Detailed message: ${cause.toLog()}"
+    is ServerState.Stopped -> "stopped"
+
+    is ServerState.StoppedByError ->
+        "stopped by the error: ${error.toLog()}; Detailed message: ${cause.toLog()}"
 }
 
 internal fun ClientState.toLog() = when (this) {
@@ -43,7 +45,11 @@ internal fun ClientState.toLog() = when (this) {
 
     is ClientState.Stopped ->
         "connection to the server with address '$serverAddress' and port '$serverPort' " +
-        "has been stopped for the reason: ${error.toLog()}; Detailed message: ${cause.toLog()}"
+        "has been stopped"
+
+    is ClientState.StoppedByError ->
+        "connection to the server with address '$serverAddress' and port '$serverPort' " +
+        "has been stopped by the error: ${error.toLog()}; Detailed message: ${cause.toLog()}"
 }
 
 internal fun ServerError.toLog() = when (this) {
