@@ -8,5 +8,5 @@ internal interface VisitClientServiceRepository {
     val serviceState: StateFlow<VisitClientServiceState>
 
     fun updateServiceState(serviceState: VisitClientServiceState)
-    fun startVisitClient(serverAddress: InetAddress, serverPort: Int, visitorID: Long)
+    suspend fun startVisitClient(serverAddress: InetAddress, serverPort: Int, visitorID: Long)
 }

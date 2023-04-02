@@ -11,10 +11,13 @@ internal interface VisitControlServerApi {
     val visitors: Flow<Set<Visitor>>
     val serverState: StateFlow<ServerState>
 
-    suspend fun startServer(address: InetAddress, port: Int = CONTROL_SERVER_DEFAULT_PORT)
-    fun clearVisitors()
+    suspend fun startServer(
+        address: InetAddress = CONTROL_SERVER_DEFAULT_ADDRESS,
+        port: Int = CONTROL_SERVER_DEFAULT_PORT
+    )
 
     companion object {
+        val CONTROL_SERVER_DEFAULT_ADDRESS = Server.DEFAULT_ADDRESS
         const val CONTROL_SERVER_DEFAULT_PORT = Server.DEFAULT_PORT
     }
 }

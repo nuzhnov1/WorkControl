@@ -5,50 +5,48 @@ import com.nuzhnov.workcontrol.shared.visitservice.data.datasource.VisitorsRemot
 import com.nuzhnov.workcontrol.shared.visitservice.data.datasource.ServerStateLocalDataSource
 import com.nuzhnov.workcontrol.shared.visitservice.data.mapper.toVisitControlServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitControlServiceState
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitControlServiceState.NotCreated
+import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitControlServiceState.NotInitialized
 import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitControlServiceRepository
-import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
-import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitServiceCoroutineScope
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.net.*
 import javax.inject.Inject
 
 internal class VisitControlServiceRepositoryImpl @Inject constructor(
     private val api: VisitControlServerApiImpl,
     visitorsDataSource: VisitorsRemoteDataSource,
-    private val serverStateDataSource: ServerStateLocalDataSource,
-    @VisitServiceCoroutineScope private val coroutineScope: CoroutineScope,
-    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
+    private val serverStateDataSource: ServerStateLocalDataSource
 ) : VisitControlServiceRepository {
 
-    private val _serviceState = MutableStateFlow<VisitControlServiceState>(value = NotCreated)
+    private val _serviceState = MutableStateFlow<VisitControlServiceState>(value = NotInitialized)
     override val serviceState = _serviceState.asStateFlow()
 
     override val visitors = visitorsDataSource.visitors
-
 
     override fun updateServiceState(serviceState: VisitControlServiceState) {
         _serviceState.value = serviceState
     }
 
-    override fun startVisitControlServer(address: InetAddress, port: Int) {
-        coroutineScope.launch(coroutineDispatcher) {
-            launch {
-                serverStateDataSource.serverState.collect { serverState ->
-                    updateServiceState(serverState.toVisitControlServiceState())
-                }
+    @OptIn(FlowPreview::class)
+    override suspend fun startVisitControlServer() = coroutineScope {
+        launch {
+            serverStateDataSource.serverState.collect { serverState ->
+                updateServiceState(serverState.toVisitControlServiceState())
             }
-
-            api.startServer(address, port)
-            cancel()
         }
+
+        launch {
+            visitors.debounce(UPDATE_TIME_INTERVAL_MS).collect { visitors ->
+                // TODO: update data in the Participant table
+            }
+        }
+
+        api.startServer()
+        cancel()
     }
 
-    override fun clearVisitors() {
-        api.clearVisitors()
+
+    companion object {
+        const val UPDATE_TIME_INTERVAL_MS = 500L
     }
 }

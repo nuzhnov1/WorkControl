@@ -13,10 +13,7 @@ internal class VisitControlServerApiImpl @Inject constructor(
 
 
     override suspend fun startServer(address: InetAddress, port: Int) {
-        server.start(address, port)
-    }
-
-    override fun clearVisitors() {
         server.clearVisitors()
+        server.start(address, port)
     }
 }

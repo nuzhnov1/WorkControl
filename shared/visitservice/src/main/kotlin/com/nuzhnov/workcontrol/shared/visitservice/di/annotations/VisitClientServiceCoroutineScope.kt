@@ -4,4 +4,4 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class VisitServiceCoroutineScope
+internal annotation class VisitClientServiceCoroutineScope

@@ -1,20 +1,19 @@
 package com.nuzhnov.workcontrol.shared.visitservice.di
 
-import com.nuzhnov.workcontrol.core.visitcontrol.client.Client
-import com.nuzhnov.workcontrol.core.visitcontrol.server.Server
+import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitControlServiceCoroutineScope
+import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
+import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitClientServiceCoroutineScope
+import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitClientServiceRepository
+import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitControlServiceRepository
 import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitControlClientApi
 import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitControlClientApiImpl
 import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitControlServerApi
 import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitControlServerApiImpl
 import com.nuzhnov.workcontrol.shared.visitservice.data.repository.VisitClientServiceRepositoryImpl
 import com.nuzhnov.workcontrol.shared.visitservice.data.repository.VisitControlServiceRepositoryImpl
-import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitServiceCoroutineScope
-import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
-import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitClientServiceRepository
-import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitControlServiceRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import com.nuzhnov.workcontrol.core.visitcontrol.client.Client
+import com.nuzhnov.workcontrol.core.visitcontrol.server.Server
+import kotlinx.coroutines.*
 import javax.inject.Singleton
 import dagger.Binds
 import dagger.Module
@@ -61,8 +60,17 @@ internal interface VisitServiceModule {
 
     @Provides
     @ServiceScoped
-    @VisitServiceCoroutineScope
-    fun provideVisitServiceCoroutineScope() = CoroutineScope(context = Dispatchers.IO + Job())
+    @VisitControlServiceCoroutineScope
+    fun provideVisitControlServiceCoroutineScope(
+        @IODispatcher dispatcher: CoroutineDispatcher
+    ) = CoroutineScope(context = dispatcher + Job())
+
+    @Provides
+    @ServiceScoped
+    @VisitClientServiceCoroutineScope
+    fun provideVisitClientServiceCoroutineScope(
+        @IODispatcher dispatcher: CoroutineDispatcher
+    ) = CoroutineScope(context = dispatcher + Job())
 
     @Provides
     @Singleton
