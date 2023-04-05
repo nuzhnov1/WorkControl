@@ -1,18 +1,18 @@
 package com.nuzhnov.workcontrol.shared.visitservice.di
 
-import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitControlServiceCoroutineScope
+import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.ControlServiceCoroutineScope
 import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
-import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitClientServiceCoroutineScope
-import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitClientServiceRepository
-import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitControlServiceRepository
-import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitControlClientApi
-import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitControlClientApiImpl
-import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitControlServerApi
-import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitControlServerApiImpl
-import com.nuzhnov.workcontrol.shared.visitservice.data.repository.VisitClientServiceRepositoryImpl
-import com.nuzhnov.workcontrol.shared.visitservice.data.repository.VisitControlServiceRepositoryImpl
-import com.nuzhnov.workcontrol.core.visitcontrol.client.Client
-import com.nuzhnov.workcontrol.core.visitcontrol.server.Server
+import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitorServiceCoroutineScope
+import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitorServiceRepository
+import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.ControlServiceRepository
+import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitorApi
+import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitorApiImpl
+import com.nuzhnov.workcontrol.shared.visitservice.data.api.ControlServerApi
+import com.nuzhnov.workcontrol.shared.visitservice.data.api.ControlServerApiImpl
+import com.nuzhnov.workcontrol.shared.visitservice.data.repository.VisitorServiceRepositoryImpl
+import com.nuzhnov.workcontrol.shared.visitservice.data.repository.ControlServiceRepositoryImpl
+import com.nuzhnov.workcontrol.core.visitcontrol.visitor.Visitor
+import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServer
 import kotlinx.coroutines.*
 import javax.inject.Singleton
 import dagger.Binds
@@ -28,47 +28,47 @@ internal interface VisitServiceModule {
 
     @Binds
     @Singleton
-    fun provideVisitControlServiceRepository(
-        instance: VisitControlServiceRepositoryImpl
-    ): VisitControlServiceRepository
+    fun provideControlServiceRepository(
+        instance: ControlServiceRepositoryImpl
+    ): ControlServiceRepository
 
     @Binds
     @Singleton
-    fun provideVisitClientServiceRepository(
-        instance: VisitClientServiceRepositoryImpl
-    ): VisitClientServiceRepository
+    fun provideVisitorServiceRepository(
+        instance: VisitorServiceRepositoryImpl
+    ): VisitorServiceRepository
 
     @Binds
     @Singleton
-    fun provideVisitControlServiceApi(
-        instance: VisitControlServerApiImpl
-    ): VisitControlServerApi
+    fun provideControlServerApi(
+        instance: ControlServerApiImpl
+    ): ControlServerApi
 
     @Binds
     @Singleton
-    fun provideVisitControlClientApi(
-        instance: VisitControlClientApiImpl
-    ): VisitControlClientApi
+    fun provideVisitorApi(
+        instance: VisitorApiImpl
+    ): VisitorApi
 
     @Provides
     @Singleton
-    fun provideVisitControlServer() = Server.getDefaultServer()
+    fun provideControlServer() = ControlServer.getDefaultControlServer()
 
     @Provides
     @Singleton
-    fun provideVisitControlClient() = Client.getDefaultClient()
+    fun provideVisitor() = Visitor.getDefaultVisitor()
 
     @Provides
     @ServiceScoped
-    @VisitControlServiceCoroutineScope
-    fun provideVisitControlServiceCoroutineScope(
+    @ControlServiceCoroutineScope
+    fun provideControlServiceCoroutineScope(
         @IODispatcher dispatcher: CoroutineDispatcher
     ) = CoroutineScope(context = dispatcher + Job())
 
     @Provides
     @ServiceScoped
-    @VisitClientServiceCoroutineScope
-    fun provideVisitClientServiceCoroutineScope(
+    @VisitorServiceCoroutineScope
+    fun provideVisitorServiceCoroutineScope(
         @IODispatcher dispatcher: CoroutineDispatcher
     ) = CoroutineScope(context = dispatcher + Job())
 

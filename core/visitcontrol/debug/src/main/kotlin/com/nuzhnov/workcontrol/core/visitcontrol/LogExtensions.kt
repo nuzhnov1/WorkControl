@@ -1,74 +1,73 @@
 package com.nuzhnov.workcontrol.core.visitcontrol
 
-import com.nuzhnov.workcontrol.core.visitcontrol.client.ClientError
-import com.nuzhnov.workcontrol.core.visitcontrol.client.ClientState
-import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorDebug
-import com.nuzhnov.workcontrol.core.visitcontrol.server.ServerError
-import com.nuzhnov.workcontrol.core.visitcontrol.server.ServerState
+import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorError
+import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorState
+import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitDebug
+import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerError
+import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerState
 import org.joda.time.LocalTime
 
 
 internal fun log(message: String) {
     val now = LocalTime.now()
-    println("$now:$message")
+    println("$now: $message")
 }
 
-internal fun VisitorDebug.toLog() =
-    "Visitor#$id: is active - ${isActive.toLog()}; " +
-    "last visit - $lastVisit; " +
+internal fun VisitDebug.toLog() =
+    "Visitor#$visitorID: is active - ${isActive.toLog()}; " +
+    "last visit - $lastVisitTime; " +
     "total visit duration - $totalVisitDuration;"
 
-internal fun ServerState.toLog() = when (this) {
-    is ServerState.NotRunning -> "not running"
+internal fun ControlServerState.toLog() = when (this) {
+    is ControlServerState.NotRunningYet -> "not running"
 
-    is ServerState.Running -> "running on address '${address}' and port '${port}'"
+    is ControlServerState.Running -> "running on address '${address}' and port '${port}'"
 
-    is ServerState.StoppedAcceptConnections ->
+    is ControlServerState.StoppedAcceptConnections ->
         "stopped accepting new connections for the reason: ${error.toLog()}; " +
         "Detailed message: ${cause.toLog()}"
 
-    is ServerState.Stopped -> "stopped"
+    is ControlServerState.Stopped -> "stopped"
 
-    is ServerState.StoppedByError ->
+    is ControlServerState.StoppedByError ->
         "stopped by the error: ${error.toLog()}; Detailed message: ${cause.toLog()}"
 }
 
-internal fun ClientState.toLog() = when (this) {
-    is ClientState.NotRunning -> "not running"
+internal fun VisitorState.toLog() = when (this) {
+    is VisitorState.NotRunningYet -> "not running"
 
-    is ClientState.Connecting ->
+    is VisitorState.Connecting ->
         "connecting to the server with address '$serverAddress' and port '$serverPort'"
 
-    is ClientState.Running ->
+    is VisitorState.Running ->
         "has successfully connected to the server with address " +
         "'$serverAddress' and port '$serverPort'"
 
-    is ClientState.Stopped ->
+    is VisitorState.Stopped ->
         "connection to the server with address '$serverAddress' and port '$serverPort' " +
         "has been stopped"
 
-    is ClientState.StoppedByError ->
+    is VisitorState.StoppedByError ->
         "connection to the server with address '$serverAddress' and port '$serverPort' " +
         "has been stopped by the error: ${error.toLog()}; Detailed message: ${cause.toLog()}"
 }
 
-internal fun ServerError.toLog() = when (this) {
-    ServerError.INIT_ERROR -> "initialization failed"
-    ServerError.MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED -> "failed to accept new connections"
-    ServerError.IO_ERROR -> "an I/O error has occurred"
-    ServerError.SECURITY_ERROR -> "permission denied to accept a new connection"
-    ServerError.UNKNOWN_ERROR -> "an unknown error has occurred"
+internal fun ControlServerError.toLog() = when (this) {
+    ControlServerError.INIT_ERROR -> "initialization failed"
+    ControlServerError.MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED -> "failed to accept new connections"
+    ControlServerError.IO_ERROR -> "an I/O error has occurred"
+    ControlServerError.SECURITY_ERROR -> "permission denied to accept a new connection"
+    ControlServerError.UNKNOWN_ERROR -> "an unknown error has occurred"
 }
 
-internal fun ClientError.toLog() =
+internal fun VisitorError.toLog() =
     when (this) {
-        ClientError.CONNECTION_FAILED -> "failed to connect to the server"
-        ClientError.BREAK_CONNECTION -> "the connection to the server has been broken"
-        ClientError.BAD_CONNECTION -> "bad connection to the server"
-        ClientError.IO_ERROR -> "an I/O error has occurred when connecting to the server"
-        ClientError.SECURITY_ERROR -> "permission denied to connect to the server"
-        ClientError.UNKNOWN_ERROR ->
-            "an unknown error has occurred when connecting to the server"
+        VisitorError.CONNECTION_FAILED -> "failed to connect to the server"
+        VisitorError.BREAK_CONNECTION -> "the connection to the server has been broken"
+        VisitorError.BAD_CONNECTION -> "bad connection to the server"
+        VisitorError.IO_ERROR -> "an I/O error has occurred when connecting to the server"
+        VisitorError.SECURITY_ERROR -> "permission denied to connect to the server"
+        VisitorError.UNKNOWN_ERROR -> "an unknown error has occurred when connecting to the server"
     }
 
 internal fun Throwable.toLog() = when (localizedMessage) {

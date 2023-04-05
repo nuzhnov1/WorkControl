@@ -1,12 +1,12 @@
 package com.nuzhnov.workcontrol.core.visitcontrol.mapper
 
-import com.nuzhnov.workcontrol.core.visitcontrol.model.Visitor
-import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorDebug
+import com.nuzhnov.workcontrol.core.visitcontrol.model.Visit
+import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitDebug
 
 
-internal fun Visitor.toVisitorDebug() = VisitorDebug(
-    id = id,
+internal fun Visit.toVisitDebug() = VisitDebug(
+    visitorID = visitorID,
     isActive = isActive,
-    lastVisit = lastVisit,
+    lastVisitTime = lastVisitTime,
     totalVisitDuration = totalVisitDuration
 )

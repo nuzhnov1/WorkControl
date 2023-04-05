@@ -1,81 +1,54 @@
 package com.nuzhnov.workcontrol.shared.visitservice.data.mapper
 
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitControlServiceState
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitControlServiceError
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitClientServiceState
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitClientServiceError
-import com.nuzhnov.workcontrol.core.visitcontrol.server.ServerError
-import com.nuzhnov.workcontrol.core.visitcontrol.server.ServerState
-import com.nuzhnov.workcontrol.core.visitcontrol.client.ClientError
-import com.nuzhnov.workcontrol.core.visitcontrol.client.ClientState
+import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState
+import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceError
+import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState
+import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceError
+import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerError
+import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerState
+import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorError
+import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorState
 
 
-internal fun ServerState.toVisitControlServiceState() = when (this) {
-    is ServerState.NotRunning -> VisitControlServiceState.NotRunning
+internal fun ControlServerState.toControlServiceState() = when (this) {
+    is ControlServerState.NotRunningYet -> ControlServiceState.NotRunningYet
+    is ControlServerState.Running -> ControlServiceState.Running(address, port)
 
-    is ServerState.Running -> VisitControlServiceState.Running(
-        serverAddress = address,
-        serverPort = port
-    )
+    is ControlServerState.StoppedAcceptConnections ->
+        ControlServiceState.StoppedAcceptConnections(error = error.toVisitorServiceError())
 
-    is ServerState.StoppedAcceptConnections -> VisitControlServiceState.StoppedAcceptConnections(
-        serverAddress = address,
-        serverPort = port,
-        error = error.toVisitControlServiceError()
-    )
+    is ControlServerState.Stopped -> ControlServiceState.Stopped
 
-    is ServerState.Stopped -> VisitControlServiceState.Stopped(
-        serverAddress = address,
-        serverPort = port
-    )
-
-    is ServerState.StoppedByError -> VisitControlServiceState.StoppedByError(
-        error = error.toVisitControlServiceError()
-    )
+    is ControlServerState.StoppedByError ->
+        ControlServiceState.StoppedByError(error = error.toVisitorServiceError())
 }
 
-internal fun ClientState.toVisitClientServiceState() = when (this) {
-    is ClientState.NotRunning -> VisitClientServiceState.NotRunning
+internal fun VisitorState.toVisitorServiceState() = when (this) {
+    is VisitorState.NotRunningYet -> VisitorServiceState.NotRunningYet
+    is VisitorState.Connecting -> VisitorServiceState.Connecting
+    is VisitorState.Running -> VisitorServiceState.Running
+    is VisitorState.Stopped -> VisitorServiceState.Stopped
 
-    is ClientState.Connecting -> VisitClientServiceState.Connecting(
-        serverAddress = serverAddress,
-        serverPort = serverPort,
-        clientID = visitorID
-    )
-
-    is ClientState.Running -> VisitClientServiceState.Running(
-        serverAddress = serverAddress,
-        serverPort = serverPort,
-        clientID = visitorID
-    )
-
-    is ClientState.Stopped -> VisitClientServiceState.Stopped(
-        serverAddress = serverAddress,
-        serverPort = serverPort,
-        clientID = visitorID
-    )
-
-    is ClientState.StoppedByError -> VisitClientServiceState.StoppedByError(
-        error = error.toVisitControlServiceError()
-    )
+    is VisitorState.StoppedByError ->
+        VisitorServiceState.StoppedByError(error = error.toVisitorServiceError())
 }
 
-internal fun ServerError.toVisitControlServiceError() = when (this) {
-    ServerError.INIT_ERROR -> VisitControlServiceError.INIT_ERROR
+internal fun ControlServerError.toVisitorServiceError() = when (this) {
+    ControlServerError.INIT_ERROR -> ControlServiceError.INIT_ERROR
 
-    ServerError.MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED ->
-        VisitControlServiceError.MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED
+    ControlServerError.MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED ->
+        ControlServiceError.MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED
 
-    ServerError.IO_ERROR -> VisitControlServiceError.IO_ERROR
-    ServerError.SECURITY_ERROR -> VisitControlServiceError.SECURITY_ERROR
-    ServerError.UNKNOWN_ERROR -> VisitControlServiceError.UNKNOWN_ERROR
+    ControlServerError.IO_ERROR -> ControlServiceError.IO_ERROR
+    ControlServerError.SECURITY_ERROR -> ControlServiceError.SECURITY_ERROR
+    ControlServerError.UNKNOWN_ERROR -> ControlServiceError.UNKNOWN_ERROR
 }
 
-internal fun ClientError.toVisitControlServiceError() = when (this) {
-    ClientError.CONNECTION_FAILED -> VisitClientServiceError.CONNECTION_FAILED_ERROR
-    ClientError.BREAK_CONNECTION -> VisitClientServiceError.BREAK_CONNECTION_ERROR
-    ClientError.BAD_CONNECTION -> VisitClientServiceError.BAD_CONNECTION_ERROR
-    ClientError.IO_ERROR -> VisitClientServiceError.IO_ERROR_ERROR
-    ClientError.SECURITY_ERROR -> VisitClientServiceError.SECURITY_ERROR
-    ClientError.UNKNOWN_ERROR -> VisitClientServiceError.UNKNOWN_ERROR
+internal fun VisitorError.toVisitorServiceError() = when (this) {
+    VisitorError.CONNECTION_FAILED -> VisitorServiceError.CONNECTION_FAILED_ERROR
+    VisitorError.BREAK_CONNECTION -> VisitorServiceError.BREAK_CONNECTION_ERROR
+    VisitorError.BAD_CONNECTION -> VisitorServiceError.BAD_CONNECTION_ERROR
+    VisitorError.IO_ERROR -> VisitorServiceError.IO_ERROR_ERROR
+    VisitorError.SECURITY_ERROR -> VisitorServiceError.SECURITY_ERROR
+    VisitorError.UNKNOWN_ERROR -> VisitorServiceError.UNKNOWN_ERROR
 }

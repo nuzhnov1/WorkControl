@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nuzhnov.workcontrol.shared.visitcontrol"
+    namespace = "com.nuzhnov.workcontrol.shared.visitservice"
     compileSdk = 33
 
     defaultConfig {
