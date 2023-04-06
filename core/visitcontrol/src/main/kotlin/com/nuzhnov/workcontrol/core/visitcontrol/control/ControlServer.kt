@@ -1,11 +1,12 @@
 package com.nuzhnov.workcontrol.core.visitcontrol.control
 
 import com.nuzhnov.workcontrol.core.visitcontrol.model.Visit
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.net.InetAddress
 
 interface ControlServer {
-    val visits: StateFlow<Set<Visit>>
+    val visits: Flow<Set<Visit>>
     val state: StateFlow<ControlServerState>
 
 

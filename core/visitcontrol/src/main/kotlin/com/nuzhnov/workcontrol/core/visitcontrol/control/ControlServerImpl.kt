@@ -25,9 +25,8 @@ import org.joda.time.Duration
 
 internal class ControlServerImpl : ControlServer {
 
-    private val _visitsMap = mutableMapOf<VisitorID, Visit>()
-    private val _visits = MutableStateFlow(value = _visitsMap.values.toSet())
-    override val visits: StateFlow<Set<Visit>> = _visits.asStateFlow()
+    private val _visits = MutableStateFlow(value = mapOf<VisitorID, Visit>())
+    override val visits = _visits.map { visits -> visits.values.toSet() }
 
     private val _state = MutableStateFlow<ControlServerState>(value = NotRunningYet)
     override val state = _state.asStateFlow()
@@ -79,16 +78,14 @@ internal class ControlServerImpl : ControlServer {
     }
 
     override fun setVisits(visits: Set<Visit>) {
-        _visitsMap.apply {
+        _visits.update {
             clear()
-            putAll(visits.map { it.visitorID to it })
+            putAll(visits.associateBy { it.visitorID })
         }
-        _visits.value = visits
     }
 
     override fun clearVisits() {
-        _visitsMap.clear()
-        _visits.value = setOf()
+        _visits.update { clear() }
     }
 
     private fun initProperties(
@@ -310,24 +307,27 @@ internal class ControlServerImpl : ControlServer {
     ) = runCatching { writeResponse(serverResponse) }
 
     private fun addNewVisitor(visitorID: VisitorID) {
-        _visitsMap.updateVisitorActivity(visitorID, isActiveNow = true)
-        _visits.value = _visitsMap.values.toSet()
+        _visits.update { updateVisitorActivity(visitorID, isActiveNow = true) }
     }
 
     private fun updateVisitorActivity(visitorID: VisitorID, isActiveNow: Boolean) {
-        val visit = _visitsMap[visitorID]
+        val visit = _visits.value[visitorID]
 
         if (visit == null || visit.isActivityChanged(isActiveNow)) {
-            _visitsMap.updateVisitorActivity(visitorID, isActiveNow)
-            _visits.value = _visitsMap.values.toSet()
+            _visits.update { updateVisitorActivity(visitorID, isActiveNow) }
         }
     }
 
     private fun makeAllVisitorsInactive() {
-        _visitsMap.apply {
+        _visits.update {
             keys.forEach { id -> updateVisitorActivity(visitorID = id, isActiveNow = false) }
-            _visits.value = values.toSet()
         }
+    }
+
+    private fun MutableStateFlow<Map<VisitorID, Visit>>.update(
+        block: MutableMap<VisitorID, Visit>.() -> Unit
+    ) {
+        value = value.toMutableMap().apply(block)
     }
 
     private fun MutableMap<VisitorID, Visit>.updateVisitorActivity(

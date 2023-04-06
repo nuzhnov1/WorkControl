@@ -13,6 +13,12 @@ internal fun log(message: String) {
     println("$now: $message")
 }
 
+internal fun Collection<VisitDebug>.log() {
+    println("Visitors info:")
+    println("Visitors count: ${size}.")
+    forEach { visit -> println(visit.toLog()) }
+}
+
 internal fun VisitDebug.toLog() =
     "Visitor#$visitorID: is active - ${isActive.toLog()}; " +
     "last visit - $lastVisitTime; " +

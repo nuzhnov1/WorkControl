@@ -10,7 +10,10 @@ import kotlin.random.Random
 import kotlin.random.nextInt
 import kotlin.random.nextLong
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import java.util.*
 
 
@@ -37,8 +40,6 @@ private fun ControlServer.testCase(testData: Iterable<TestCaseData>) {
         }
 
         println("End testing.")
-        println("Visitors info:")
-        logVisitorsInfo()
         clearVisits()
         println("-".repeat(n = 80))
     }
@@ -47,12 +48,13 @@ private fun ControlServer.testCase(testData: Iterable<TestCaseData>) {
 }
 
 private suspend fun ControlServer.startControlTask(testData: TestCaseData) = coroutineScope {
-    launchServerStateObserver(controlServer = this@startControlTask)
-    launchVisitorsObserver(controlServer = this@startControlTask)
+    val serverStateObserverJob = launchServerStateObserver(controlServer = this@startControlTask)
+    val visitorsObserverJob = launchVisitorsObserver(controlServer = this@startControlTask)
 
     startControl(testData)
+    serverStateObserverJob.cancel()
+    visitorsObserverJob.cancel()
     delay(DELAY_AFTER_FINISH_MS)
-    cancel()
 }
 
 private fun CoroutineScope.launchServerStateObserver(controlServer: ControlServer) = launch {
@@ -73,10 +75,12 @@ private fun CoroutineScope.launchVisitorsObserver(controlServer: ControlServer) 
 
     controlServer.visits
         .map { visits -> visits.map { visit -> visit.toVisitDebug() }.toSortedSet() }
-        .collect { visits ->
+        .onEach { visits ->
             onUpdateVisits(oldVisitsSet = currentVisits, newVisitsSet = visits)
             currentVisits = visits
         }
+        .onCompletion { currentVisits.log() }
+        .collect()
 }
 
 private suspend fun ControlServer.startControl(testData: TestCaseData) = runCatching {
@@ -131,13 +135,12 @@ private fun CoroutineScope.startVisitorTask(
     visitorTestData: VisitorTestData
 ) = launch {
     val visitor = Visitor.getDefaultVisitor()
-
-    launchVisitorStateObserver(visitor, visitorTestData)
+    val visitorStateObserverJob = launchVisitorStateObserver(visitor, visitorTestData)
 
     delay(timeMillis = visitorTestData.delayTimeMillis)
     visitor.startVisitor(testData, visitorTestData)
+    visitorStateObserverJob.cancel()
     delay(DELAY_AFTER_FINISH_MS)
-    cancel()
 }
 
 private fun CoroutineScope.launchVisitorStateObserver(
@@ -181,13 +184,6 @@ private suspend fun Visitor.startVisitor(
 
         delay(delayTimeMillis)
     }
-}
-
-private fun ControlServer.logVisitorsInfo() {
-    println("Visitors count: ${visits.value.size}.")
-    visits.value
-        .map { visit -> visit.toVisitDebug() }
-        .forEach { visitor -> println(visitor.toLog()) }
 }
 
 
