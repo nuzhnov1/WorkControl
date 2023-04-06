@@ -16,6 +16,8 @@ interface ControlServer {
         maxAcceptConnectionAttempts: Int = DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS
     )
 
+    fun setVisits(visits: Set<Visit>)
+
     fun clearVisits()
 
 

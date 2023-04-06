@@ -77,6 +77,14 @@ internal class ControlServerImpl : ControlServer {
         }
     }
 
+    override fun setVisits(visits: Set<Visit>) {
+        _visitsMap.apply {
+            clear()
+            putAll(visits.map { it.visitorID to it })
+        }
+        _visits.value = visits
+    }
+
     override fun clearVisits() {
         _visitsMap.clear()
         _visits.value = setOf()
@@ -272,11 +280,8 @@ internal class ControlServerImpl : ControlServer {
     }
 
     private fun MutableMap<SocketAddress, VisitorConnection>.disconnectAll() {
-        values.forEach { (channel, visitorID) ->
-            if (visitorID != null) {
-                updateVisitorActivity(visitorID = visitorID, isActiveNow = false)
-            }
-
+        makeAllVisitorsInactive()
+        values.forEach { (channel, _) ->
             channel.safeWriteResponse(ServerResponse.SHUTDOWN_SERVER)
             channel.safeClose()
         }
@@ -306,6 +311,13 @@ internal class ControlServerImpl : ControlServer {
     private fun updateVisitorActivity(visitorID: Long, isActiveNow: Boolean) {
         _visitsMap.updateVisitorActivity(visitorID, isActiveNow)
         _visits.value = _visitsMap.values.toSet()
+    }
+
+    private fun makeAllVisitorsInactive() {
+        _visitsMap.apply {
+            keys.forEach { id -> updateVisitorActivity(visitorID = id, isActiveNow = false) }
+            _visits.value = values.toSet()
+        }
     }
 
     private fun MutableMap<Long, Visit>.updateVisitorActivity(

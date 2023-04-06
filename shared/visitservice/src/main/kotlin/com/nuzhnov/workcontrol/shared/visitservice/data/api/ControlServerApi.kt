@@ -16,6 +16,8 @@ internal interface ControlServerApi {
         port: Int = CONTROL_SERVER_DEFAULT_PORT
     )
 
+    fun restoreVisits(visits: Set<Visit>)
+
     companion object {
         val CONTROL_SERVER_DEFAULT_ADDRESS = ControlServer.DEFAULT_ADDRESS
         const val CONTROL_SERVER_DEFAULT_PORT = ControlServer.DEFAULT_PORT

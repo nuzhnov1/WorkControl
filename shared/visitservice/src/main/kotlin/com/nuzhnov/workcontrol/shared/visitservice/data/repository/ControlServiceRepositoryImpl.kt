@@ -1,5 +1,6 @@
 package com.nuzhnov.workcontrol.shared.visitservice.data.repository
 
+import com.nuzhnov.workcontrol.core.visitcontrol.model.Visit
 import com.nuzhnov.workcontrol.shared.visitservice.data.api.ControlServerApi
 import com.nuzhnov.workcontrol.shared.visitservice.data.datasource.VisitsRemoteDataSource
 import com.nuzhnov.workcontrol.shared.visitservice.data.datasource.ControlServerStateLocalDataSource
@@ -47,6 +48,9 @@ internal class ControlServiceRepositoryImpl @Inject constructor(
     }
 
     override suspend fun startControl() = coroutineScope {
+        val restoredVisits: Set<Visit> = /* TODO: fetch all visits from Visitor table */ setOf()
+        api.restoreVisits(restoredVisits)
+
         controlServerState
             .onEach { serverState -> updateState(state = serverState.toControlServiceState()) }
             .launchIn(scope = this)
