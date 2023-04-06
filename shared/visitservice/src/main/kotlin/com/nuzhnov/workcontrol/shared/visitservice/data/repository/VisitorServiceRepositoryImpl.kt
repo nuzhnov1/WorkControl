@@ -6,6 +6,7 @@ import com.nuzhnov.workcontrol.shared.visitservice.data.mapper.toVisitorServiceS
 import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitorServiceRepository
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState.*
+import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.net.InetAddress
@@ -58,7 +59,7 @@ internal class VisitorServiceRepositoryImpl @Inject constructor(
     override suspend fun startVisit(
         serverAddress: InetAddress,
         serverPort: Int,
-        visitorID: Long
+        visitorID: VisitorID
     ) = coroutineScope {
         visitorState
             .onEach { visitorState -> updateState(state = visitorState.toVisitorServiceState()) }

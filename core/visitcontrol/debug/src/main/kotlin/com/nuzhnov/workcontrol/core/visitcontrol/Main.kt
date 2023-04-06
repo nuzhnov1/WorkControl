@@ -2,6 +2,7 @@ package com.nuzhnov.workcontrol.core.visitcontrol
 
 import com.nuzhnov.workcontrol.core.visitcontrol.mapper.toVisitDebug
 import com.nuzhnov.workcontrol.core.visitcontrol.testcase.*
+import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitDebug
 import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServer
 import com.nuzhnov.workcontrol.core.visitcontrol.visitor.Visitor
@@ -191,7 +192,7 @@ private fun ControlServer.logVisitorsInfo() {
 
 
 private data class VisitorTestData(
-    val id: Long,
+    val id: VisitorID,
     val workTimeMillis: Long,
     val delayTimeMillis: Long,
     val interruptionsCount: Int

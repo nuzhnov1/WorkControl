@@ -3,6 +3,7 @@ package com.nuzhnov.workcontrol.core.visitcontrol.control
 import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerException.*
 import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerState.*
 import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerError.*
+import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.core.visitcontrol.model.Visit
 import com.nuzhnov.workcontrol.core.visitcontrol.model.ServerResponse
 import com.nuzhnov.workcontrol.core.visitcontrol.util.*
@@ -24,7 +25,7 @@ import org.joda.time.Duration
 
 internal class ControlServerImpl : ControlServer {
 
-    private val _visitsMap = mutableMapOf<Long, Visit>()
+    private val _visitsMap = mutableMapOf<VisitorID, Visit>()
     private val _visits = MutableStateFlow(value = _visitsMap.values.toSet())
     override val visits: StateFlow<Set<Visit>> = _visits.asStateFlow()
 
@@ -244,7 +245,7 @@ internal class ControlServerImpl : ControlServer {
 
                 if (visitorID == null) {
                     visitorsConnections[clientAddress] = VisitorConnection(channel = this, id = id)
-                    updateVisitorActivity(id, isActiveNow = true)
+                    addNewVisitor(visitorID = id)
                 } else {
                     updateVisitorActivity(visitorID, isActiveNow = true)
                 }
@@ -268,7 +269,7 @@ internal class ControlServerImpl : ControlServer {
 
         visitorsConnections.remove(clientAddress)?.also { (_, visitorID) ->
             if (visitorID != null) {
-                updateVisitorActivity(visitorID = visitorID, isActiveNow = false)
+                updateVisitorActivity(visitorID, isActiveNow = false)
             }
         }
 
@@ -308,9 +309,18 @@ internal class ControlServerImpl : ControlServer {
         serverResponse: ServerResponse
     ) = runCatching { writeResponse(serverResponse) }
 
-    private fun updateVisitorActivity(visitorID: Long, isActiveNow: Boolean) {
-        _visitsMap.updateVisitorActivity(visitorID, isActiveNow)
+    private fun addNewVisitor(visitorID: VisitorID) {
+        _visitsMap.updateVisitorActivity(visitorID, isActiveNow = true)
         _visits.value = _visitsMap.values.toSet()
+    }
+
+    private fun updateVisitorActivity(visitorID: VisitorID, isActiveNow: Boolean) {
+        val visit = _visitsMap[visitorID]
+
+        if (visit == null || visit.isActivityChanged(isActiveNow)) {
+            _visitsMap.updateVisitorActivity(visitorID, isActiveNow)
+            _visits.value = _visitsMap.values.toSet()
+        }
     }
 
     private fun makeAllVisitorsInactive() {
@@ -320,8 +330,8 @@ internal class ControlServerImpl : ControlServer {
         }
     }
 
-    private fun MutableMap<Long, Visit>.updateVisitorActivity(
-        visitorID: Long,
+    private fun MutableMap<VisitorID, Visit>.updateVisitorActivity(
+        visitorID: VisitorID,
         isActiveNow: Boolean
     ) {
         val visit = this[visitorID]
@@ -349,6 +359,8 @@ internal class ControlServerImpl : ControlServer {
         }
     }
 
+    private fun Visit.isActivityChanged(isActiveNow: Boolean) = isActive != isActiveNow
 
-    private data class VisitorConnection(val channel: SocketChannel, val id: Long?)
+
+    private data class VisitorConnection(val channel: SocketChannel, val id: VisitorID?)
 }

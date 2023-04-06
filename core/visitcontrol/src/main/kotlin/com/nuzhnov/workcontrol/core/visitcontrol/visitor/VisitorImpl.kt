@@ -3,6 +3,7 @@ package com.nuzhnov.workcontrol.core.visitcontrol.visitor
 import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorException.*
 import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorState.*
 import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorError.*
+import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.core.visitcontrol.model.ServerResponse
 import com.nuzhnov.workcontrol.core.visitcontrol.util.*
 import kotlin.properties.Delegates
@@ -25,7 +26,7 @@ internal class VisitorImpl : Visitor {
 
     private var serverAddress by Delegates.notNull<InetAddress>()
     private var serverPort by Delegates.notNull<Int>()
-    private var visitorID by Delegates.notNull<Long>()
+    private var visitorID by Delegates.notNull<VisitorID>()
 
     private var selector: Selector? = null
     private var clientSocketChannel: SocketChannel? = null
@@ -36,7 +37,7 @@ internal class VisitorImpl : Visitor {
     private val outputBuffer = ByteBuffer.allocate(outputBufferSize)
 
 
-    override suspend fun start(serverAddress: InetAddress, serverPort: Int, visitorID: Long) {
+    override suspend fun start(serverAddress: InetAddress, serverPort: Int, visitorID: VisitorID) {
         initProperties(serverAddress, serverPort, visitorID)
 
         try {
@@ -76,7 +77,7 @@ internal class VisitorImpl : Visitor {
         }
     }
 
-    private fun initProperties(serverAddress: InetAddress, serverPort: Int, visitorID: Long) {
+    private fun initProperties(serverAddress: InetAddress, serverPort: Int, visitorID: VisitorID) {
         this.serverAddress = serverAddress
         this.serverPort = serverPort
         this.visitorID = visitorID

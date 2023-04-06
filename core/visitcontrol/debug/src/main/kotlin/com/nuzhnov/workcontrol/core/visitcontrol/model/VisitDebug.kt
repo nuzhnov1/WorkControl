@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 
 internal data class VisitDebug(
-    val visitorID: Long,
+    val visitorID: VisitorID,
     val isActive: Boolean,
     val lastVisitTime: DateTime?,
     val totalVisitDuration: Duration

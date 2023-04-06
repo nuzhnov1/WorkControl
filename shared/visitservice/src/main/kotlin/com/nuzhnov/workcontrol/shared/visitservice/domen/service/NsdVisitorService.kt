@@ -9,6 +9,7 @@ import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceSta
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceInitFailedReason.*
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceError.*
 import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitorServiceCoroutineScope
+import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import android.app.Service
@@ -28,7 +29,7 @@ internal class NsdVisitorService : Service(),
         get() = repository.state.value
         set(value) = repository.updateState(value)
 
-    private var visitorID: Long? = null
+    private var visitorID: VisitorID? = null
 
     private var visitorJob: Job? = null
     private var executedCommand: VisitorServiceCommand? = null
@@ -251,7 +252,7 @@ internal class NsdVisitorService : Service(),
 
 
     companion object {
-        const val INVALID_ID = Long.MIN_VALUE
+        const val INVALID_ID = VisitorID.MIN_VALUE
 
         const val VISITOR_ID = "com.nuzhnov.workcontrol.shared.visitservice.domen." +
                 "service.visitorID"
