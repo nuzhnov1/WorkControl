@@ -78,14 +78,14 @@ internal class ControlServerImpl : ControlServer {
     }
 
     override fun setVisits(visits: Set<Visit>) {
-        _visits.update {
+        _visits.applyUpdate {
             clear()
             putAll(visits.associateBy { it.visitorID })
         }
     }
 
     override fun clearVisits() {
-        _visits.update { clear() }
+        _visits.applyUpdate { clear() }
     }
 
     private fun initProperties(
@@ -307,24 +307,24 @@ internal class ControlServerImpl : ControlServer {
     ) = runCatching { writeResponse(serverResponse) }
 
     private fun addNewVisitor(visitorID: VisitorID) {
-        _visits.update { updateVisitorActivity(visitorID, isActiveNow = true) }
+        _visits.applyUpdate { updateVisitorActivity(visitorID, isActiveNow = true) }
     }
 
     private fun updateVisitorActivity(visitorID: VisitorID, isActiveNow: Boolean) {
         val visit = _visits.value[visitorID]
 
         if (visit == null || visit.isActivityChanged(isActiveNow)) {
-            _visits.update { updateVisitorActivity(visitorID, isActiveNow) }
+            _visits.applyUpdate { updateVisitorActivity(visitorID, isActiveNow) }
         }
     }
 
     private fun makeAllVisitorsInactive() {
-        _visits.update {
+        _visits.applyUpdate {
             keys.forEach { id -> updateVisitorActivity(visitorID = id, isActiveNow = false) }
         }
     }
 
-    private fun MutableStateFlow<Map<VisitorID, Visit>>.update(
+    private fun MutableStateFlow<Map<VisitorID, Visit>>.applyUpdate(
         block: MutableMap<VisitorID, Visit>.() -> Unit
     ) {
         value = value.toMutableMap().apply(block)

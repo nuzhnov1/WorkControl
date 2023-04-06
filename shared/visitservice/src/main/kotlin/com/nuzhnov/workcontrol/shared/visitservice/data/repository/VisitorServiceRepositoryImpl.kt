@@ -41,19 +41,15 @@ internal class VisitorServiceRepositoryImpl @Inject constructor(
     }
 
     override fun addDiscoveredService(discoveredService: String) {
-        _discoveredServices.value = _discoveredServices.value
-            .toMutableSet()
-            .apply { add(discoveredService) }
+        _discoveredServices.applyUpdate { add(discoveredService) }
     }
 
     override fun removeDiscoveredService(discoveredService: String) {
-        _discoveredServices.value = _discoveredServices.value
-            .toMutableSet()
-            .apply { remove(discoveredService) }
+        _discoveredServices.applyUpdate { remove(discoveredService) }
     }
 
     override fun clearDiscoveredServices() {
-        _discoveredServices.value = setOf()
+        _discoveredServices.applyUpdate { clear() }
     }
 
     override suspend fun startVisit(
@@ -67,5 +63,11 @@ internal class VisitorServiceRepositoryImpl @Inject constructor(
 
         api.startVisit(serverAddress, serverPort, visitorID)
         cancel()
+    }
+
+    private fun MutableStateFlow<Set<String>>.applyUpdate(
+        block: MutableSet<String>.() -> Unit
+    ) {
+        value = value.toMutableSet().apply(block)
     }
 }
