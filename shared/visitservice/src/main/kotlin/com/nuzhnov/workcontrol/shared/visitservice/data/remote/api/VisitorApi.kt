@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.shared.visitservice.data.api
+package com.nuzhnov.workcontrol.shared.visitservice.data.remote.api
 
 import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorState

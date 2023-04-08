@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
 
-class StartControlServiceUseCase @Inject constructor(
+class StartControlServiceUseCase @Inject internal constructor(
     @ApplicationContext private val context: Context
 ) {
     operator fun invoke(serviceName: String) {

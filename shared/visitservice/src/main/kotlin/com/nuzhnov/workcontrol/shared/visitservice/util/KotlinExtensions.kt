@@ -4,7 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 
 
-fun <T> Flow<T>.throttleLatest(delayMillis: Long) = this
+internal fun <T> Flow<T>.throttleLatest(delayMillis: Long) = this
     .conflate()
     .transform {
         emit(it)

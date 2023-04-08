@@ -21,12 +21,12 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
     @Inject @ControlServiceCoroutineScope internal lateinit var coroutineScope: CoroutineScope
 
     private var state: ControlServiceState
-        get() = repository.state.value
-        set(value) = repository.updateState(value)
+        get() = repository.serviceState.value
+        set(value) = repository.updateServiceState(value)
 
     private var serviceName: String?
-        get() = repository.name.value
-        set(value) = repository.updateName(value)
+        get() = repository.serviceName.value
+        set(value) = repository.updateServiceName(value)
 
     private var controlJob: Job? = null
     private var nsdManager: NsdManager? = null
@@ -34,7 +34,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
 
     override fun onCreate() {
         coroutineScope.launch {
-            repository.state.collect { state -> onStateChange(state) }
+            repository.serviceState.collect { state -> onStateChange(state) }
         }
     }
 

@@ -1,73 +1,41 @@
 package com.nuzhnov.workcontrol.shared.visitservice.data.repository
 
-import com.nuzhnov.workcontrol.shared.visitservice.data.api.VisitorApi
-import com.nuzhnov.workcontrol.shared.visitservice.data.datasource.VisitorStateLocalDataSource
-import com.nuzhnov.workcontrol.shared.visitservice.data.mapper.toVisitorServiceState
+import com.nuzhnov.workcontrol.shared.visitservice.data.datasource.VisitorServiceRemoteDataSource
+import com.nuzhnov.workcontrol.shared.visitservice.data.datasource.DiscoveredServicesLocalDataSource
 import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitorServiceRepository
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState.*
 import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 import java.net.InetAddress
 import javax.inject.Inject
 
 internal class VisitorServiceRepositoryImpl @Inject constructor(
-    private val api: VisitorApi,
-    visitorStateDataSource: VisitorStateLocalDataSource
+    private val visitorServiceRemoteDataSource: VisitorServiceRemoteDataSource,
+    private val discoveredServicesLocalDataSource: DiscoveredServicesLocalDataSource
 ) : VisitorServiceRepository {
 
-    private val visitorState = visitorStateDataSource.visitorState
-
-    private val _state = MutableStateFlow<VisitorServiceState>(value = NotInitialized)
-    override val state = _state.asStateFlow()
-
-    private val _discoveredServices = MutableStateFlow<Set<String>>(value = setOf())
-    override val discoveredServices: Flow<Set<String>> = _discoveredServices
+    override val discoveredServices = discoveredServicesLocalDataSource.discoveredServices
+    override val serviceState = visitorServiceRemoteDataSource.serviceState
 
 
-    override fun updateState(state: VisitorServiceState) {
-        val currentState = _state.value
-        val newState = state
-
-        val currentStateIsStopped = currentState is Stopped || currentState is StoppedByError
-        val newStateIsStopped = newState is Stopped || newState is StoppedByError
-
-        if (currentStateIsStopped && newStateIsStopped) {
-            return
-        } else {
-            _state.value = newState
-        }
+    override fun updateServiceState(state: VisitorServiceState) {
+        visitorServiceRemoteDataSource.updateServiceState(state)
     }
 
     override fun addDiscoveredService(discoveredService: String) {
-        _discoveredServices.applyUpdate { add(discoveredService) }
+        discoveredServicesLocalDataSource.addDiscoveredService(discoveredService)
     }
 
     override fun removeDiscoveredService(discoveredService: String) {
-        _discoveredServices.applyUpdate { remove(discoveredService) }
+        discoveredServicesLocalDataSource.removeDiscoveredService(discoveredService)
     }
 
     override fun clearDiscoveredServices() {
-        _discoveredServices.applyUpdate { clear() }
+        discoveredServicesLocalDataSource.clearDiscoveredServices()
     }
 
     override suspend fun startVisit(
         serverAddress: InetAddress,
         serverPort: Int,
         visitorID: VisitorID
-    ) = coroutineScope {
-        visitorState
-            .onEach { visitorState -> updateState(state = visitorState.toVisitorServiceState()) }
-            .launchIn(scope = this)
-
-        api.startVisit(serverAddress, serverPort, visitorID)
-        cancel()
-    }
-
-    private fun MutableStateFlow<Set<String>>.applyUpdate(
-        block: MutableSet<String>.() -> Unit
-    ) {
-        value = value.toMutableSet().apply(block)
-    }
+    ) = visitorServiceRemoteDataSource.startVisit(serverAddress, serverPort, visitorID)
 }

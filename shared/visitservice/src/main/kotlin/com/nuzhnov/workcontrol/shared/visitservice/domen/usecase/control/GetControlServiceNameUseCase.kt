@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetControlServiceNameUseCase @Inject internal constructor(
     private val repository: ControlServiceRepository
 ) {
-    operator fun invoke() = repository.name
+    operator fun invoke() = repository.serviceName
 }

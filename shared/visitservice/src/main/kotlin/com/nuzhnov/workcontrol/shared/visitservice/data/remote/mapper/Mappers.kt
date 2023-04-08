@@ -1,5 +1,7 @@
-package com.nuzhnov.workcontrol.shared.visitservice.data.mapper
+package com.nuzhnov.workcontrol.shared.visitservice.data.remote.mapper
 
+import com.nuzhnov.workcontrol.shared.visitservice.data.remote.util.VisitorNetworkModel
+import com.nuzhnov.workcontrol.shared.visitservice.domen.model.Visitor
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceError
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState
@@ -9,6 +11,24 @@ import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerState
 import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorError
 import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorState
 
+
+internal fun Visitor.toNetworkModel() = VisitorNetworkModel(
+    visitorID = id,
+    isActive = isActive,
+    lastVisitTime = lastVisitTime,
+    totalVisitDuration = totalVisitDuration
+)
+
+internal fun VisitorNetworkModel.toModel() = Visitor(
+    id = visitorID,
+    isActive = isActive,
+    lastVisitTime = lastVisitTime,
+    totalVisitDuration = totalVisitDuration
+)
+
+internal fun Iterable<Visitor>.toNetworkModelSet() = map(Visitor::toNetworkModel).toSet()
+
+internal fun Iterable<VisitorNetworkModel>.toModelSet() = map(VisitorNetworkModel::toModel).toSet()
 
 internal fun ControlServerState.toControlServiceState() = when (this) {
     is ControlServerState.NotRunningYet -> ControlServiceState.NotRunningYet

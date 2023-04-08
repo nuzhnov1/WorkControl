@@ -39,13 +39,17 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.core:core-ktx:1.10.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.room:room-runtime:2.5.1")
+    implementation("androidx.room:room-ktx:2.5.1")
     implementation("com.google.android.material:material:1.8.0")
     implementation("com.google.dagger:hilt-android:2.44")
+    implementation("joda-time:joda-time:2.12.4")
     implementation(project(":core:visitcontrol"))
 
     kapt("com.google.dagger:hilt-android-compiler:2.44")
+    kapt("androidx.room:room-compiler:2.5.1")
 
     testImplementation("junit:junit:4.13.2")
 

@@ -2,13 +2,13 @@ package com.nuzhnov.workcontrol.shared.visitservice.domen.service
 
 import com.nuzhnov.workcontrol.shared.visitservice.domen.service.model.VisitorServiceCommand
 import com.nuzhnov.workcontrol.shared.visitservice.domen.service.model.VisitorServiceCommand.*
-import com.nuzhnov.workcontrol.shared.visitservice.util.getSerializable
 import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitorServiceRepository
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState.*
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceInitFailedReason.*
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceError.*
 import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitorServiceCoroutineScope
+import com.nuzhnov.workcontrol.shared.visitservice.util.getSerializable
 import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -26,8 +26,8 @@ internal class NsdVisitorService : Service(),
     @Inject @VisitorServiceCoroutineScope internal lateinit var coroutineScope: CoroutineScope
 
     private var state: VisitorServiceState
-        get() = repository.state.value
-        set(value) = repository.updateState(value)
+        get() = repository.serviceState.value
+        set(value) = repository.updateServiceState(value)
 
     private var visitorID: VisitorID? = null
 
@@ -39,7 +39,7 @@ internal class NsdVisitorService : Service(),
 
     override fun onCreate() {
         coroutineScope.launch {
-            repository.state.collect { state -> onStateChange(state) }
+            repository.serviceState.collect { state -> onStateChange(state) }
         }
     }
 
@@ -97,7 +97,7 @@ internal class NsdVisitorService : Service(),
             return
         }
 
-        when (val visitorIdExtra = intent.getLongExtra(VISITOR_ID, INVALID_ID)) {
+        when (val visitorIdExtra = intent.getLongExtra(VISITOR_ID_EXTRA, INVALID_ID)) {
             INVALID_ID -> {
                 state = InitFailed(reason = VISITOR_ID_MISSED)
                 return
@@ -254,7 +254,7 @@ internal class NsdVisitorService : Service(),
     companion object {
         const val INVALID_ID = VisitorID.MIN_VALUE
 
-        const val VISITOR_ID = "com.nuzhnov.workcontrol.shared.visitservice.domen." +
+        const val VISITOR_ID_EXTRA = "com.nuzhnov.workcontrol.shared.visitservice.domen." +
                 "service.visitorID"
 
         const val COMMAND_EXTRA = "com.nuzhnov.workcontrol.shared.visitservice.domen." +

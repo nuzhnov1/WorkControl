@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetVisitorServiceStateUseCase @Inject internal constructor(
     private val repository: VisitorServiceRepository
 ) {
-    operator fun invoke() = repository.state
+    operator fun invoke() = repository.serviceState
 }

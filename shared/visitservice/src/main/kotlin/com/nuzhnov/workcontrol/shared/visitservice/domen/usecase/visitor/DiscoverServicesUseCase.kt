@@ -8,12 +8,12 @@ import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
 
-class DiscoverServicesUseCase @Inject constructor(
+class DiscoverServicesUseCase @Inject internal constructor(
     @ApplicationContext private val context: Context
 ) {
     operator fun invoke(visitorID: VisitorID) {
         Intent(context, NsdVisitorService::class.java).apply {
-            putExtra(NsdVisitorService.VISITOR_ID, visitorID)
+            putExtra(NsdVisitorService.VISITOR_ID_EXTRA, visitorID)
             putExtra(NsdVisitorService.COMMAND_EXTRA, VisitorServiceCommand.Discover)
 
             context.startService(this)
