@@ -6,12 +6,15 @@ import com.nuzhnov.workcontrol.shared.visitservice.data.remote.mapper.toControlS
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.Visitor
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState.*
-import kotlinx.coroutines.coroutineScope
+import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 internal class ControlServiceRemoteDataSource @Inject constructor(
-    private val api: ControlServerApi
+    private val api: ControlServerApi,
+    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) {
 
     private val serverState = api.controlServerState
@@ -40,7 +43,7 @@ internal class ControlServiceRemoteDataSource @Inject constructor(
         _serviceName.value = name
     }
 
-    suspend fun startControl() = coroutineScope {
+    suspend fun startControl() = withContext(coroutineDispatcher) {
         val serviceStateUpdateJob = serverState
             .onEach { serverState -> updateServiceState(serverState.toControlServiceState()) }
             .launchIn(scope = this)

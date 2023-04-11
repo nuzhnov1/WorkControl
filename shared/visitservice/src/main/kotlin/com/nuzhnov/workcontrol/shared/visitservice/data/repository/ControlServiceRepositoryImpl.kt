@@ -6,6 +6,7 @@ import com.nuzhnov.workcontrol.shared.visitservice.data.datasource.VisitorsRemot
 import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.ControlServiceRepository
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.util.throttleLatest
+import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -13,7 +14,8 @@ import javax.inject.Inject
 internal class ControlServiceRepositoryImpl @Inject constructor(
     private val controlServiceRemoteDataSource: ControlServiceRemoteDataSource,
     private val visitorsLocalDataSource: VisitorsLocalDataSource,
-    private val visitorsRemoteDataSource: VisitorsRemoteDataSource
+    private val visitorsRemoteDataSource: VisitorsRemoteDataSource,
+    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : ControlServiceRepository {
 
     override val visitors = visitorsLocalDataSource.visitors
@@ -29,7 +31,7 @@ internal class ControlServiceRepositoryImpl @Inject constructor(
         controlServiceRemoteDataSource.updateServiceName(name)
     }
 
-    override suspend fun startControl() = coroutineScope {
+    override suspend fun startControl() = withContext(coroutineDispatcher) {
         val visitorsUpdateJob = visitorsRemoteDataSource.visitors
             .throttleLatest(UPDATE_TIME_INTERVAL_MS)
             .onEach { visitors -> visitorsLocalDataSource.persistVisitors(visitors) }
