@@ -31,7 +31,8 @@ internal fun Iterable<Visitor>.toNetworkModelSet() = map(Visitor::toNetworkModel
 internal fun Iterable<VisitorNetworkModel>.toModelSet() = map(VisitorNetworkModel::toModel).toSet()
 
 internal fun ControlServerState.toControlServiceState() = when (this) {
-    is ControlServerState.NotRunningYet -> ControlServiceState.NotRunningYet
+    is ControlServerState.NotRunningYet -> null
+
     is ControlServerState.Running -> ControlServiceState.Running(address, port)
 
     is ControlServerState.StoppedAcceptConnections ->
@@ -44,7 +45,7 @@ internal fun ControlServerState.toControlServiceState() = when (this) {
 }
 
 internal fun VisitorState.toVisitorServiceState() = when (this) {
-    is VisitorState.NotRunningYet -> VisitorServiceState.NotRunningYet
+    is VisitorState.NotRunningYet -> null
     is VisitorState.Connecting -> VisitorServiceState.Connecting
     is VisitorState.Running -> VisitorServiceState.Running
     is VisitorState.Stopped -> VisitorServiceState.Stopped

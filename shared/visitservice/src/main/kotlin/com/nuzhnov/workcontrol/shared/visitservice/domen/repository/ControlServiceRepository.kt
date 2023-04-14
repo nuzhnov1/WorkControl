@@ -11,6 +11,8 @@ internal interface ControlServiceRepository {
     val serviceName: StateFlow<String?>
 
 
+    suspend fun getVisitors(): Set<Visitor>
+
     fun updateServiceState(state: ControlServiceState)
 
     fun updateServiceName(name: String?)

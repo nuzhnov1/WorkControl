@@ -9,6 +9,8 @@ internal class DiscoveredServicesLocalDataSource @Inject constructor() {
     val discoveredServices: Flow<Set<String>> = _discoveredServices
 
 
+    fun getDiscoveredServices() = _discoveredServices.value
+
     fun addDiscoveredService(discoveredService: String) {
         _discoveredServices.applyUpdate { add(discoveredService) }
     }

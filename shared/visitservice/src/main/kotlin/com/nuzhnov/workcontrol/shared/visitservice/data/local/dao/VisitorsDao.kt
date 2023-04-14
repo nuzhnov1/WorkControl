@@ -15,7 +15,6 @@ internal interface VisitorsDao {
     @Upsert
     suspend fun insertOrUpdate(vararg visitorEntity: VisitorEntity)
 
-
     @Query("DELETE FROM visitor")
     suspend fun clearVisitors()
 }

@@ -45,7 +45,9 @@ internal class ControlServiceRemoteDataSource @Inject constructor(
 
     suspend fun startControl() = withContext(coroutineDispatcher) {
         val serviceStateUpdateJob = serverState
-            .onEach { serverState -> updateServiceState(serverState.toControlServiceState()) }
+            .onEach { serverState ->
+                updateServiceState(state = serverState.toControlServiceState() ?: return@onEach)
+            }
             .launchIn(scope = this)
 
         api.startControl()

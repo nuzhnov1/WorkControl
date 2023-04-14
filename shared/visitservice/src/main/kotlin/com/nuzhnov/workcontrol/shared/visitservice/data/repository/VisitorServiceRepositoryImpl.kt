@@ -17,6 +17,10 @@ internal class VisitorServiceRepositoryImpl @Inject constructor(
     override val serviceState = visitorServiceRemoteDataSource.serviceState
 
 
+    override fun getDiscoveredServices(): Set<String> {
+        return discoveredServicesLocalDataSource.getDiscoveredServices()
+    }
+
     override fun updateServiceState(state: VisitorServiceState) {
         visitorServiceRemoteDataSource.updateServiceState(state)
     }

@@ -11,6 +11,8 @@ internal interface VisitorServiceRepository {
     val serviceState: StateFlow<VisitorServiceState>
 
 
+    fun getDiscoveredServices(): Set<String>
+
     fun updateServiceState(state: VisitorServiceState)
 
     fun addDiscoveredService(discoveredService: String)

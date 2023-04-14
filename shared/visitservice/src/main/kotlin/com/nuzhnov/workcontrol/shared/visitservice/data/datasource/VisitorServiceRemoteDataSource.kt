@@ -42,7 +42,9 @@ internal class VisitorServiceRemoteDataSource @Inject constructor(
         visitorID: VisitorID
     ) = withContext(coroutineDispatcher) {
         val serviceStateUpdateJob = visitorState
-            .onEach { visitorState -> updateServiceState(visitorState.toVisitorServiceState()) }
+            .onEach { visitorState ->
+                updateServiceState(state = visitorState.toVisitorServiceState() ?: return@onEach)
+            }
             .launchIn(scope = this)
 
         api.startVisit(serverAddress, serverPort, visitorID)

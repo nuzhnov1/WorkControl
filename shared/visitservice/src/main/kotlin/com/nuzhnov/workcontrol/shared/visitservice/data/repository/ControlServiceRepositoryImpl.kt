@@ -7,6 +7,7 @@ import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.ControlServi
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.util.throttleLatest
 import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
+import com.nuzhnov.workcontrol.shared.visitservice.domen.model.Visitor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -22,6 +23,10 @@ internal class ControlServiceRepositoryImpl @Inject constructor(
     override val serviceState = controlServiceRemoteDataSource.serviceState
     override val serviceName = controlServiceRemoteDataSource.serviceName
 
+
+    override suspend fun getVisitors(): Set<Visitor> {
+        return visitorsLocalDataSource.getVisitors()
+    }
 
     override fun updateServiceState(state: ControlServiceState) {
         controlServiceRemoteDataSource.updateServiceState(state)
@@ -49,7 +54,7 @@ internal class ControlServiceRepositoryImpl @Inject constructor(
     }
 
 
-    private companion object {
-        const val UPDATE_TIME_INTERVAL_MS = 50L
+    companion object {
+        private const val UPDATE_TIME_INTERVAL_MS = 50L
     }
 }
