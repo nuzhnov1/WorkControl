@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.shared.visitservice.domen.usecase.control
 
-import com.nuzhnov.workcontrol.shared.visitservice.domen.service.NsdControlService
+import com.nuzhnov.workcontrol.shared.visitservice.domen.service.control.NsdControlService
 import javax.inject.Inject
 import android.content.Context
 import android.content.Intent
@@ -10,8 +10,6 @@ class StopControlServiceUseCase @Inject internal constructor(
     @ApplicationContext private val context: Context
 ) {
     operator fun invoke() {
-        Intent(context, NsdControlService::class.java).apply {
-            context.stopService(this)
-        }
+        context.stopService(Intent(context, NsdControlService::class.java))
     }
 }

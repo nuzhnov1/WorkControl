@@ -10,8 +10,6 @@ class StopVisitorServiceUseCase @Inject internal constructor(
     @ApplicationContext private val context: Context
 ) {
     operator fun invoke() {
-        Intent(context, NsdVisitorService::class.java).apply {
-            context.stopService(this)
-        }
+        context.stopService(Intent(context, NsdVisitorService::class.java))
     }
 }
