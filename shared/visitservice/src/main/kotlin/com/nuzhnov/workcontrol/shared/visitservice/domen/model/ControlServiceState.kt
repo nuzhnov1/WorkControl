@@ -4,9 +4,8 @@ import java.net.InetAddress
 
 sealed interface ControlServiceState {
     object NotInitialized : ControlServiceState
-    data class InitFailed(val reason: ControlServiceInitFailedReason) : ControlServiceState
-    object ReadyToStart : ControlServiceState
-    object NotRunningYet : ControlServiceState
+    object InitFailed : ControlServiceState
+    object ReadyToRun : ControlServiceState
 
     data class Running internal constructor(
         internal val serverAddress: InetAddress,
