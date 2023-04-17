@@ -10,13 +10,18 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 class StartControlServiceUseCase @Inject internal constructor(
     @ApplicationContext private val context: Context
 ) {
-    operator fun invoke(boundActivity: Class<out Activity>, serviceName: String) {
+    operator fun invoke(
+        boundActivity: Class<out Activity>,
+        serviceName: String,
+        notificationChannelID: String
+    ) {
         Intent(context, NsdControlService::class.java).apply {
             putExtra(
-                NsdControlService.BOUND_ACTIVITY_CLASS_NAME_EXTRA,
+                NsdControlService.CONTENT_ACTIVITY_CLASS_NAME_EXTRA,
                 boundActivity.canonicalName!!
             )
             putExtra(NsdControlService.SERVICE_NAME_EXTRA, serviceName)
+            putExtra(NsdControlService.NOTIFICATION_CHANNEL_ID_EXTRA, notificationChannelID)
 
             context.startService(this)
         }

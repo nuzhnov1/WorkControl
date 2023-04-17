@@ -41,7 +41,7 @@ internal val testCaseData = listOf(
     TestCaseData(
         serverWorkTimeMillis = 30_000L,
         visitorsCount = 5,
-        serverAddress = LOCALHOST,
+        serverAddress = localhost,
         serverPort = DEFAULT_SERVER_PORT,
         minVisitTimeMillis = 1_000L,
         maxVisitTimeMillis = 5_000L,
@@ -54,7 +54,7 @@ internal val testCaseData = listOf(
     TestCaseData(
         serverWorkTimeMillis = 5_000L,
         visitorsCount = 5,
-        serverAddress = LOCALHOST,
+        serverAddress = localhost,
         serverPort = DEFAULT_SERVER_PORT,
         minVisitTimeMillis = 1_000L,
         maxVisitTimeMillis = 5_000L,
@@ -67,7 +67,7 @@ internal val testCaseData = listOf(
     TestCaseData(
         serverWorkTimeMillis = 10_000L,
         visitorsCount = 100,
-        serverAddress = LOCALHOST,
+        serverAddress = localhost,
         serverPort = DEFAULT_SERVER_PORT,
         minVisitTimeMillis = 1_000L,
         maxVisitTimeMillis = 2_000L,
@@ -80,7 +80,7 @@ internal val testCaseData = listOf(
     TestCaseData(
         serverWorkTimeMillis = 30_000L,
         visitorsCount = 5,
-        serverAddress = LOCALHOST,
+        serverAddress = localhost,
         serverPort = DEFAULT_SERVER_PORT,
         minVisitTimeMillis = 5_000L,
         maxVisitTimeMillis = 10_000L,

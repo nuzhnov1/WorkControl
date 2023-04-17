@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 internal interface ControlServerApi {
-    val visitors: Flow<Set<VisitorNetworkModel>>
+    val visitorsFlow: Flow<Set<VisitorNetworkModel>>
     val controlServerState: StateFlow<ControlServerState>
 
 

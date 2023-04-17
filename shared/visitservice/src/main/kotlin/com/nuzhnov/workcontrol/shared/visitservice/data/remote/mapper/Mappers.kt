@@ -30,7 +30,7 @@ internal fun Iterable<Visitor>.toNetworkModelSet() = map(Visitor::toNetworkModel
 
 internal fun Iterable<VisitorNetworkModel>.toModelSet() = map(VisitorNetworkModel::toModel).toSet()
 
-internal fun ControlServerState.toControlServiceState() = when (this) {
+internal fun ControlServerState.toServiceState() = when (this) {
     is ControlServerState.NotRunningYet -> null
 
     is ControlServerState.Running -> ControlServiceState.Running(address, port)
@@ -44,7 +44,7 @@ internal fun ControlServerState.toControlServiceState() = when (this) {
         ControlServiceState.StoppedByError(error = error.toVisitorServiceError())
 }
 
-internal fun VisitorState.toVisitorServiceState() = when (this) {
+internal fun VisitorState.toServiceState() = when (this) {
     is VisitorState.NotRunningYet -> null
     is VisitorState.Connecting -> VisitorServiceState.Connecting
     is VisitorState.Running -> VisitorServiceState.Running
@@ -69,7 +69,7 @@ internal fun VisitorError.toVisitorServiceError() = when (this) {
     VisitorError.CONNECTION_FAILED -> VisitorServiceError.CONNECTION_FAILED_ERROR
     VisitorError.BREAK_CONNECTION -> VisitorServiceError.BREAK_CONNECTION_ERROR
     VisitorError.BAD_CONNECTION -> VisitorServiceError.BAD_CONNECTION_ERROR
-    VisitorError.IO_ERROR -> VisitorServiceError.IO_ERROR_ERROR
+    VisitorError.IO_ERROR -> VisitorServiceError.IO_ERROR
     VisitorError.SECURITY_ERROR -> VisitorServiceError.SECURITY_ERROR
     VisitorError.UNKNOWN_ERROR -> VisitorServiceError.UNKNOWN_ERROR
 }

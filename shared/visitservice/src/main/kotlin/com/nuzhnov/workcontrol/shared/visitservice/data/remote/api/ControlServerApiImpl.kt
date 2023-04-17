@@ -9,7 +9,7 @@ internal class ControlServerApiImpl @Inject constructor(
     private val controlServer: ControlServer
 ) : ControlServerApi {
 
-    override val visitors: Flow<Set<VisitorNetworkModel>> = controlServer.visits
+    override val visitorsFlow: Flow<Set<VisitorNetworkModel>> = controlServer.visits
     override val controlServerState = controlServer.state
 
 

@@ -11,7 +11,7 @@ interface ControlServer {
 
 
     suspend fun start(
-        address: InetAddress = DEFAULT_ADDRESS,
+        address: InetAddress = defaultAddress,
         port: Int = DEFAULT_PORT,
         backlog: Int = DEFAULT_BACKLOG,
         maxAcceptConnectionAttempts: Int = DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS
@@ -23,10 +23,12 @@ interface ControlServer {
 
 
     companion object {
-        val DEFAULT_ADDRESS: InetAddress = InetAddress.getLocalHost()
         const val DEFAULT_PORT = 0
         const val DEFAULT_BACKLOG = 512
         const val DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS = 16
+
+        val defaultAddress: InetAddress = InetAddress.getLocalHost()
+
 
         fun getDefaultControlServer(): ControlServer = ControlServerImpl()
     }

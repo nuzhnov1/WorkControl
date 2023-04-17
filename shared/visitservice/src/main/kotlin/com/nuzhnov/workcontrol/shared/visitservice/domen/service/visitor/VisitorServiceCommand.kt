@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.shared.visitservice.domen.service.model
+package com.nuzhnov.workcontrol.shared.visitservice.domen.service.visitor
 
 import java.io.Serializable
 

@@ -1,17 +1,17 @@
-package com.nuzhnov.workcontrol.shared.visitservice.domen.service
+package com.nuzhnov.workcontrol.shared.visitservice.domen.service.visitor
 
-import com.nuzhnov.workcontrol.shared.visitservice.domen.service.model.VisitorServiceCommand
-import com.nuzhnov.workcontrol.shared.visitservice.domen.service.model.VisitorServiceCommand.*
+import com.nuzhnov.workcontrol.shared.visitservice.domen.service.visitor.VisitorServiceCommand.*
+import com.nuzhnov.workcontrol.shared.visitservice.domen.service.control.NsdControlService
 import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.VisitorServiceRepository
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState.*
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceInitFailedReason.*
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceError.*
 import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.VisitorServiceCoroutineScope
 import com.nuzhnov.workcontrol.shared.visitservice.util.getSerializable
 import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import kotlinx.coroutines.*
 import javax.inject.Inject
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.net.nsd.NsdManager
@@ -30,14 +30,15 @@ internal class NsdVisitorService : Service(),
         set(value) = repository.updateServiceState(value)
 
     private var visitorID: VisitorID? = null
-
-    private var visitorJob: Job? = null
     private var executedCommand: VisitorServiceCommand? = null
+
+    private var notificationManager: VisitorServiceNotificationManager? = null
+    private var visitorJob: Job? = null
     private var nsdManager: NsdManager? = null
-    private val discoveredServices = mutableMapOf<String, NsdServiceInfo>()
 
 
     override fun onCreate() {
+        state = NotInitialized
         coroutineScope.launch {
             repository.serviceState.collect { state -> onStateChange(state) }
         }
@@ -67,7 +68,7 @@ internal class NsdVisitorService : Service(),
     override fun onBind(intent: Intent?) = null
 
     override fun onDestroy() {
-        clearDiscoveredServices()
+        repository.clearDiscoveredServices()
         nsdManager?.stopServiceDiscovery(/* listener = */ this)
         coroutineScope.cancel()
 
@@ -85,40 +86,52 @@ internal class NsdVisitorService : Service(),
         }
     }
 
-    private fun onNotificationChange(serviceState: VisitorServiceState) {
-        // TODO: implemented notifications about the service state changes
+    private fun onNotificationChange(state: VisitorServiceState) {
+        notificationManager?.updateNotification(state)
     }
 
     private fun onInit(intent: Intent?, startId: Int) {
-        addToForeground(startId)
-
         if (intent == null) {
-            state = InitFailed(reason = INTENT_MISSED)
             return
         }
 
-        when (val visitorIdExtra = intent.getLongExtra(VISITOR_ID_EXTRA, INVALID_ID)) {
-            INVALID_ID -> {
-                state = InitFailed(reason = VISITOR_ID_MISSED)
-                return
-            }
+        val activityClassNameExtra = intent.getStringExtra(CONTENT_ACTIVITY_CLASS_NAME_EXTRA)!!
+        val contentActivityClass = Class.forName(activityClassNameExtra)
+        val visitorIdExtra = intent.getLongExtra(VISITOR_ID_EXTRA, /* defaultValue = */ 0)
+        val notificationChannelID = intent.getStringExtra(NOTIFICATION_CHANNEL_ID_EXTRA)!!
+        val manager = getSystemService(NSD_SERVICE) as? NsdManager
 
-            else -> visitorID = visitorIdExtra
+        initNotificationSystem(
+            notificationID = startId,
+            notificationChannelID = notificationChannelID,
+            contentActivityClass = contentActivityClass
+        )
+
+        if (manager == null) {
+            state = InitFailed
+            return
         }
 
-        when (val manager = getSystemService(NSD_SERVICE) as? NsdManager) {
-            null -> {
-                state = InitFailed(reason = TECHNOLOGY_UNAVAILABLE_ERROR)
-                return
-            }
-
-            else -> nsdManager = manager
-        }
-
-        state = ReadyToStart
+        visitorID = visitorIdExtra
+        nsdManager = manager
+        state = ReadyToRun
     }
 
-    private fun Intent.getCommandExtra() = getSerializable<VisitorServiceCommand>(COMMAND_EXTRA)
+    private fun initNotificationSystem(
+        notificationID: Int,
+        notificationChannelID: String,
+        contentActivityClass: Class<*>
+    ) {
+        notificationManager = VisitorServiceNotificationManager(
+            applicationContext = applicationContext,
+            notificationChannelID = notificationChannelID,
+            notificationID = notificationID,
+            contentActivityClass = contentActivityClass,
+            initState = state
+        ).apply { addToForeground(notificationID, notification) }
+    }
+
+    private fun Intent.getCommandExtra() = getSerializable<VisitorServiceCommand>(COMMAND_EXTRA)!!
 
     private fun onDiscover() {
         val nsdManager = nsdManager
@@ -142,31 +155,32 @@ internal class NsdVisitorService : Service(),
     }
 
     private fun onDiscoverFailed() {
-        clearDiscoveredServices()
+        repository.clearDiscoveredServices()
         nsdManager?.stopServiceDiscovery(/* listener = */ this)
-        state = StoppedByError(error = DISCOVER_SERVICE_FAILED)
+        state = StoppedByError(error = DISCOVER_SERVICES_FAILED)
     }
 
     override fun onServiceFound(serviceInfo: NsdServiceInfo?) {
         if (serviceInfo != null) {
-            addDiscoveredService(serviceInfo)
+            repository.addDiscoveredService(serviceInfo)
         }
     }
 
     override fun onServiceLost(serviceInfo: NsdServiceInfo?) {
         if (serviceInfo != null) {
-            removeDiscoveredService(serviceInfo)
+            repository.removeDiscoveredService(serviceInfo)
         }
     }
 
     override fun onDiscoveryStopped(serviceType: String?) {
-        clearDiscoveredServices()
+        repository.clearDiscoveredServices()
     }
 
     override fun onStopDiscoveryFailed(serviceType: String?, errorCode: Int) = Unit
 
     private fun onResolve(serviceName: String) {
         val nsdManager = nsdManager
+        val discoveredServices = repository.getDiscoveredServices()
         val nsdServiceInfo = discoveredServices[serviceName]
 
         if (nsdManager == null || nsdServiceInfo == null) {
@@ -202,7 +216,6 @@ internal class NsdVisitorService : Service(),
 
     private fun onResolveFailed() {
         state = StoppedByError(error = RESOLVE_SERVICE_FAILED)
-        visitorJob?.cancel()
     }
 
     private fun onStop() {
@@ -219,27 +232,8 @@ internal class NsdVisitorService : Service(),
         executedCommand = null
     }
 
-    private fun addDiscoveredService(serviceInfo: NsdServiceInfo) {
-        val serviceName = serviceInfo.serviceName
-
-        discoveredServices[serviceName] = serviceInfo
-        repository.addDiscoveredService(serviceName)
-    }
-
-    private fun removeDiscoveredService(serviceInfo: NsdServiceInfo) {
-        val serviceName = serviceInfo.serviceName
-
-        discoveredServices.remove(serviceName)
-        repository.removeDiscoveredService(serviceName)
-    }
-
-    private fun clearDiscoveredServices() {
-        discoveredServices.clear()
-        repository.clearDiscoveredServices()
-    }
-
-    private fun addToForeground(startId: Int) {
-        // TODO: startForeground(startId, ...)
+    private fun addToForeground(notificationID: Int, notification: Notification) {
+        startForeground(notificationID, notification)
     }
 
     private fun removeFromForeground() {
@@ -252,12 +246,16 @@ internal class NsdVisitorService : Service(),
 
 
     companion object {
-        const val INVALID_ID = VisitorID.MIN_VALUE
+        internal const val CONTENT_ACTIVITY_CLASS_NAME_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".visitservice.domen.service.visitor.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
 
-        const val VISITOR_ID_EXTRA = "com.nuzhnov.workcontrol.shared.visitservice.domen." +
-                "service.visitorID"
+        internal const val VISITOR_ID_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".visitservice.domen.service.visitor.VISITOR_ID_EXTRA"
 
-        const val COMMAND_EXTRA = "com.nuzhnov.workcontrol.shared.visitservice.domen." +
-                "service.commandExtra"
+        internal const val COMMAND_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".visitservice.domen.service.visitor.COMMAND_EXTRA"
+
+        internal const val NOTIFICATION_CHANNEL_ID_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".visitservice.domen.service.visitor.NOTIFICATION_CHANNEL_ID_EXTRA"
     }
 }

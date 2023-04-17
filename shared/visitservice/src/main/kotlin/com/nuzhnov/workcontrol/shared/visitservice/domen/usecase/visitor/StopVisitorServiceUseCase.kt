@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.shared.visitservice.domen.usecase.visitor
 
-import com.nuzhnov.workcontrol.shared.visitservice.domen.service.NsdVisitorService
+import com.nuzhnov.workcontrol.shared.visitservice.domen.service.visitor.NsdVisitorService
 import javax.inject.Inject
 import android.content.Context
 import android.content.Intent

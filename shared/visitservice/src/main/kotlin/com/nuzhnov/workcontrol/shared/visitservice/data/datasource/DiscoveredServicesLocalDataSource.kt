@@ -3,29 +3,30 @@ package com.nuzhnov.workcontrol.shared.visitservice.data.datasource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
+import android.net.nsd.NsdServiceInfo
 
 internal class DiscoveredServicesLocalDataSource @Inject constructor() {
-    private val _discoveredServices = MutableStateFlow<Set<String>>(value = setOf())
-    val discoveredServices: Flow<Set<String>> = _discoveredServices
+    private val _services = MutableStateFlow<Map<String, NsdServiceInfo>>(value = mapOf())
+    val servicesFlow: Flow<Map<String, NsdServiceInfo>> = _services
 
 
-    fun getDiscoveredServices() = _discoveredServices.value
+    fun getServices() = _services.value
 
-    fun addDiscoveredService(discoveredService: String) {
-        _discoveredServices.applyUpdate { add(discoveredService) }
+    fun addService(service: NsdServiceInfo) {
+        _services.applyUpdate { put(service.serviceName, service) }
     }
 
-    fun removeDiscoveredService(discoveredService: String) {
-        _discoveredServices.applyUpdate { remove(discoveredService) }
+    fun removeDiscoveredService(service: NsdServiceInfo) {
+        _services.applyUpdate { remove(service.serviceName) }
     }
 
     fun clearDiscoveredServices() {
-        _discoveredServices.applyUpdate { clear() }
+        _services.applyUpdate { clear() }
     }
 
-    private fun MutableStateFlow<Set<String>>.applyUpdate(
-        block: MutableSet<String>.() -> Unit
+    private fun MutableStateFlow<Map<String, NsdServiceInfo>>.applyUpdate(
+        block: MutableMap<String, NsdServiceInfo>.() -> Unit
     ) {
-        value = value.toMutableSet().apply(block)
+        value = value.toMutableMap().apply(block)
     }
 }

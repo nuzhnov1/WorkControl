@@ -8,7 +8,6 @@ import javax.inject.Inject
 internal class VisitorApiImpl @Inject constructor(private val visitor: Visitor) : VisitorApi {
     override val visitorState = visitor.state
 
-
     override suspend fun startVisit(
         serverAddress: InetAddress,
         serverPort: Int,

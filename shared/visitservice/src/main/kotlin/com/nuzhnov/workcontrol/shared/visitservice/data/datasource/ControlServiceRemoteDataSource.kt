@@ -2,7 +2,7 @@ package com.nuzhnov.workcontrol.shared.visitservice.data.datasource
 
 import com.nuzhnov.workcontrol.shared.visitservice.data.remote.api.ControlServerApi
 import com.nuzhnov.workcontrol.shared.visitservice.data.remote.mapper.toNetworkModelSet
-import com.nuzhnov.workcontrol.shared.visitservice.data.remote.mapper.toControlServiceState
+import com.nuzhnov.workcontrol.shared.visitservice.data.remote.mapper.toServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.Visitor
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState.*
@@ -46,7 +46,7 @@ internal class ControlServiceRemoteDataSource @Inject constructor(
     suspend fun startControl() = withContext(coroutineDispatcher) {
         val serviceStateUpdateJob = serverState
             .onEach { serverState ->
-                updateServiceState(state = serverState.toControlServiceState() ?: return@onEach)
+                updateServiceState(state = serverState.toServiceState() ?: return@onEach)
             }
             .launchIn(scope = this)
 

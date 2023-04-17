@@ -31,62 +31,48 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 internal interface VisitServiceModule {
 
-    @Binds
-    @Singleton
+    @[Binds Singleton]
     fun provideControlServiceRepository(
         instance: ControlServiceRepositoryImpl
     ): ControlServiceRepository
 
-    @Binds
-    @Singleton
+    @[Binds Singleton]
     fun provideVisitorServiceRepository(
         instance: VisitorServiceRepositoryImpl
     ): VisitorServiceRepository
 
-    @Binds
-    @Singleton
+    @[Binds Singleton]
     fun provideControlServerApi(instance: ControlServerApiImpl): ControlServerApi
 
-    @Binds
-    @Singleton
+    @[Binds Singleton]
     fun provideVisitorApi(instance: VisitorApiImpl): VisitorApi
 
-    @Provides
-    @Singleton
+    @[Provides Singleton]
     fun provideControlServer() = ControlServer.getDefaultControlServer()
 
-    @Provides
-    @Singleton
+    @[Provides Singleton]
     fun provideVisitor() = Visitor.getDefaultVisitor()
 
-    @Provides
-    @Singleton
+    @[Provides Singleton]
     fun provideVisitorsDao(database: VisitorsDatabase) = database.provideVisitorsDao()
 
-    @Provides
-    @Singleton
+    @[Provides Singleton]
     fun provideVisitorsDatabase(
         @ApplicationContext context: Context
     ) = Room.databaseBuilder(context, VisitorsDatabase::class.java, name = VISITORS_DATABASE_NAME)
         .fallbackToDestructiveMigration()
         .build()
 
-    @Provides
-    @ServiceScoped
-    @ControlServiceCoroutineScope
+    @[Provides ServiceScoped ControlServiceCoroutineScope]
     fun provideControlServiceCoroutineScope(
         @IODispatcher dispatcher: CoroutineDispatcher
     ) = CoroutineScope(context = dispatcher + Job())
 
-    @Provides
-    @ServiceScoped
-    @VisitorServiceCoroutineScope
+    @[Provides ServiceScoped VisitorServiceCoroutineScope]
     fun provideVisitorServiceCoroutineScope(
         @IODispatcher dispatcher: CoroutineDispatcher
     ) = CoroutineScope(context = dispatcher + Job())
 
-    @Provides
-    @Singleton
-    @IODispatcher
+    @[Provides Singleton IODispatcher]
     fun provideIODispatcher() = Dispatchers.IO
 }

@@ -12,7 +12,7 @@ internal class VisitorsRemoteDataSource @Inject constructor(
     api: ControlServerApi,
     @IODispatcher coroutineDispatcher: CoroutineDispatcher
 ) {
-    val visitors = api.visitors
+    val visitorsFlow = api.visitorsFlow
         .map { networkModelSet -> networkModelSet.toModelSet() }
         .flowOn(coroutineDispatcher)
 }

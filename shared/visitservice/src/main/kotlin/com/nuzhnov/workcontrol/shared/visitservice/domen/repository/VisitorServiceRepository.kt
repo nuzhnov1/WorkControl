@@ -5,19 +5,20 @@ import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.net.InetAddress
+import android.net.nsd.NsdServiceInfo
 
 internal interface VisitorServiceRepository {
-    val discoveredServices: Flow<Set<String>>
+    val servicesFlow: Flow<Map<String, NsdServiceInfo>>
     val serviceState: StateFlow<VisitorServiceState>
 
 
-    fun getDiscoveredServices(): Set<String>
+    fun getDiscoveredServices(): Map<String, NsdServiceInfo>
 
     fun updateServiceState(state: VisitorServiceState)
 
-    fun addDiscoveredService(discoveredService: String)
+    fun addDiscoveredService(service: NsdServiceInfo)
 
-    fun removeDiscoveredService(discoveredService: String)
+    fun removeDiscoveredService(service: NsdServiceInfo)
 
     fun clearDiscoveredServices()
 

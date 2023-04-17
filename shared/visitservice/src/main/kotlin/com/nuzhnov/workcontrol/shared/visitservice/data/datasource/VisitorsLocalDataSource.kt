@@ -7,8 +7,6 @@ import com.nuzhnov.workcontrol.shared.visitservice.domen.model.Visitor
 import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class VisitorsLocalDataSource @Inject constructor(
@@ -16,20 +14,11 @@ internal class VisitorsLocalDataSource @Inject constructor(
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) {
 
-    val visitors = dao.getVisitorsFlow()
-        .map { entitySet -> entitySet.toModelSet() }
-        .flowOn(coroutineDispatcher)
-
-
     suspend fun getVisitors() = withContext(coroutineDispatcher) {
         dao.getVisitors().toModelSet()
     }
 
     suspend fun persistVisitors(visitors: Set<Visitor>) = withContext(coroutineDispatcher) {
         dao.insertOrUpdate(*visitors.toEntityArray())
-    }
-
-    suspend fun clearPersistVisitors() = withContext(coroutineDispatcher) {
-        dao.clearVisitors()
     }
 }

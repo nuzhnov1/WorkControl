@@ -7,30 +7,31 @@ import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceSta
 import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
 import java.net.InetAddress
 import javax.inject.Inject
+import android.net.nsd.NsdServiceInfo
 
 internal class VisitorServiceRepositoryImpl @Inject constructor(
     private val visitorServiceRemoteDataSource: VisitorServiceRemoteDataSource,
     private val discoveredServicesLocalDataSource: DiscoveredServicesLocalDataSource
 ) : VisitorServiceRepository {
 
-    override val discoveredServices = discoveredServicesLocalDataSource.discoveredServices
+    override val servicesFlow = discoveredServicesLocalDataSource.servicesFlow
     override val serviceState = visitorServiceRemoteDataSource.serviceState
 
 
-    override fun getDiscoveredServices(): Set<String> {
-        return discoveredServicesLocalDataSource.getDiscoveredServices()
+    override fun getDiscoveredServices(): Map<String, NsdServiceInfo> {
+        return discoveredServicesLocalDataSource.getServices()
     }
 
     override fun updateServiceState(state: VisitorServiceState) {
         visitorServiceRemoteDataSource.updateServiceState(state)
     }
 
-    override fun addDiscoveredService(discoveredService: String) {
-        discoveredServicesLocalDataSource.addDiscoveredService(discoveredService)
+    override fun addDiscoveredService(service: NsdServiceInfo) {
+        discoveredServicesLocalDataSource.addService(service)
     }
 
-    override fun removeDiscoveredService(discoveredService: String) {
-        discoveredServicesLocalDataSource.removeDiscoveredService(discoveredService)
+    override fun removeDiscoveredService(service: NsdServiceInfo) {
+        discoveredServicesLocalDataSource.removeDiscoveredService(service)
     }
 
     override fun clearDiscoveredServices() {

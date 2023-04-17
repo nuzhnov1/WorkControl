@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.shared.visitservice.data.datasource
 
 import com.nuzhnov.workcontrol.shared.visitservice.data.remote.api.VisitorApi
-import com.nuzhnov.workcontrol.shared.visitservice.data.remote.mapper.toVisitorServiceState
+import com.nuzhnov.workcontrol.shared.visitservice.data.remote.mapper.toServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.VisitorServiceState.*
 import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.IODispatcher
@@ -43,7 +43,7 @@ internal class VisitorServiceRemoteDataSource @Inject constructor(
     ) = withContext(coroutineDispatcher) {
         val serviceStateUpdateJob = visitorState
             .onEach { visitorState ->
-                updateServiceState(state = visitorState.toVisitorServiceState() ?: return@onEach)
+                updateServiceState(state = visitorState.toServiceState() ?: return@onEach)
             }
             .launchIn(scope = this)
 

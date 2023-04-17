@@ -1,10 +1,8 @@
 package com.nuzhnov.workcontrol.shared.visitservice.domen.service.control
 
-import com.nuzhnov.workcontrol.shared.visitservice.domen.service.util.createNotificationChannelGroup
 import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.ControlServiceRepository
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState.*
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceInitFailedReason.*
 import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceError.*
 import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.ControlServiceCoroutineScope
 import kotlinx.coroutines.*
@@ -25,8 +23,6 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
     private var state: ControlServiceState
         get() = repository.serviceState.value
         set(value) = repository.updateServiceState(value)
-
-    private var boundActivity: Class<*>? = null
 
     private var serviceName: String?
         get() = repository.serviceName.value
@@ -50,7 +46,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
         }
 
         if (state is Stopped || state is StoppedByError) {
-            state = ReadyToStart
+            state = ReadyToRun
         }
 
         return START_STICKY
@@ -70,7 +66,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
         onNotificationChange(state)
 
         when (state) {
-            is ReadyToStart -> onStart()
+            is ReadyToRun -> onStart()
             is Running -> onRegisterService(state.serverAddress, state.serverPort)
             is Stopped, is StoppedByError -> onStop()
             else -> Unit
@@ -78,9 +74,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
     }
 
     private fun onNotificationChange(state: ControlServiceState) {
-        notificationManager?.apply {
-            updateNotification(newNotification = state.toNotification() ?: return)
-        }
+        notificationManager?.updateNotification(state)
     }
 
     private fun onInit(intent: Intent?, startId: Int) {
@@ -88,37 +82,40 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
             return
         }
 
-        val activityClassNameExtra = intent.getStringExtra(BOUND_ACTIVITY_CLASS_NAME_EXTRA)!!
+        val activityClassNameExtra = intent.getStringExtra(CONTENT_ACTIVITY_CLASS_NAME_EXTRA)!!
+        val contentActivityClass = Class.forName(activityClassNameExtra)
         val serviceNameExtra = intent.getStringExtra(SERVICE_NAME_EXTRA)!!
+        val notificationChannelID = intent.getStringExtra(NOTIFICATION_CHANNEL_ID_EXTRA)!!
         val manager = getSystemService(NSD_SERVICE) as? NsdManager
 
+        initNotificationSystem(
+            notificationID = startId,
+            notificationChannelID = notificationChannelID,
+            contentActivityClass = contentActivityClass
+        )
+
         if (manager == null) {
-            state = InitFailed(reason = TECHNOLOGY_UNAVAILABLE_ERROR)
+            state = InitFailed
             return
         }
 
-        boundActivity = Class.forName(activityClassNameExtra)
         serviceName = serviceNameExtra
         nsdManager = manager
-        initNotificationSystem(startId)
-        state = ReadyToStart
+        state = ReadyToRun
     }
 
-    private fun initNotificationSystem(startId: Int) {
-        val boundActivity = boundActivity ?: return
-
+    private fun initNotificationSystem(
+        notificationID: Int,
+        notificationChannelID: String,
+        contentActivityClass: Class<*>
+    ) {
         notificationManager = ControlServiceNotificationManager(
-            context = applicationContext,
-            notificationID = startId,
-            activityClass = boundActivity
-        ).apply {
-            createNotificationChannelGroup()
-            createControlServiceNotificationChannel()
-            addToForeground(
-                notificationID = startId,
-                notification = NotInitialized.toNotification()!!
-            )
-        }
+            applicationContext = applicationContext,
+            notificationChannelID = notificationChannelID,
+            notificationID = notificationID,
+            contentActivityClass = contentActivityClass,
+            initState = state
+        ).apply { addToForeground(notificationID, notification) }
     }
 
     private fun onStart() {
@@ -130,7 +127,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
 
     private fun onRegisterService(serverAddress: InetAddress, serverPort: Int) {
         val nsdManager = nsdManager
-        val nsdServiceName = this@NsdControlService.serviceName
+        val nsdServiceName = serviceName
 
         if (nsdServiceName == null || nsdManager == null) {
             onRegistrationFailed()
@@ -185,12 +182,15 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
 
 
     companion object {
-        const val SERVICE_TYPE = "_vctrl._tcp"
+        internal const val SERVICE_TYPE = "_vctrl._tcp"
 
-        const val BOUND_ACTIVITY_CLASS_NAME_EXTRA = "com.nuzhnov.workcontrol.shared. " +
-                "visitservice.domen.service.control.boundActivityClassNameExtra"
+        internal const val CONTENT_ACTIVITY_CLASS_NAME_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".visitservice.domen.service.control.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
 
-        const val SERVICE_NAME_EXTRA = "com.nuzhnov.workcontrol.shared.visitservice.domen." +
-                "service.control.serviceNameExtra"
+        internal const val SERVICE_NAME_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".visitservice.domen.service.control.SERVICE_NAME_EXTRA"
+
+        internal const val NOTIFICATION_CHANNEL_ID_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".visitservice.domen.service.control.NOTIFICATION_CHANNEL_ID_EXTRA"
     }
 }
