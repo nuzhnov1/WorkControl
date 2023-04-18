@@ -12,9 +12,9 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/core" />
-            <option value="$PROJECT_DIR$/core/visitcontrol" />
-            <option value="$PROJECT_DIR$/core/visitcontrol/debug" />
+            <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/common/visitcontrol" />
+            <option value="$PROJECT_DIR$/common/visitcontrol/debug" />
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/visitservice" />
           </set>

@@ -1,2 +1,2 @@
-1: Isolate the injection of internal dependencies in the module :shared:visitservice
-using Dagger or using manual dependency injection
+1: Допилить проверки SelectionKey
+2: Make the visitcontrol library multiplatform (migrate from java.nio to ktor?)
