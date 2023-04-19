@@ -1,27 +1,20 @@
-package com.nuzhnov.workcontrol.core.visitcontrol.control
+package com.nuzhnov.workcontrol.common.visitcontrol.control
 
-import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerException.*
-import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerState.*
-import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServerError.*
-import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
-import com.nuzhnov.workcontrol.core.visitcontrol.model.Visit
-import com.nuzhnov.workcontrol.core.visitcontrol.model.ServerResponse
-import com.nuzhnov.workcontrol.core.visitcontrol.util.*
+import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerState.*
+import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerError.*
+import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerException.*
+import com.nuzhnov.workcontrol.common.visitcontrol.model.*
+import com.nuzhnov.workcontrol.common.visitcontrol.util.*
 import kotlin.properties.Delegates
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.IOException
-import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.SocketAddress
+import java.net.*
 import java.nio.ByteBuffer
+import java.nio.channels.*
 import java.nio.channels.SelectionKey.*
-import java.nio.channels.Selector
-import java.nio.channels.ServerSocketChannel
-import java.nio.channels.SocketChannel
-import org.joda.time.DateTime
-import org.joda.time.Duration
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.TimeSpan
 
 internal class ControlServerImpl : ControlServer {
 
@@ -30,6 +23,8 @@ internal class ControlServerImpl : ControlServer {
 
     private val _state = MutableStateFlow<ControlServerState>(value = NotRunningYet)
     override val state = _state.asStateFlow()
+
+    private var job: Job? = null
 
     private lateinit var address: InetAddress
     private var port by Delegates.notNull<Int>()
@@ -55,15 +50,41 @@ internal class ControlServerImpl : ControlServer {
         port: Int,
         backlog: Int,
         maxAcceptConnectionAttempts: Int
-    ) {
+    ) = coroutineScope {
         initProperties(address, port, backlog, maxAcceptConnectionAttempts)
+        job?.cancelAndJoin()
+        job = launch { startJob() }.also { job ->
+            job.invokeOnCompletion { this@ControlServerImpl.job = null }
+            job.join()
+        }
+    }
 
+    override fun stop() {
+        job?.cancel()
+        job = null
+    }
+
+    override fun disconnectVisitor(visitorID: VisitorID) {
+        visitorsConnections.values
+            .filter { (_, id) -> id == visitorID }
+            .forEach { (channel, _) -> channel.disconnectVisitor(ServerResponse.DISCONNECTED) }
+    }
+
+    override fun updateVisits(vararg visit: Visit) {
+        _visits.applyUpdate { putAll(visit.associateBy { it.visitorID }) }
+    }
+
+    override fun clearVisits() {
+        _visits.applyUpdate { clear() }
+    }
+
+    private suspend fun startJob() {
         try {
-            initControlServer()
-                .onSuccess { startControlServer() }
-                .onFailure { cause -> onInitFailed(cause) }
+            init()
+                .onSuccess { start() }
+                .onFailure { cause -> throwExceptionAfterInitFailed(cause) }
         } catch (exception: CancellationException) {
-            _state.value = _state.value.toNextStateWhenCancelled()
+            _state.value = _state.value.toNextStateWhenCancelOccurs()
         } catch (exception: ControlServerException) {
             _state.value = exception.toControlServerState()
         } catch (exception: IOException) {
@@ -73,19 +94,8 @@ internal class ControlServerImpl : ControlServer {
         } catch (exception: Throwable) {
             _state.value = StoppedByError(address, port, error = UNKNOWN_ERROR, cause =  exception)
         } finally {
-            finishControlServer()
+            finish()
         }
-    }
-
-    override fun setVisits(visits: Set<Visit>) {
-        _visits.applyUpdate {
-            clear()
-            putAll(visits.associateBy { it.visitorID })
-        }
-    }
-
-    override fun clearVisits() {
-        _visits.applyUpdate { clear() }
     }
 
     private fun initProperties(
@@ -104,7 +114,7 @@ internal class ControlServerImpl : ControlServer {
         this.maxAcceptConnectionAttempts = maxAcceptConnectionAttempts
     }
 
-    private fun ControlServerState.toNextStateWhenCancelled() = when (this) {
+    private fun ControlServerState.toNextStateWhenCancelOccurs() = when (this) {
         is Running -> Stopped(address, port)
         is StoppedAcceptConnections -> StoppedByError(address, port, error, cause)
         else -> this
@@ -126,7 +136,7 @@ internal class ControlServerImpl : ControlServer {
         )
     }
 
-    private fun initControlServer() = applyCatching {
+    private fun init() = applyCatching {
         selector = Selector.open()
         serverSocketChannel = ServerSocketChannel.open().apply {
             val selector = selector!!
@@ -144,13 +154,13 @@ internal class ControlServerImpl : ControlServer {
         }
     }
 
-    private fun onInitFailed(cause: Throwable): Nothing = when (cause) {
+    private fun throwExceptionAfterInitFailed(cause: Throwable): Nothing = when (cause) {
         is SecurityException -> throw cause
         else -> throw InitException(cause)
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    private suspend fun startControlServer(): Nothing {
+    private suspend fun start(): Nothing {
         val selector = selector!!
 
         acceptConnectionAttempts = 0
@@ -172,6 +182,10 @@ internal class ControlServerImpl : ControlServer {
             while (iterator.hasNext()) {
                 val key = iterator.next().also { iterator.remove() }
 
+                if (!key.isValid) {
+                    continue
+                }
+
                 if (key.isAcceptable) {
                     key.server?.apply {
                         acceptVisitor(selector)
@@ -190,22 +204,21 @@ internal class ControlServerImpl : ControlServer {
         }
     }
 
-    private fun finishControlServer() = applyCatching {
+    private fun finish() = applyCatching {
         visitorsConnections.disconnectAll()
         selector?.safeClose()
         serverSocketChannel?.safeClose()
     }
 
-    private fun ServerSocketChannel.acceptVisitor(selector: Selector) = runCatching {
-        accept().apply {
-            val clientSocket = socket()
-            val clientAddress = clientSocket.remoteSocketAddress
+    private fun ServerSocketChannel.acceptVisitor(selector: Selector) = applyCatching {
+        val clientChannel = accept()
+        val clientSocket = clientChannel.socket()
+        val clientAddress = clientSocket.remoteSocketAddress
 
-            configureBlocking(/* block = */ false)
-            register(selector, /* ops = */ OP_READ or OP_WRITE)
+        clientChannel.configureBlocking(/* block = */ false)
+        clientChannel.register(selector, /* ops = */ OP_READ or OP_WRITE)
 
-            visitorsConnections[clientAddress] = VisitorConnection(channel = this, id = null)
-        }
+        visitorsConnections[clientAddress] = VisitorConnection(channel = clientChannel, id = null)
     }
 
     private fun ServerSocketChannel.onFailedAcceptVisitor(cause: Throwable) {
@@ -242,7 +255,7 @@ internal class ControlServerImpl : ControlServer {
 
                 if (visitorID == null) {
                     visitorsConnections[clientAddress] = VisitorConnection(channel = this, id = id)
-                    addNewVisitor(visitorID = id)
+                    updateVisitorActivity(visitorID = id, isActiveNow = true)
                 } else {
                     updateVisitorActivity(visitorID, isActiveNow = true)
                 }
@@ -306,10 +319,6 @@ internal class ControlServerImpl : ControlServer {
         serverResponse: ServerResponse
     ) = runCatching { writeResponse(serverResponse) }
 
-    private fun addNewVisitor(visitorID: VisitorID) {
-        _visits.applyUpdate { updateVisitorActivity(visitorID, isActiveNow = true) }
-    }
-
     private fun updateVisitorActivity(visitorID: VisitorID, isActiveNow: Boolean) {
         val visit = _visits.value[visitorID]
 
@@ -335,25 +344,25 @@ internal class ControlServerImpl : ControlServer {
         isActiveNow: Boolean
     ) {
         val visit = this[visitorID]
-        val now = DateTime.now()
+        val now = DateTime.nowLocal()
 
-        if (visit?.lastVisitTime == null) {
+        if (visit?.lastVisitDateTime == null) {
             this[visitorID] = Visit(
                 visitorID = visitorID,
                 isActive = isActiveNow,
-                lastVisitTime = if (isActiveNow) { now } else { null },
-                totalVisitDuration = Duration.ZERO
+                lastVisitDateTime = if (isActiveNow) { now } else { null },
+                totalVisitDuration = TimeSpan.ZERO
             )
         } else {
             val isPreviouslyActive = visit.isActive
-            val previouslyVisitTime = visit.lastVisitTime
+            val previouslyVisitTime = visit.lastVisitDateTime
             val duration = visit.totalVisitDuration
-            val delta = Duration(previouslyVisitTime, now)
+            val delta = now - previouslyVisitTime
 
             this[visitorID] = Visit(
                 visitorID = visitorID,
                 isActive = isActiveNow,
-                lastVisitTime = if (isActiveNow) { now } else { previouslyVisitTime },
+                lastVisitDateTime = if (isActiveNow) { now } else { previouslyVisitTime },
                 totalVisitDuration = if (isPreviouslyActive) { duration + delta } else { duration }
             )
         }

@@ -1,35 +1,32 @@
-package com.nuzhnov.workcontrol.core.visitcontrol
+package com.nuzhnov.workcontrol.common.visitcontrol
 
-import com.nuzhnov.workcontrol.core.visitcontrol.mapper.toVisitDebug
-import com.nuzhnov.workcontrol.core.visitcontrol.testcase.*
-import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
-import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitDebug
-import com.nuzhnov.workcontrol.core.visitcontrol.control.ControlServer
-import com.nuzhnov.workcontrol.core.visitcontrol.visitor.Visitor
-import kotlin.random.Random
-import kotlin.random.nextInt
-import kotlin.random.nextLong
+import com.nuzhnov.workcontrol.common.visitcontrol.mapper.toVisitDebug
+import com.nuzhnov.workcontrol.common.visitcontrol.testcase.*
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
+import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitDebug
+import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServer
+import com.nuzhnov.workcontrol.common.visitcontrol.visitor.Visitor
+import kotlin.random.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import java.util.*
 
 
 private const val RANDOM_SEED = 0
-private const val DELAY_AFTER_FINISH_MS = 1_000L
+private val RANDOM = Random(RANDOM_SEED)
 
-private val random = Random(RANDOM_SEED)
 private val VisitDebug.isNotActive get() = !isActive
 
 
 fun main() {
-    ControlServer.getDefaultControlServer().testCase(testData = testCaseData)
+    ControlServer.getDefaultControlServer().test(
+        testCaseType6
+    )
 }
 
-private fun ControlServer.testCase(testData: Iterable<TestCaseData>) {
-    testData.forEachIndexed { index, data ->
+private fun ControlServer.test(vararg testCase: TestCase) {
+    testCase.forEachIndexed { index, data ->
         println("Start test case #${index + 1}...")
         println("Test case info:\n$data")
         println("-".repeat(n = 80))
@@ -47,14 +44,15 @@ private fun ControlServer.testCase(testData: Iterable<TestCaseData>) {
     println()
 }
 
-private suspend fun ControlServer.startControlTask(testData: TestCaseData) = coroutineScope {
+private suspend fun ControlServer.startControlTask(testData: TestCase) = coroutineScope {
     val serverStateObserverJob = launchServerStateObserver(controlServer = this@startControlTask)
     val visitorsObserverJob = launchVisitorsObserver(controlServer = this@startControlTask)
+    val terminatorJob = launchTerminatorJob(controlServer = this@startControlTask, testData)
 
     startControl(testData)
-    serverStateObserverJob.cancel()
-    visitorsObserverJob.cancel()
-    delay(DELAY_AFTER_FINISH_MS)
+    serverStateObserverJob.cancelAndJoin()
+    visitorsObserverJob.cancelAndJoin()
+    terminatorJob.cancelAndJoin()
 }
 
 private fun CoroutineScope.launchServerStateObserver(controlServer: ControlServer) = launch {
@@ -83,7 +81,30 @@ private fun CoroutineScope.launchVisitorsObserver(controlServer: ControlServer) 
         .collect()
 }
 
-private suspend fun ControlServer.startControl(testData: TestCaseData) = runCatching {
+private fun CoroutineScope.launchTerminatorJob(
+    controlServer: ControlServer,
+    testData: TestCase
+) = launch {
+    var remainingDisconnections = testData.disconnectionsNumber
+    var oldActiveVisits: Set<Visit> = setOf()
+
+    controlServer.visits.collect { visitSet ->
+        val activeVisits = visitSet.filter { visit -> visit.isActive }.toSet()
+
+        if (remainingDisconnections > 0) {
+            oldActiveVisits.randomOrNull()?.apply {
+                log("ControlServer: disconnect the visitor with id = $visitorID.")
+
+                controlServer.disconnectVisitor(visitorID)
+                remainingDisconnections--
+            }
+        }
+
+        oldActiveVisits = activeVisits
+    }
+}
+
+private suspend fun ControlServer.startControl(testData: TestCase) = runCatching {
     withTimeout(timeMillis = testData.serverWorkTimeMillis) {
         start(testData.serverAddress, testData.serverPort)
     }
@@ -97,6 +118,7 @@ private fun onUpdateVisits(
 
     val newVisits = newVisitsSet - oldVisitsSet
 
+    log("ControlServer: visits updated.")
     newVisits.forEach { visit -> log("ControlServer: new visitor with id = ${visit.visitorID}!") }
     oldVisitsSet.zip(newVisitsSet).forEach { (oldInfo, newInfo) ->
         if (oldInfo.isActive but newInfo.isNotActive) {
@@ -107,23 +129,23 @@ private fun onUpdateVisits(
     }
 }
 
-private suspend fun startVisitorsTasks(testData: TestCaseData) = coroutineScope {
+private suspend fun startVisitorsTasks(testData: TestCase) = coroutineScope {
     testData
         .generateVisitorTestData()
         .forEach { visitorTestData -> startVisitorTask(testData, visitorTestData) }
 }
 
-private fun TestCaseData.generateVisitorTestData() = buildList {
+private fun TestCase.generateVisitorTestData() = buildList {
     repeat(visitorsCount) {
         add(VisitorTestData(
-            id = random.nextLong(range = 0L..(visitorsCount * 1000)),
-            workTimeMillis = random.nextLong(
+            id = RANDOM.nextLong(range = 0L..(visitorsCount * 1000)),
+            workTimeMillis = RANDOM.nextLong(
                 range = minVisitTimeMillis..maxVisitTimeMillis
             ),
-            delayTimeMillis = random.nextLong(
+            delayTimeMillis = RANDOM.nextLong(
                 range = visitorMinAppearanceDelayTimeMillis..visitorMaxAppearanceDelayTimeMillis
             ),
-            interruptionsCount = random.nextInt(
+            interruptionsCount = RANDOM.nextInt(
                 range = visitorMinInterruptionCount..visitorMaxInterruptionCount
             )
         ))
@@ -131,7 +153,7 @@ private fun TestCaseData.generateVisitorTestData() = buildList {
 }
 
 private fun CoroutineScope.startVisitorTask(
-    testData: TestCaseData,
+    testData: TestCase,
     visitorTestData: VisitorTestData
 ) = launch {
     val visitor = Visitor.getDefaultVisitor()
@@ -139,8 +161,7 @@ private fun CoroutineScope.startVisitorTask(
 
     delay(timeMillis = visitorTestData.delayTimeMillis)
     visitor.startVisitor(testData, visitorTestData)
-    visitorStateObserverJob.cancel()
-    delay(DELAY_AFTER_FINISH_MS)
+    visitorStateObserverJob.cancelAndJoin()
 }
 
 private fun CoroutineScope.launchVisitorStateObserver(
@@ -160,7 +181,7 @@ private fun CoroutineScope.launchVisitorStateObserver(
 }
 
 private suspend fun Visitor.startVisitor(
-    testData: TestCaseData,
+    testData: TestCase,
     visitorTestData: VisitorTestData
 ) {
     val id = visitorTestData.id
@@ -174,7 +195,7 @@ private suspend fun Visitor.startVisitor(
     repeat(times = interruptionsCount + 1) {
         runCatching {
             withTimeout(timeMillis = partWorkTimeMillis) {
-                start(
+                startVisit(
                     serverAddress = testData.serverAddress,
                     serverPort = testData.serverPort,
                     visitorID = id
