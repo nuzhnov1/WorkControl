@@ -10,7 +10,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.IOException
 import java.net.*
-import java.nio.ByteBuffer
 import java.nio.channels.*
 import java.nio.channels.SelectionKey.*
 import com.soywiz.klock.DateTime
@@ -24,25 +23,22 @@ internal class ControlServerImpl : ControlServer {
     private val _state = MutableStateFlow<ControlServerState>(value = NotRunningYet)
     override val state = _state.asStateFlow()
 
-    private var job: Job? = null
+    private var serverJob: Job? = null
 
     private lateinit var address: InetAddress
     private var port by Delegates.notNull<Int>()
     private var backlog by Delegates.notNull<Int>()
     private var maxAcceptConnectionAttempts by Delegates.notNull<Int>()
 
-    private val visitorsConnections = mutableMapOf<SocketAddress, VisitorConnection>()
-    private var selector: Selector? = null
-    private var serverSocketChannel: ServerSocketChannel? = null
+    // TODO: synchronize operations on this list
+    private val clientHandlers = mutableListOf<ClientHandler>()
+
+    private var serverSelector: Selector? = null
+    private var serverChannel: ServerSocketChannel? = null
     private var acceptConnectionAttempts = 0
 
-    private val inputBufferSize = Long.SIZE_BYTES
-    private val inputBuffer = ByteBuffer.allocate(inputBufferSize)
-    private val outputBufferSize = Int.SIZE_BYTES
-    private val outputBuffer = ByteBuffer.allocate(outputBufferSize)
-
     private val isStoppedAcceptConnections get() = _state.value is StoppedAcceptConnections
-    private val isNoClients get() = visitorsConnections.isEmpty()
+    private val isNoClients get() = clientHandlers.isEmpty()
 
 
     override suspend fun start(
@@ -50,52 +46,38 @@ internal class ControlServerImpl : ControlServer {
         port: Int,
         backlog: Int,
         maxAcceptConnectionAttempts: Int
-    ) = coroutineScope {
+    ): Unit = withContext(context = Dispatchers.IO) {
         initProperties(address, port, backlog, maxAcceptConnectionAttempts)
-        job?.cancelAndJoin()
-        job = launch { startJob() }.also { job ->
-            job.invokeOnCompletion { this@ControlServerImpl.job = null }
-            job.join()
-        }
+        serverJob?.cancelAndJoin()
+
+        val newServerJob = launchServerJob()
+
+        serverJob = newServerJob
+        newServerJob.join()
     }
 
     override fun stop() {
-        job?.cancel()
-        job = null
+        serverJob?.cancel()
     }
 
     override fun disconnectVisitor(visitorID: VisitorID) {
-        visitorsConnections.values
-            .filter { (_, id) -> id == visitorID }
-            .forEach { (channel, _) -> channel.disconnectVisitor(ServerResponse.DISCONNECTED) }
+        synchronized(lock = clientHandlers) {
+            clientHandlers
+                .filter { handler -> handler.receivedVisitorID == visitorID }
+                .forEach { handler -> handler.stopHandlerJob(ServerResponse.DISCONNECTED) }
+        }
     }
 
     override fun updateVisits(vararg visit: Visit) {
         _visits.applyUpdate { putAll(visit.associateBy { it.visitorID }) }
     }
 
-    override fun clearVisits() {
-        _visits.applyUpdate { clear() }
+    override fun removeVisits(vararg visitorID: VisitorID) {
+        _visits.applyUpdate { visitorID.forEach { remove(it) } }
     }
 
-    private suspend fun startJob() {
-        try {
-            init()
-                .onSuccess { start() }
-                .onFailure { cause -> throwExceptionAfterInitFailed(cause) }
-        } catch (exception: CancellationException) {
-            _state.value = _state.value.toNextStateWhenCancelOccurs()
-        } catch (exception: ControlServerException) {
-            _state.value = exception.toControlServerState()
-        } catch (exception: IOException) {
-            _state.value = StoppedByError(address, port, error = IO_ERROR, cause = exception)
-        } catch (exception: SecurityException) {
-            _state.value = StoppedByError(address, port, error = SECURITY_ERROR, cause = exception)
-        } catch (exception: Throwable) {
-            _state.value = StoppedByError(address, port, error = UNKNOWN_ERROR, cause =  exception)
-        } finally {
-            finish()
-        }
+    override fun clearVisits() {
+        _visits.applyUpdate { clear() }
     }
 
     private fun initProperties(
@@ -114,229 +96,182 @@ internal class ControlServerImpl : ControlServer {
         this.maxAcceptConnectionAttempts = maxAcceptConnectionAttempts
     }
 
-    private fun ControlServerState.toNextStateWhenCancelOccurs() = when (this) {
-        is Running -> Stopped(address, port)
-        is StoppedAcceptConnections -> StoppedByError(address, port, error, cause)
-        else -> this
-    }
+    private fun CoroutineScope.launchServerJob(): Job = launch {
+        val jobResult = initServer().fold(
+            onSuccess = {
+                startServerJob().fold(
+                    onSuccess = { Result.success(Unit) },
+                    onFailure = { cause -> Result.failure(cause) }
+                )
+            },
 
-    private fun ControlServerException.toControlServerState() = when (this) {
-        is InitException -> StoppedByError(
-            address = address,
-            port = port,
-            error = INIT_ERROR,
-            cause = cause
+            onFailure = { cause -> Result.failure(cause) }
         )
 
-        is MaxAcceptConnectionAttemptsReachedException -> StoppedByError(
-            address = address,
-            port = port,
-            error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
-            cause = cause
-        )
+        updateState(state = jobResult.toControlServerState())
+        completeServerJob()
     }
 
-    private fun init() = applyCatching {
-        selector = Selector.open()
-        serverSocketChannel = ServerSocketChannel.open().apply {
-            val selector = selector!!
+    private fun Result<Unit>.toControlServerState(): ControlServerState = fold(
+        onSuccess = { _state.value.toNextStateOnNormalCompletion() },
+        onFailure = { cause -> when (cause) {
+            is CancellationException -> _state.value.toNextStateOnNormalCompletion()
+            is ControlServerException -> cause.toControlServerState()
+            is IOException -> StoppedByError(address, port, error = IO_ERROR, cause)
+            is SecurityException -> StoppedByError(address, port, error = SECURITY_ERROR, cause)
+            else -> StoppedByError(address, port, error = UNKNOWN_ERROR, cause)
+        } }
+    )
+
+    private fun ControlServerState.toNextStateOnNormalCompletion(): ControlServerState =
+        when (this) {
+            is Running -> Stopped(address, port)
+            is StoppedAcceptConnections -> StoppedByError(address, port, error, cause)
+            else -> this
+        }
+
+    private fun ControlServerException.toControlServerState(): ControlServerState =
+        when (this) {
+            is InitException -> StoppedByError(
+                address = address,
+                port = port,
+                error = INIT_ERROR,
+                cause = cause
+            )
+
+            is MaxAcceptConnectionAttemptsReachedException -> StoppedByError(
+                address = address,
+                port = port,
+                error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
+                cause = cause
+            )
+        }
+
+    private fun initServer(): Result<Unit> = applyCatching {
+        serverSelector = Selector.open()
+        serverChannel = ServerSocketChannel.open().apply {
             val socket = socket()
             val serverSocketAddress = InetSocketAddress(address, port)
 
             configureBlocking(/* block = */ false)
             socket.bind(serverSocketAddress, backlog)
-            register(selector, OP_ACCEPT)
+            register(serverSelector!!, OP_ACCEPT)
 
             address = socket.inetAddress
             port = socket.localPort
-
-            _state.value = Running(address, port)
+            updateState(state = Running(address, port))
+        }
+    }.transformFailedCause { cause ->
+        when (cause) {
+            is SecurityException -> cause
+            else -> InitException(cause)
         }
     }
 
-    private fun throwExceptionAfterInitFailed(cause: Throwable): Nothing = when (cause) {
-        is SecurityException -> throw cause
-        else -> throw InitException(cause)
-    }
+    private suspend fun startServerJob(): Result<Unit> = applyCatching {
+        coroutineScope {
+            val serverSelector = serverSelector!!
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    private suspend fun start(): Nothing {
-        val selector = selector!!
+            acceptConnectionAttempts = 0
 
-        acceptConnectionAttempts = 0
+            while (true) {
+                if (isStoppedAcceptConnections && isNoClients) {
+                    throw CancellationException()
+                }
 
-        while (true) {
-            yield()
-
-            if (isStoppedAcceptConnections && isNoClients) {
-                throw CancellationException()
-            }
-
-            if (selector.isEventsNotOccurred) {
-                continue
-            }
-
-            val selectedKeys = selector.selectedKeys
-            val iterator = selectedKeys.iterator()
-
-            while (iterator.hasNext()) {
-                val key = iterator.next().also { iterator.remove() }
-
-                if (!key.isValid) {
+                if (serverSelector.isEventsNotOccurred) {
+                    yield()
                     continue
                 }
 
-                if (key.isAcceptable) {
-                    key.server?.apply {
-                        acceptVisitor(selector)
-                            .onSuccess { acceptConnectionAttempts = 0 }
-                            .onFailure { cause -> onFailedAcceptVisitor(cause) }
-                    }
-                }
+                val selectedKeys = serverSelector.selectedKeys
+                val iterator = selectedKeys.iterator()
 
-                if (key.isReadable) {
-                    key.client?.apply {
-                        receiveVisitorID()
-                            .onFailure { disconnectVisitor() }
+                while (iterator.hasNext()) {
+                    val key = iterator.next().also { iterator.remove() }
+
+                    if (!isStoppedAcceptConnections && key.isValid && key.isAcceptable) {
+                        key.serverChannel?.apply {
+                            acceptClient()
+                                .onSuccess { handler -> onSuccessAcceptClient(handler) }
+                                .onFailure { cause -> onFailureAcceptClient(cause) }
+                        }
                     }
+
+                    yield()
                 }
             }
         }
     }
 
-    private fun finish() = applyCatching {
-        visitorsConnections.disconnectAll()
-        selector?.safeClose()
-        serverSocketChannel?.safeClose()
+    private fun completeServerJob(): Result<Unit> = applyCatching {
+        synchronized(lock = clientHandlers) {
+            clientHandlers.forEach { it.stopHandlerJob(ServerResponse.SHUTDOWN_SERVER) }
+        }
+
+        serverSelector?.safeClose()
+        serverChannel?.safeClose()
+
+        makeAllVisitorsInactive()
     }
 
-    private fun ServerSocketChannel.acceptVisitor(selector: Selector) = applyCatching {
-        val clientChannel = accept()
-        val clientSocket = clientChannel.socket()
-        val clientAddress = clientSocket.remoteSocketAddress
+    private fun ServerSocketChannel.acceptClient(): Result<ClientHandler> =
+        runCatching {
+            val clientChannel = accept()
+            val clientSelector = Selector.open()
 
-        clientChannel.configureBlocking(/* block = */ false)
-        clientChannel.register(selector, /* ops = */ OP_READ or OP_WRITE)
+            clientChannel.configureBlocking(/* block = */ false)
+            clientChannel.register(clientSelector, /* ops = */ OP_READ or OP_WRITE)
 
-        visitorsConnections[clientAddress] = VisitorConnection(channel = clientChannel, id = null)
-    }
+            ClientHandler(
+                controlServer = this@ControlServerImpl,
+                selector = clientSelector,
+                channel = clientChannel
+            )
+        }
 
-    private fun ServerSocketChannel.onFailedAcceptVisitor(cause: Throwable) {
-        acceptConnectionAttempts++
+    private fun CoroutineScope.onSuccessAcceptClient(clientHandler: ClientHandler) {
+        acceptConnectionAttempts = 0
 
-        if (acceptConnectionAttempts > maxAcceptConnectionAttempts) {
-            onStoppedAcceptConnections(cause)
+        clientHandler.apply {
+            synchronized(lock = clientHandlers) { clientHandlers.add(this) }
+            launchHandlerJob()
         }
     }
 
-    private fun ServerSocketChannel.onStoppedAcceptConnections(cause: Throwable) {
-        safeClose().onSuccess {
-            _state.value = StoppedAcceptConnections(
-                address = address,
-                port = port,
-                error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
-                cause = MaxAcceptConnectionAttemptsReachedException(cause)
+    private fun ServerSocketChannel.onFailureAcceptClient(cause: Throwable) {
+        acceptConnectionAttempts++
+
+        if (acceptConnectionAttempts > maxAcceptConnectionAttempts) {
+            safeClose()
+
+            updateState(
+                state = StoppedAcceptConnections(
+                    address = address,
+                    port = port,
+                    error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
+                    cause = MaxAcceptConnectionAttemptsReachedException(cause)
+                )
             )
         }
     }
 
-    private fun SocketChannel.receiveVisitorID() = applyCatching {
-        val clientSocket = socket()
-        val clientAddress = clientSocket.remoteSocketAddress
-        val visitorID = visitorsConnections[clientAddress]?.id
+    private fun updateState(state: ControlServerState) {
+        _state.value = state
+    }
 
-        val readBytesCount = readVisitorID()
-
-        when {
-            readBytesCount < 0 -> disconnectVisitor()
-
-            readBytesCount == inputBufferSize -> {
-                val id = inputBuffer.long
-
-                if (visitorID == null) {
-                    visitorsConnections[clientAddress] = VisitorConnection(channel = this, id = id)
-                    updateVisitorActivity(visitorID = id, isActiveNow = true)
-                } else {
-                    updateVisitorActivity(visitorID, isActiveNow = true)
-                }
-
-                writeResponse(ServerResponse.OK)
-            }
-
-            else -> {
-                if (visitorID != null) {
-                    updateVisitorActivity(visitorID, isActiveNow = false)
-                }
-
-                writeResponse(ServerResponse.BAD_REQUEST)
-            }
+    private fun makeAllVisitorsInactive() {
+        _visits.applyUpdate {
+            keys.forEach { visitorID -> updateVisitorActivity(visitorID, isActiveNow = false) }
         }
     }
 
-    private fun SocketChannel.disconnectVisitor(serverResponse: ServerResponse? = null) {
-        val clientSocket = socket()
-        val clientAddress = clientSocket.remoteSocketAddress
-
-        visitorsConnections.remove(clientAddress)?.also { (_, visitorID) ->
-            if (visitorID != null) {
-                updateVisitorActivity(visitorID, isActiveNow = false)
-            }
-        }
-
-        if (serverResponse != null) {
-            safeWriteResponse(serverResponse)
-        }
-
-        safeClose()
-    }
-
-    private fun MutableMap<SocketAddress, VisitorConnection>.disconnectAll() {
-        makeAllVisitorsInactive()
-        values.forEach { (channel, _) ->
-            channel.safeWriteResponse(ServerResponse.SHUTDOWN_SERVER)
-            channel.safeClose()
-        }
-
-        clear()
-    }
-
-    private fun SocketChannel.readVisitorID(): Int {
-        inputBuffer.clear()
-        return read(inputBuffer).also { inputBuffer.flip() }
-    }
-
-    private fun SocketChannel.writeResponse(serverResponse: ServerResponse): Int {
-        outputBuffer.apply {
-            clear()
-            putInt(serverResponse.ordinal)
-            flip()
-        }
-
-        return write(outputBuffer)
-    }
-
-    private fun SocketChannel.safeWriteResponse(
-        serverResponse: ServerResponse
-    ) = runCatching { writeResponse(serverResponse) }
-
-    private fun updateVisitorActivity(visitorID: VisitorID, isActiveNow: Boolean) {
+    internal fun requestUpdateVisitorActivity(visitorID: VisitorID, isActiveNow: Boolean) {
         val visit = _visits.value[visitorID]
 
         if (visit == null || visit.isActivityChanged(isActiveNow)) {
             _visits.applyUpdate { updateVisitorActivity(visitorID, isActiveNow) }
         }
-    }
-
-    private fun makeAllVisitorsInactive() {
-        _visits.applyUpdate {
-            keys.forEach { id -> updateVisitorActivity(visitorID = id, isActiveNow = false) }
-        }
-    }
-
-    private fun MutableStateFlow<Map<VisitorID, Visit>>.applyUpdate(
-        block: MutableMap<VisitorID, Visit>.() -> Unit
-    ) {
-        value = value.toMutableMap().apply(block)
     }
 
     private fun MutableMap<VisitorID, Visit>.updateVisitorActivity(
@@ -369,7 +304,4 @@ internal class ControlServerImpl : ControlServer {
     }
 
     private fun Visit.isActivityChanged(isActiveNow: Boolean) = isActive != isActiveNow
-
-
-    private data class VisitorConnection(val channel: SocketChannel, val id: VisitorID?)
 }

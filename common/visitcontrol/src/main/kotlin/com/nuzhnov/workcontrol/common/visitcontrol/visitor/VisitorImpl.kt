@@ -23,13 +23,13 @@ internal class VisitorImpl : Visitor {
     private val _state = MutableStateFlow<VisitorState>(value = NotRunningYet)
     override val state = _state.asStateFlow()
 
-    private var job: Job? = null
+    private var clientJob: Job? = null
 
     private var serverAddress by Delegates.notNull<InetAddress>()
     private var serverPort by Delegates.notNull<Int>()
     private var visitorID by Delegates.notNull<VisitorID>()
 
-    private var selector: Selector? = null
+    private var clientSelector: Selector? = null
     private var clientSocketChannel: SocketChannel? = null
 
     private val inputBufferSize = Int.SIZE_BYTES
@@ -42,110 +42,125 @@ internal class VisitorImpl : Visitor {
         serverAddress: InetAddress,
         serverPort: Int,
         visitorID: VisitorID
-    ) = coroutineScope {
+    ) = withContext(context = Dispatchers.IO) {
         initProperties(serverAddress, serverPort, visitorID)
-        job?.cancelAndJoin()
-        job = launch { startJob() }.also { job ->
-            job.invokeOnCompletion { this@VisitorImpl.job = null }
-            job.join()
-        }
+        clientJob?.cancelAndJoin()
+
+        val newClientJob = launchClientJob()
+
+        clientJob = newClientJob
+        newClientJob.join()
     }
 
     override fun stop() {
-        job?.cancel()
-        job = null
+        clientJob?.cancel()
     }
 
-    private suspend fun startJob() {
-        try {
-            initiateConnection()
-                .onSuccess { start() }
-                .onFailure { cause -> throwExceptionAfterFailedConnection(cause) }
-        } catch (exception: CancellationException) {
-            _state.value = _state.value.toNextStateWhenCancelled()
-        } catch (exception: VisitorException) {
-            _state.value = exception.toVisitorState()
-        } catch (exception: IOException) {
-            _state.value = StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = IO_ERROR,
-                cause = exception
-            )
-        } catch (exception: SecurityException) {
-            _state.value = StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = SECURITY_ERROR,
-                cause = exception
-            )
-        } catch (exception: Throwable) {
-            _state.value = StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = UNKNOWN_ERROR,
-                cause = exception
-            )
-        } finally {
-            finish()
-        }
-    }
-
-    private fun initProperties(serverAddress: InetAddress, serverPort: Int, visitorID: VisitorID) {
+    private fun initProperties(
+        serverAddress: InetAddress,
+        serverPort: Int,
+        visitorID: VisitorID
+    ) {
         this.serverAddress = serverAddress
         this.serverPort = serverPort
         this.visitorID = visitorID
     }
 
-    private fun VisitorState.toNextStateWhenCancelled() = when (this) {
-        is Connecting -> Stopped(serverAddress, serverPort, visitorID)
-        is Running -> Stopped(serverAddress, serverPort, visitorID)
-        else -> this
-    }
+    private fun CoroutineScope.launchClientJob(): Job = launch {
+        val jobResult = initiateConnection().fold(
+            onSuccess = {
+                startClientJob().fold(
+                    onSuccess = { Result.success(Unit) },
+                    onFailure = { cause -> Result.failure(cause) }
+                )
+            },
 
-    private fun VisitorException.toVisitorState() = when (this) {
-        is ConnectionFailedException -> StoppedByError(
-            serverAddress = serverAddress,
-            serverPort = serverPort,
-            visitorID = visitorID,
-            error = CONNECTION_FAILED,
-            cause = cause
+            onFailure = { cause -> Result.failure(cause) }
         )
 
-        is BreakConnectionException -> StoppedByError(
-            serverAddress = serverAddress,
-            serverPort = serverPort,
-            visitorID = visitorID,
-            error = BREAK_CONNECTION,
-            cause = cause
-        )
+        updateState(state = jobResult.toVisitorState())
+    }.also { job -> job.invokeOnCompletion { completeClientJob() } }
 
-        is BadConnectionException -> StoppedByError(
-            serverAddress = serverAddress,
-            serverPort = serverPort,
-            visitorID = visitorID,
-            error = BAD_CONNECTION,
-            cause = cause
-        )
+    private fun Result<Unit>.toVisitorState(): VisitorState = fold(
+        onSuccess = { _state.value.toNextStateOnNormalCompletion() },
+        onFailure = { cause -> when (cause) {
+            is CancellationException -> _state.value.toNextStateOnNormalCompletion()
+            is VisitorException -> cause.toVisitorState()
 
-        is DisconnectedException -> StoppedByError(
-            serverAddress = serverAddress,
-            serverPort = serverPort,
-            visitorID = visitorID,
-            error = DISCONNECTED,
-            cause = cause
-        )
+            is IOException -> StoppedByError(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                visitorID = visitorID,
+                error = IO_ERROR,
+                cause = cause
+            )
 
-        is ServerShutdownException -> Stopped(serverAddress, serverPort, visitorID)
-    }
+            is SecurityException -> StoppedByError(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                visitorID = visitorID,
+                error = SECURITY_ERROR,
+                cause = cause
+            )
 
-    private suspend fun initiateConnection() = applyCatching {
-        selector = Selector.open()
+            else -> StoppedByError(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                visitorID = visitorID,
+                error = UNKNOWN_ERROR,
+                cause = cause
+            )
+        } }
+    )
+
+    private fun VisitorState.toNextStateOnNormalCompletion(): VisitorState =
+        when (this) {
+            is Connecting -> Stopped(serverAddress, serverPort, visitorID)
+            is Running -> Stopped(serverAddress, serverPort, visitorID)
+            else -> this
+        }
+
+    private fun VisitorException.toVisitorState(): VisitorState =
+        when (this) {
+            is ConnectionFailedException -> StoppedByError(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                visitorID = visitorID,
+                error = CONNECTION_FAILED,
+                cause = cause
+            )
+
+            is BreakConnectionException -> StoppedByError(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                visitorID = visitorID,
+                error = BREAK_CONNECTION,
+                cause = cause
+            )
+
+            is BadConnectionException -> StoppedByError(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                visitorID = visitorID,
+                error = BAD_CONNECTION,
+                cause = cause
+            )
+
+            is DisconnectedException -> StoppedByError(
+                serverAddress = serverAddress,
+                serverPort = serverPort,
+                visitorID = visitorID,
+                error = DISCONNECTED,
+                cause = cause
+            )
+
+            is ServerShutdownException -> Stopped(serverAddress, serverPort, visitorID)
+        }
+
+    private suspend fun initiateConnection(): Result<Unit> = applyCatching {
+        clientSelector = Selector.open()
         clientSocketChannel = SocketChannel.open().apply {
-            val selector = selector!!
+            val selector = clientSelector!!
             val socket = socket()
             val serverSocketAddress = InetSocketAddress(serverAddress, serverPort)
 
@@ -156,9 +171,14 @@ internal class VisitorImpl : Visitor {
             serverAddress = socket.inetAddress
             serverPort = socket.port
 
-            _state.value = Connecting(serverAddress, serverPort, visitorID)
+            updateState(state = Connecting(serverAddress, serverPort, visitorID))
             awaitConnection()
-            _state.value = Running(serverAddress, serverPort, visitorID)
+            updateState(state = Running(serverAddress, serverPort, visitorID))
+        }
+    }.transformFailedCause { cause ->
+        when (cause) {
+            is SecurityException -> throw cause
+            else -> throw ConnectionFailedException(cause)
         }
     }
 
@@ -169,45 +189,38 @@ internal class VisitorImpl : Visitor {
         }
     }
 
-    private fun throwExceptionAfterFailedConnection(cause: Throwable): Nothing = when (cause) {
-        is SecurityException -> throw cause
-        else -> throw ConnectionFailedException(cause)
-    }
+    private suspend fun startClientJob(): Result<Unit> = applyCatching {
+        coroutineScope {
+            val clientSelector = clientSelector!!
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    private suspend fun start(): Nothing {
-        val selector = selector!!
-
-        while (true) {
-            yield()
-
-            if (selector.isEventsNotOccurred) {
-                continue
-            }
-
-            val selectedKeys = selector.selectedKeys
-            val iterator = selectedKeys.iterator()
-
-            while (iterator.hasNext()) {
-                val key = iterator.next().also { iterator.remove() }
-
-                if (!key.isValid) {
+            while (true) {
+                if (clientSelector.isEventsNotOccurred) {
+                    yield()
                     continue
                 }
 
-                if (key.isWritable) {
-                    key.client?.sendVisitorID()
-                }
+                val selectedKeys = clientSelector.selectedKeys
+                val iterator = selectedKeys.iterator()
 
-                if (key.isReadable) {
-                    key.client?.receiveResponse()
+                while (iterator.hasNext()) {
+                    val key = iterator.next().also { iterator.remove() }
+
+                    if (key.isWritable) {
+                        key.clientChannel?.sendVisitorID()
+                    }
+
+                    if (key.isValid && key.isReadable) {
+                        key.clientChannel?.receiveResponse()
+                    }
+
+                    yield()
                 }
             }
         }
     }
 
-    private fun finish() = applyCatching {
-        selector?.safeClose()
+    private fun completeClientJob(): Result<Unit> = applyCatching {
+        clientSelector?.safeClose()
         clientSocketChannel?.safeClose()
     }
 
@@ -263,5 +276,9 @@ internal class VisitorImpl : Visitor {
         }
 
         return write(outputBuffer)
+    }
+
+    private fun updateState(state: VisitorState) {
+        _state.value = state
     }
 }

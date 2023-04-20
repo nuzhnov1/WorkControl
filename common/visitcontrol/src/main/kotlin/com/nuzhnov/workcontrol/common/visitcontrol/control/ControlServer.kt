@@ -24,6 +24,8 @@ interface ControlServer {
 
     fun updateVisits(vararg visit: Visit)
 
+    fun removeVisits(vararg visitorID: VisitorID)
+
     fun clearVisits()
 
 

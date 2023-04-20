@@ -21,7 +21,7 @@ private val VisitDebug.isNotActive get() = !isActive
 
 fun main() {
     ControlServer.getDefaultControlServer().test(
-        testCaseType6
+        testCaseType4
     )
 }
 
@@ -77,7 +77,7 @@ private fun CoroutineScope.launchVisitorsObserver(controlServer: ControlServer) 
             onUpdateVisits(oldVisitsSet = currentVisits, newVisitsSet = visits)
             currentVisits = visits
         }
-        .onCompletion { currentVisits.log() }
+        .onCompletion { currentVisits.sortedBy { visit -> visit.totalVisitDuration }.log() }
         .collect()
 }
 
