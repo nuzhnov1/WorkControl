@@ -1,17 +1,23 @@
 package com.nuzhnov.workcontrol.common.visitcontrol.control
 
-import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerState.*
 import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerError.*
-import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerException.*
-import com.nuzhnov.workcontrol.common.visitcontrol.model.*
+import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerException.InitException
+import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerException.MaxAcceptConnectionAttemptsReachedException
+import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerState.*
+import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.common.visitcontrol.util.*
 import kotlin.properties.Delegates
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import java.io.IOException
-import java.net.*
-import java.nio.channels.*
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.nio.channels.SelectionKey.*
+import java.nio.channels.Selector
+import java.nio.channels.ServerSocketChannel
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.TimeSpan
 
@@ -30,7 +36,6 @@ internal class ControlServerImpl : ControlServer {
     private var backlog by Delegates.notNull<Int>()
     private var maxAcceptConnectionAttempts by Delegates.notNull<Int>()
 
-    // TODO: synchronize operations on this list
     private val clientHandlers = mutableListOf<ClientHandler>()
 
     private var serverSelector: Selector? = null
@@ -119,13 +124,15 @@ internal class ControlServerImpl : ControlServer {
 
     private fun Result<Unit>.toControlServerState(): ControlServerState = fold(
         onSuccess = { _state.value.toNextStateOnNormalCompletion() },
-        onFailure = { cause -> when (cause) {
-            is CancellationException -> _state.value.toNextStateOnNormalCompletion()
-            is ControlServerException -> cause.toControlServerState()
-            is IOException -> StoppedByError(address, port, error = IO_ERROR, cause)
-            is SecurityException -> StoppedByError(address, port, error = SECURITY_ERROR, cause)
-            else -> StoppedByError(address, port, error = UNKNOWN_ERROR, cause)
-        } }
+        onFailure = { cause ->
+            when (cause) {
+                is CancellationException -> _state.value.toNextStateOnNormalCompletion()
+                is ControlServerException -> cause.toControlServerState()
+                is IOException -> StoppedByError(address, port, error = IO_ERROR, cause)
+                is SecurityException -> StoppedByError(address, port, error = SECURITY_ERROR, cause)
+                else -> StoppedByError(address, port, error = UNKNOWN_ERROR, cause)
+            }
+        }
     )
 
     private fun ControlServerState.toNextStateOnNormalCompletion(): ControlServerState =

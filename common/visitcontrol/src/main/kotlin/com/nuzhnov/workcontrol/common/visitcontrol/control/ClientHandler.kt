@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.common.visitcontrol.control
 
-import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.common.visitcontrol.model.ServerResponse
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.common.visitcontrol.util.*
 import kotlinx.coroutines.*
 import java.nio.ByteBuffer

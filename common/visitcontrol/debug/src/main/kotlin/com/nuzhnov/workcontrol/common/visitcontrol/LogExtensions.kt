@@ -1,10 +1,10 @@
 package com.nuzhnov.workcontrol.common.visitcontrol
 
-import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorError
-import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorState
-import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitDebug
 import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerError
 import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerState
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitDebug
+import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorError
+import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorState
 import com.soywiz.klock.DateTime
 
 

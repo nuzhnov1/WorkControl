@@ -1,15 +1,20 @@
 package com.nuzhnov.workcontrol.common.visitcontrol
 
+import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServer
 import com.nuzhnov.workcontrol.common.visitcontrol.mapper.toVisitDebug
-import com.nuzhnov.workcontrol.common.visitcontrol.testcase.*
-import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
 import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitDebug
-import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServer
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
+import com.nuzhnov.workcontrol.common.visitcontrol.testcase.*
 import com.nuzhnov.workcontrol.common.visitcontrol.visitor.Visitor
-import kotlin.random.*
+import kotlin.random.Random
+import kotlin.random.nextInt
+import kotlin.random.nextLong
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import java.util.*
 
 private const val DELAY_AFTER_COMPLETE_MS = 1_000L
@@ -144,18 +149,20 @@ private suspend fun startVisitorsTasks(testData: TestCase) = coroutineScope {
 
 private fun TestCase.generateVisitorTestData() = buildList {
     repeat(visitorsCount) {
-        add(VisitorTestData(
-            id = RANDOM.nextLong(range = 0L..(visitorsCount * 1000)),
-            workTimeMillis = RANDOM.nextLong(
-                range = minVisitTimeMillis..maxVisitTimeMillis
-            ),
-            delayTimeMillis = RANDOM.nextLong(
-                range = visitorMinAppearanceDelayTimeMillis..visitorMaxAppearanceDelayTimeMillis
-            ),
-            interruptionsCount = RANDOM.nextInt(
-                range = visitorMinInterruptionCount..visitorMaxInterruptionCount
+        add(
+            VisitorTestData(
+                id = RANDOM.nextLong(range = 0L..(visitorsCount * 1000)),
+                workTimeMillis = RANDOM.nextLong(
+                    range = minVisitTimeMillis..maxVisitTimeMillis
+                ),
+                delayTimeMillis = RANDOM.nextLong(
+                    range = visitorMinAppearanceDelayTimeMillis..visitorMaxAppearanceDelayTimeMillis
+                ),
+                interruptionsCount = RANDOM.nextInt(
+                    range = visitorMinInterruptionCount..visitorMaxInterruptionCount
+                )
             )
-        ))
+        )
     }
 }
 
