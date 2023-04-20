@@ -1,11 +1,11 @@
 package com.nuzhnov.workcontrol.common.visitcontrol.visitor
 
-import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorState.*
+import com.nuzhnov.workcontrol.common.visitcontrol.model.ServerResponse
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
+import com.nuzhnov.workcontrol.common.visitcontrol.util.*
 import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorError.*
 import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorException.*
-import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
-import com.nuzhnov.workcontrol.common.visitcontrol.model.ServerResponse
-import com.nuzhnov.workcontrol.common.visitcontrol.util.*
+import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorState.*
 import kotlin.properties.Delegates
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,38 +79,41 @@ internal class VisitorImpl : Visitor {
         )
 
         updateState(state = jobResult.toVisitorState())
-    }.also { job -> job.invokeOnCompletion { completeClientJob() } }
+        completeClientJob()
+    }
 
     private fun Result<Unit>.toVisitorState(): VisitorState = fold(
         onSuccess = { _state.value.toNextStateOnNormalCompletion() },
-        onFailure = { cause -> when (cause) {
-            is CancellationException -> _state.value.toNextStateOnNormalCompletion()
-            is VisitorException -> cause.toVisitorState()
+        onFailure = { cause ->
+            when (cause) {
+                is CancellationException -> _state.value.toNextStateOnNormalCompletion()
+                is VisitorException -> cause.toVisitorState()
 
-            is IOException -> StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = IO_ERROR,
-                cause = cause
-            )
+                is IOException -> StoppedByError(
+                    serverAddress = serverAddress,
+                    serverPort = serverPort,
+                    visitorID = visitorID,
+                    error = IO_ERROR,
+                    cause = cause
+                )
 
-            is SecurityException -> StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = SECURITY_ERROR,
-                cause = cause
-            )
+                is SecurityException -> StoppedByError(
+                    serverAddress = serverAddress,
+                    serverPort = serverPort,
+                    visitorID = visitorID,
+                    error = SECURITY_ERROR,
+                    cause = cause
+                )
 
-            else -> StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = UNKNOWN_ERROR,
-                cause = cause
-            )
-        } }
+                else -> StoppedByError(
+                    serverAddress = serverAddress,
+                    serverPort = serverPort,
+                    visitorID = visitorID,
+                    error = UNKNOWN_ERROR,
+                    cause = cause
+                )
+            }
+        }
     )
 
     private fun VisitorState.toNextStateOnNormalCompletion(): VisitorState =
@@ -153,8 +156,6 @@ internal class VisitorImpl : Visitor {
                 error = DISCONNECTED,
                 cause = cause
             )
-
-            is ServerShutdownException -> Stopped(serverAddress, serverPort, visitorID)
         }
 
     private suspend fun initiateConnection(): Result<Unit> = applyCatching {
@@ -205,12 +206,12 @@ internal class VisitorImpl : Visitor {
                 while (iterator.hasNext()) {
                     val key = iterator.next().also { iterator.remove() }
 
-                    if (key.isWritable) {
-                        key.clientChannel?.sendVisitorID()
-                    }
-
                     if (key.isValid && key.isReadable) {
                         key.clientChannel?.receiveResponse()
+                    }
+
+                    if (key.isValid && key.isWritable) {
+                        key.clientChannel?.sendVisitorID()
                     }
 
                     yield()
@@ -242,14 +243,6 @@ internal class VisitorImpl : Visitor {
                     ServerResponse.BAD_REQUEST -> throw BadConnectionException(
                         cause = IOException(/* message = */ "bad connection")
                     )
-
-                    ServerResponse.DISCONNECTED -> throw DisconnectedException(
-                        cause = IOException(/* message = */ "disconnected")
-                    )
-
-                    ServerResponse.SHUTDOWN_SERVER -> throw ServerShutdownException(
-                        cause = IOException(/* message = */ "server shutdown")
-                    )
                 }
             }
 
@@ -265,7 +258,12 @@ internal class VisitorImpl : Visitor {
 
     private fun SocketChannel.readResponse(): Int {
         inputBuffer.clear()
-        return read(inputBuffer).also { inputBuffer.flip() }
+
+        return try {
+            read(inputBuffer).also { inputBuffer.flip() }
+        } catch (exception: IOException) {
+            throw DisconnectedException(cause = exception)
+        }
     }
 
     private fun SocketChannel.writeVisitorID(): Int {
@@ -275,7 +273,11 @@ internal class VisitorImpl : Visitor {
             flip()
         }
 
-        return write(outputBuffer)
+        return try {
+            write(outputBuffer)
+        } catch (exception: IOException) {
+            throw DisconnectedException(cause = exception)
+        }
     }
 
     private fun updateState(state: VisitorState) {

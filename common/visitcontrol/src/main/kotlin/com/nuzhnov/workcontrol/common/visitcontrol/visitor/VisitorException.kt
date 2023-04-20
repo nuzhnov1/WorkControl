@@ -7,5 +7,4 @@ internal sealed class VisitorException(cause: Throwable) : Exception(cause) {
     class BreakConnectionException(cause: Throwable) : VisitorException(cause)
     class BadConnectionException(cause: Throwable) : VisitorException(cause)
     class DisconnectedException(cause: Throwable) : VisitorException(cause)
-    class ServerShutdownException(cause: Throwable) : VisitorException(cause)
 }

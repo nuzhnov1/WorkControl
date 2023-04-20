@@ -35,8 +35,7 @@ internal class ClientHandler(
         return job
     }
 
-    internal fun stopHandlerJob(serverResponse: ServerResponse) {
-        channel.safeWriteResponse(serverResponse)
+    internal fun stopHandlerJob() {
         handlerJob?.cancel()
     }
 
@@ -125,8 +124,4 @@ internal class ClientHandler(
 
         return write(outputBuffer)
     }
-
-    private fun SocketChannel.safeWriteResponse(
-        serverResponse: ServerResponse
-    ) = runCatching { writeResponse(serverResponse) }
 }

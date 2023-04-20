@@ -12,6 +12,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.util.*
 
+private const val DELAY_AFTER_COMPLETE_MS = 1_000L
 
 private const val RANDOM_SEED = 0
 private val RANDOM = Random(RANDOM_SEED)
@@ -21,7 +22,12 @@ private val VisitDebug.isNotActive get() = !isActive
 
 fun main() {
     ControlServer.getDefaultControlServer().test(
-        testCaseType4
+        testCaseType1,
+        testCaseType2,
+        testCaseType3,
+        testCaseType4,
+        testCaseType5,
+        testCaseType6
     )
 }
 
@@ -50,6 +56,7 @@ private suspend fun ControlServer.startControlTask(testData: TestCase) = corouti
     val terminatorJob = launchTerminatorJob(controlServer = this@startControlTask, testData)
 
     startControl(testData)
+    delay(DELAY_AFTER_COMPLETE_MS)
     serverStateObserverJob.cancelAndJoin()
     visitorsObserverJob.cancelAndJoin()
     terminatorJob.cancelAndJoin()
@@ -161,6 +168,7 @@ private fun CoroutineScope.startVisitorTask(
 
     delay(timeMillis = visitorTestData.delayTimeMillis)
     visitor.startVisitor(testData, visitorTestData)
+    delay(DELAY_AFTER_COMPLETE_MS)
     visitorStateObserverJob.cancelAndJoin()
 }
 

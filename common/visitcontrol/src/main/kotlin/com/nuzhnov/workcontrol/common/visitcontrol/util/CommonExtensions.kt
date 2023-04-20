@@ -12,7 +12,7 @@ internal inline fun <T> T.applyCatching(block: T.() -> Unit): Result<Unit> = try
 
 internal inline fun <T> Result<T>.transformFailedCause(
     block: (Throwable) -> Throwable
-) = recoverCatching { cause -> throw block(cause) }
+): Result<T> = recoverCatching { cause -> throw block(cause) }
 
 internal inline fun <K, V> MutableStateFlow<Map<K, V>>.applyUpdate(
     block: MutableMap<K, V>.() -> Unit

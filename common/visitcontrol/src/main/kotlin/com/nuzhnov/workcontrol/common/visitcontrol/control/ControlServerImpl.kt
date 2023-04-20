@@ -62,9 +62,14 @@ internal class ControlServerImpl : ControlServer {
 
     override fun disconnectVisitor(visitorID: VisitorID) {
         synchronized(lock = clientHandlers) {
-            clientHandlers
-                .filter { handler -> handler.receivedVisitorID == visitorID }
-                .forEach { handler -> handler.stopHandlerJob(ServerResponse.DISCONNECTED) }
+            clientHandlers.removeAll { handler ->
+                if (handler.receivedVisitorID == visitorID) {
+                    handler.stopHandlerJob()
+                    true
+                } else {
+                    false
+                }
+            }
         }
     }
 
@@ -206,29 +211,27 @@ internal class ControlServerImpl : ControlServer {
 
     private fun completeServerJob(): Result<Unit> = applyCatching {
         synchronized(lock = clientHandlers) {
-            clientHandlers.forEach { it.stopHandlerJob(ServerResponse.SHUTDOWN_SERVER) }
+            clientHandlers.forEach { it.stopHandlerJob() }
+            clientHandlers.clear()
         }
 
         serverSelector?.safeClose()
         serverChannel?.safeClose()
-
-        makeAllVisitorsInactive()
     }
 
-    private fun ServerSocketChannel.acceptClient(): Result<ClientHandler> =
-        runCatching {
-            val clientChannel = accept()
-            val clientSelector = Selector.open()
+    private fun ServerSocketChannel.acceptClient(): Result<ClientHandler> = runCatching {
+        val clientChannel = accept()
+        val clientSelector = Selector.open()
 
-            clientChannel.configureBlocking(/* block = */ false)
-            clientChannel.register(clientSelector, /* ops = */ OP_READ or OP_WRITE)
+        clientChannel.configureBlocking(/* block = */ false)
+        clientChannel.register(clientSelector, /* ops = */ OP_READ or OP_WRITE)
 
-            ClientHandler(
-                controlServer = this@ControlServerImpl,
-                selector = clientSelector,
-                channel = clientChannel
-            )
-        }
+        ClientHandler(
+            controlServer = this@ControlServerImpl,
+            selector = clientSelector,
+            channel = clientChannel
+        )
+    }
 
     private fun CoroutineScope.onSuccessAcceptClient(clientHandler: ClientHandler) {
         acceptConnectionAttempts = 0
@@ -258,12 +261,6 @@ internal class ControlServerImpl : ControlServer {
 
     private fun updateState(state: ControlServerState) {
         _state.value = state
-    }
-
-    private fun makeAllVisitorsInactive() {
-        _visits.applyUpdate {
-            keys.forEach { visitorID -> updateVisitorActivity(visitorID, isActiveNow = false) }
-        }
     }
 
     internal fun requestUpdateVisitorActivity(visitorID: VisitorID, isActiveNow: Boolean) {
