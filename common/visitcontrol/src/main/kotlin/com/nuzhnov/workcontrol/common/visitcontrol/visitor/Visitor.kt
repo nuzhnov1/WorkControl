@@ -15,7 +15,7 @@ interface Visitor {
         @Unique visitorID: VisitorID
     )
 
-    fun stop()
+    fun stopVisit()
 
 
     companion object {

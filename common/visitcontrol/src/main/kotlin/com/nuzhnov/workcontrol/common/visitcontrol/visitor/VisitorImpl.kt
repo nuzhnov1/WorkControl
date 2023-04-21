@@ -52,7 +52,7 @@ internal class VisitorImpl : Visitor {
         newClientJob.join()
     }
 
-    override fun stop() {
+    override fun stopVisit() {
         clientJob?.cancel()
     }
 
