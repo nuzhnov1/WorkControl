@@ -16,6 +16,8 @@
             <option value="$PROJECT_DIR$/common/visitcontrol" />
             <option value="$PROJECT_DIR$/common/visitcontrol/debug" />
             <option value="$PROJECT_DIR$/shared" />
+            <option value="$PROJECT_DIR$/shared/database" />
+            <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/visitservice" />
           </set>
         </option>
