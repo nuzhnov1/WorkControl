@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.shared.visitservice.util
+package com.nuzhnov.workcontrol.shared.util
 
 import java.io.Serializable
 import android.content.Context
