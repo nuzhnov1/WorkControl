@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lesson type: -->
+    <string name="lecture_lesson_type">Lecture</string>
+    <string name="practice_lesson_type">Practice</string>
+
+    <!-- Visit type: -->
+    <string name="intramural_visit_type">Intramural</string>
+    <string name="remote_visit_type">Remote</string>
+    <string name="mix_visit_type">Mix</string>
+</resources>
