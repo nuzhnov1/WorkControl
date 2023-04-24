@@ -1,2 +1,2 @@
-1: Допилить проверки SelectionKey
-2: Make the visitcontrol library multiplatform (migrate from java.nio to ktor?)
+1: Make the visitcontrol library multiplatform (migrate from java.nio to ktor?)
+2: Move auxiliary functions and classes to a separate module

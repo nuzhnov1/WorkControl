@@ -7,6 +7,6 @@ import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitDebug
 internal fun Visit.toVisitDebug() = VisitDebug(
     visitorID = visitorID,
     isActive = isActive,
-    lastVisitTime = lastVisitDateTime,
+    lastVisitTime = lastVisit,
     totalVisitDuration = totalVisitDuration
 )

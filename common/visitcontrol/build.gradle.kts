@@ -1,9 +1,11 @@
 plugins {
     kotlin("jvm")
+    
     `java-library`
 }
 
 dependencies {
+    implementation(project(":common:util"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("com.soywiz.korlibs.klock:klock-jvm:2.2.0")
 }

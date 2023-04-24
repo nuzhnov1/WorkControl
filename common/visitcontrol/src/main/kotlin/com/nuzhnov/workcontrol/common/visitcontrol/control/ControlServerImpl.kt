@@ -7,6 +7,9 @@ import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerState.*
 import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
 import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.common.visitcontrol.util.*
+import com.nuzhnov.workcontrol.common.util.applyCatching
+import com.nuzhnov.workcontrol.common.util.applyUpdate
+import com.nuzhnov.workcontrol.common.util.transformFailedCause
 import kotlin.properties.Delegates
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -285,23 +288,23 @@ internal class ControlServerImpl : ControlServer {
         val visit = this[visitorID]
         val now = DateTime.nowLocal()
 
-        if (visit?.lastVisitDateTime == null) {
+        if (visit?.lastVisit == null) {
             this[visitorID] = Visit(
                 visitorID = visitorID,
                 isActive = isActiveNow,
-                lastVisitDateTime = if (isActiveNow) { now } else { null },
+                lastVisit = if (isActiveNow) { now } else { null },
                 totalVisitDuration = TimeSpan.ZERO
             )
         } else {
             val isPreviouslyActive = visit.isActive
-            val previouslyVisitTime = visit.lastVisitDateTime
+            val previouslyVisitTime = visit.lastVisit
             val duration = visit.totalVisitDuration
             val delta = now - previouslyVisitTime
 
             this[visitorID] = Visit(
                 visitorID = visitorID,
                 isActive = isActiveNow,
-                lastVisitDateTime = if (isActiveNow) { now } else { previouslyVisitTime },
+                lastVisit = if (isActiveNow) { now } else { previouslyVisitTime },
                 totalVisitDuration = if (isPreviouslyActive) { duration + delta } else { duration }
             )
         }

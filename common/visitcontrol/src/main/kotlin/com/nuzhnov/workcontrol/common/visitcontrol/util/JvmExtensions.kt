@@ -1,5 +1,6 @@
 package com.nuzhnov.workcontrol.common.visitcontrol.util
 
+import com.nuzhnov.workcontrol.common.util.applyCatching
 import java.io.Closeable
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector

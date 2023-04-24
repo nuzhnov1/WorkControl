@@ -3,6 +3,7 @@ package com.nuzhnov.workcontrol.common.visitcontrol.control
 import com.nuzhnov.workcontrol.common.visitcontrol.model.ServerResponse
 import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
 import com.nuzhnov.workcontrol.common.visitcontrol.util.*
+import com.nuzhnov.workcontrol.common.util.applyCatching
 import kotlinx.coroutines.*
 import java.nio.ByteBuffer
 import java.nio.channels.Selector

@@ -7,6 +7,6 @@ import com.soywiz.klock.TimeSpan
 data class Visit(
     @Unique val visitorID: VisitorID,
     val isActive: Boolean,
-    val lastVisitDateTime: DateTimeTz?,
+    val lastVisit: DateTimeTz?,
     val totalVisitDuration: TimeSpan
 )

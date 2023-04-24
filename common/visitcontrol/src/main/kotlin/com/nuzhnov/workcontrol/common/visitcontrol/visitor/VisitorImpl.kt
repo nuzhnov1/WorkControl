@@ -6,6 +6,8 @@ import com.nuzhnov.workcontrol.common.visitcontrol.util.*
 import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorError.*
 import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorException.*
 import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorState.*
+import com.nuzhnov.workcontrol.common.util.applyCatching
+import com.nuzhnov.workcontrol.common.util.transformFailedCause
 import kotlin.properties.Delegates
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
