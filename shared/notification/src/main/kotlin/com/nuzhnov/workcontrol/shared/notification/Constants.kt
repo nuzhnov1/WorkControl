@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.shared.visitservice.ui.notification
+package com.nuzhnov.workcontrol.shared.notification
 
 import android.net.Uri
 import android.provider.Settings

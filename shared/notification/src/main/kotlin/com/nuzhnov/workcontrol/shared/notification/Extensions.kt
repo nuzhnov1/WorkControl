@@ -1,7 +1,6 @@
-package com.nuzhnov.workcontrol.shared.visitservice.ui.notification
+package com.nuzhnov.workcontrol.shared.notification
 
-import com.nuzhnov.workcontrol.shared.visitservice.ui.resources.*
-import com.nuzhnov.workcontrol.shared.visitservice.util.*
+import com.nuzhnov.workcontrol.shared.util.checkPermissionGranted
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -13,7 +12,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
-internal fun Context.getNotificationBuilderTemplate(
+fun Context.getNotificationBuilderTemplate(
     notificationChannel: String
 ) = NotificationCompat.Builder(/* context = */ this, notificationChannel).apply {
     setBadgeIconType(NOTIFICATION_BADGE_ICON_TYPE)
@@ -39,7 +38,7 @@ internal fun Context.getNotificationBuilderTemplate(
     setAutoCancel(false)
 }
 
-internal fun Context.getContentPendingIntent(clazz: Class<*>): PendingIntent {
+fun Context.getContentPendingIntent(clazz: Class<*>): PendingIntent {
     val contentIntent = Intent(applicationContext, clazz).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
     }
@@ -57,7 +56,7 @@ internal fun Context.getContentPendingIntent(clazz: Class<*>): PendingIntent {
 }
 
 @SuppressLint("MissingPermission")
-internal fun NotificationManagerCompat.notifyIfPermissionGranted(
+fun NotificationManagerCompat.notifyIfPermissionGranted(
     context: Context,
     notificationID: Int,
     notification: Notification
