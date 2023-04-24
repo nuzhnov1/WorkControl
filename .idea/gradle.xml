@@ -20,6 +20,7 @@
             <option value="$PROJECT_DIR$/shared/database" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/notification" />
+            <option value="$PROJECT_DIR$/shared/resources" />
             <option value="$PROJECT_DIR$/shared/studentservice" />
             <option value="$PROJECT_DIR$/shared/teacherservice" />
             <option value="$PROJECT_DIR$/shared/util" />

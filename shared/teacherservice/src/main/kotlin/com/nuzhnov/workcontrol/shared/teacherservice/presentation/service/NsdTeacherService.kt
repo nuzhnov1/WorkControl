@@ -1,10 +1,15 @@
-package com.nuzhnov.workcontrol.shared.visitservice.domen.service.control
+package com.nuzhnov.workcontrol.shared.teacherservice.presentation.service
 
-import com.nuzhnov.workcontrol.shared.visitservice.domen.repository.ControlServiceRepository
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceState.*
-import com.nuzhnov.workcontrol.shared.visitservice.domen.model.ControlServiceError.*
-import com.nuzhnov.workcontrol.shared.visitservice.di.annotations.ControlServiceCoroutineScope
+import com.nuzhnov.workcontrol.shared.teacherservice.presentation.notification.TeacherServiceNotificationManager
+import com.nuzhnov.workcontrol.shared.teacherservice.domen.usecase.GetTeacherServiceStateUseCase
+import com.nuzhnov.workcontrol.shared.teacherservice.domen.usecase.GetTeacherServiceNameUseCase
+import com.nuzhnov.workcontrol.shared.teacherservice.domen.usecase.internal.StartControlUseCase
+import com.nuzhnov.workcontrol.shared.teacherservice.domen.usecase.internal.UpdateTeacherServiceStateUseCase
+import com.nuzhnov.workcontrol.shared.teacherservice.domen.usecase.internal.UpdateTeacherServiceNameUseCase
+import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceState
+import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceState.*
+import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceError.*
+import com.nuzhnov.workcontrol.shared.teacherservice.di.annotation.TeacherServiceCoroutineScope
 import kotlinx.coroutines.*
 import java.net.InetAddress
 import javax.inject.Inject
@@ -15,20 +20,24 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
 
-internal class NsdControlService : Service(), NsdManager.RegistrationListener {
+internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
-    @Inject internal lateinit var repository: ControlServiceRepository
-    @Inject @ControlServiceCoroutineScope internal lateinit var coroutineScope: CoroutineScope
+    @Inject internal lateinit var getTeacherServiceStateUseCase: GetTeacherServiceStateUseCase
+    @Inject internal lateinit var getTeacherServiceNameUseCase: GetTeacherServiceNameUseCase
+    @Inject internal lateinit var updateTeacherServiceStateUseCase: UpdateTeacherServiceStateUseCase
+    @Inject internal lateinit var updateTeacherServiceNameUseCase: UpdateTeacherServiceNameUseCase
+    @Inject internal lateinit var startControlUseCase: StartControlUseCase
+    @[Inject TeacherServiceCoroutineScope] internal lateinit var coroutineScope: CoroutineScope
 
-    private var state: ControlServiceState
-        get() = repository.serviceState.value
-        set(value) = repository.updateServiceState(value)
+    private var state: TeacherServiceState
+        get() = getTeacherServiceStateUseCase().value
+        set(value) = updateTeacherServiceStateUseCase(value)
 
     private var serviceName: String?
-        get() = repository.serviceName.value
-        set(value) = repository.updateServiceName(value)
+        get() = getTeacherServiceNameUseCase().value
+        set(value) = updateTeacherServiceNameUseCase(value)
 
-    private var notificationManager: ControlServiceNotificationManager? = null
+    private var notificationManager: TeacherServiceNotificationManager? = null
     private var controlJob: Job? = null
     private var nsdManager: NsdManager? = null
 
@@ -36,7 +45,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
     override fun onCreate() {
         state = NotInitialized
         coroutineScope.launch {
-            repository.serviceState.collect { state -> onStateChange(state) }
+            getTeacherServiceStateUseCase().collect { state -> onStateChange(state) }
         }
     }
 
@@ -62,7 +71,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
         removeFromForeground()
     }
 
-    private fun onStateChange(state: ControlServiceState) {
+    private fun onStateChange(state: TeacherServiceState) {
         onNotificationChange(state)
 
         when (state) {
@@ -73,7 +82,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
         }
     }
 
-    private fun onNotificationChange(state: ControlServiceState) {
+    private fun onNotificationChange(state: TeacherServiceState) {
         notificationManager?.updateNotification(state)
     }
 
@@ -84,7 +93,6 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
 
         val activityClassNameExtra = intent.getStringExtra(CONTENT_ACTIVITY_CLASS_NAME_EXTRA)!!
         val contentActivityClass = Class.forName(activityClassNameExtra)
-        val serviceNameExtra = intent.getStringExtra(SERVICE_NAME_EXTRA)!!
         val notificationChannelID = intent.getStringExtra(NOTIFICATION_CHANNEL_ID_EXTRA)!!
         val manager = getSystemService(NSD_SERVICE) as? NsdManager
 
@@ -99,7 +107,6 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
             return
         }
 
-        serviceName = serviceNameExtra
         nsdManager = manager
         state = ReadyToRun
     }
@@ -109,7 +116,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
         notificationChannelID: String,
         contentActivityClass: Class<*>
     ) {
-        notificationManager = ControlServiceNotificationManager(
+        notificationManager = TeacherServiceNotificationManager(
             applicationContext = applicationContext,
             notificationChannelID = notificationChannelID,
             notificationID = notificationID,
@@ -121,7 +128,7 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
     private fun onStart() {
         controlJob?.cancel()
         controlJob = coroutineScope.launch {
-            repository.startControl()
+            startControlUseCase()
         }
     }
 
@@ -181,16 +188,13 @@ internal class NsdControlService : Service(), NsdManager.RegistrationListener {
     }
 
 
-    companion object {
-        internal const val SERVICE_TYPE = "_vctrl._tcp"
+    internal companion object {
+        const val SERVICE_TYPE = "_vctrl._tcp"
 
-        internal const val CONTENT_ACTIVITY_CLASS_NAME_EXTRA = "com.nuzhnov.workcontrol.shared" +
-                ".visitservice.domen.service.control.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
+        const val CONTENT_ACTIVITY_CLASS_NAME_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".teacherservice.presentation.service.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
 
-        internal const val SERVICE_NAME_EXTRA = "com.nuzhnov.workcontrol.shared" +
-                ".visitservice.domen.service.control.SERVICE_NAME_EXTRA"
-
-        internal const val NOTIFICATION_CHANNEL_ID_EXTRA = "com.nuzhnov.workcontrol.shared" +
-                ".visitservice.domen.service.control.NOTIFICATION_CHANNEL_ID_EXTRA"
+        const val NOTIFICATION_CHANNEL_ID_EXTRA = "com.nuzhnov.workcontrol.shared" +
+                ".teacherservice.presentation.service.NOTIFICATION_CHANNEL_ID_EXTRA"
     }
 }

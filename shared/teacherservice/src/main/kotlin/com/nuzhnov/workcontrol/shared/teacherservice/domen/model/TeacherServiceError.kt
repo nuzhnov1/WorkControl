@@ -1,6 +1,6 @@
-package com.nuzhnov.workcontrol.shared.visitservice.domen.model
+package com.nuzhnov.workcontrol.shared.teacherservice.domen.model
 
-enum class ControlServiceError {
+enum class TeacherServiceError {
     REGISTER_SERVICE_FAILED,
     INIT_ERROR,
     MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,

@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.shared.visitservice.di.annotations
+package com.nuzhnov.workcontrol.shared.teacherservice.di.annotation
 
 import javax.inject.Qualifier
 
