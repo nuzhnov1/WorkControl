@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.shared.util
+package com.nuzhnov.workcontrol.shared.util.extensions
 
 import java.io.Serializable
 import android.content.Intent

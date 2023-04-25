@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.shared.teacherservice.data.datasource
 
-import com.nuzhnov.workcontrol.shared.teacherservice.di.annotation.IODispatcher
+import com.nuzhnov.workcontrol.shared.util.di.annotation.IODispatcher
 import com.nuzhnov.workcontrol.shared.database.entity.ParticipantEntity
 import com.nuzhnov.workcontrol.shared.database.models.ParticipantActivity
 import com.nuzhnov.workcontrol.shared.database.dao.ParticipantDao
@@ -17,7 +17,7 @@ internal class ParticipantsLocalDataSource @Inject constructor(
         participantDao.getEntities()
     }
 
-    suspend fun updateParticipantsActivities(
-        participantsActivities: Array<ParticipantActivity>
-    ) = participantDao.updateActivity(*participantsActivities)
+    suspend fun updateParticipantsActivities(participantsActivities: Array<ParticipantActivity>) {
+        participantDao.updateActivity(*participantsActivities)
+    }
 }

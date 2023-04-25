@@ -1,10 +1,10 @@
 package com.nuzhnov.workcontrol.shared.teacherservice.presentation.controller
 
 import com.nuzhnov.workcontrol.shared.teacherservice.presentation.service.NsdTeacherService
+import com.nuzhnov.workcontrol.shared.teacherservice.presentation.resources.toResourceString
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.controller.TeacherServiceController
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.usecase.internal.UpdateTeacherServiceNameUseCase
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.usecase.internal.UpdateLessonIdUseCase
-import com.nuzhnov.workcontrol.shared.resources.toResourceString
 import com.nuzhnov.workcontrol.shared.models.Lesson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -42,6 +42,9 @@ internal class TeacherServiceControllerImpl @Inject constructor(
 
     override fun stopTeacherService() {
         context.stopService(Intent(context, NsdTeacherService::class.java))
+
+        updateServiceNameUseCase(serviceName = null)
+        updateLessonIdUseCase(lessonID = null)
     }
 
     private fun Lesson.toServiceName(): String =

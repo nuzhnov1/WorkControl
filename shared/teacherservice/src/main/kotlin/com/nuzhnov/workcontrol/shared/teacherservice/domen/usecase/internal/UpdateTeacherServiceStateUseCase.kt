@@ -8,6 +8,6 @@ internal class UpdateTeacherServiceStateUseCase @Inject constructor(
     private val repository: TeacherServiceRepository
 ) {
     operator fun invoke(serviceState: TeacherServiceState) {
-        repository.updateServiceState(serviceState)
+        repository.updateServiceState(state = serviceState)
     }
 }

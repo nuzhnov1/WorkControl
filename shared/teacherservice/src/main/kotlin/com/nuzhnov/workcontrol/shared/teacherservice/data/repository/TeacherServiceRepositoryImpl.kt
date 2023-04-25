@@ -9,8 +9,8 @@ import com.nuzhnov.workcontrol.shared.teacherservice.data.mapper.toServiceState
 import com.nuzhnov.workcontrol.shared.teacherservice.data.mapper.toVisitArray
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.repository.TeacherServiceRepository
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceState
-import com.nuzhnov.workcontrol.shared.teacherservice.di.annotation.ApplicationCoroutineScope
-import com.nuzhnov.workcontrol.shared.teacherservice.di.annotation.IODispatcher
+import com.nuzhnov.workcontrol.shared.util.di.annotation.ApplicationCoroutineScope
+import com.nuzhnov.workcontrol.shared.util.di.annotation.IODispatcher
 import com.nuzhnov.workcontrol.common.util.throttleLatest
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*

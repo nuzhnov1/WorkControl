@@ -3,8 +3,14 @@ package com.nuzhnov.workcontrol.shared.teacherservice.presentation.resources
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceState
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceError
 import com.nuzhnov.workcontrol.shared.teacherservice.R
+import com.nuzhnov.workcontrol.shared.models.Lesson
 import android.content.Context
 
+
+internal fun Lesson.Type.toResourceString(context: Context): String = when (this) {
+    Lesson.Type.LECTURE -> context.getString(R.string.lecture_lesson_type)
+    Lesson.Type.PRACTICE -> context.getString(R.string.practice_lesson_type)
+}
 
 internal fun TeacherServiceState.toResourceString(context: Context): String = context
     .applicationContext

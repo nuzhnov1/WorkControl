@@ -10,6 +10,7 @@ import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceS
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceState.*
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceError.*
 import com.nuzhnov.workcontrol.shared.teacherservice.di.annotation.TeacherServiceCoroutineScope
+import com.nuzhnov.workcontrol.shared.util.constant.VISIT_CONTROL_PROTOCOL_NAME
 import kotlinx.coroutines.*
 import java.net.InetAddress
 import javax.inject.Inject
@@ -31,7 +32,7 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
     private var state: TeacherServiceState
         get() = getTeacherServiceStateUseCase().value
-        set(value) = updateTeacherServiceStateUseCase(value)
+        set(value) = updateTeacherServiceStateUseCase(serviceState = value)
 
     private var serviceName: String?
         get() = getTeacherServiceNameUseCase().value
@@ -66,7 +67,6 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
     override fun onDestroy() {
         nsdManager?.unregisterService(/* listener = */ this)
         coroutineScope.cancel()
-        serviceName = null
 
         removeFromForeground()
     }
@@ -118,9 +118,9 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
     ) {
         notificationManager = TeacherServiceNotificationManager(
             applicationContext = applicationContext,
-            notificationChannelID = notificationChannelID,
             notificationID = notificationID,
             contentActivityClass = contentActivityClass,
+            notificationChannelID = notificationChannelID,
             initState = state
         ).apply { addToForeground(notificationID, notification) }
     }
@@ -143,7 +143,7 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
         val nsdServiceInfo = NsdServiceInfo().apply {
             serviceName = nsdServiceName
-            serviceType = SERVICE_TYPE
+            serviceType = VISIT_CONTROL_PROTOCOL_NAME
             host = serverAddress
             port = serverPort
         }
@@ -189,8 +189,6 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
 
     internal companion object {
-        const val SERVICE_TYPE = "_vctrl._tcp"
-
         const val CONTENT_ACTIVITY_CLASS_NAME_EXTRA = "com.nuzhnov.workcontrol.shared" +
                 ".teacherservice.presentation.service.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
 

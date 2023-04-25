@@ -7,6 +7,6 @@ internal class UpdateLessonIdUseCase @Inject constructor(
     private val repository: TeacherServiceRepository
 ) {
     operator fun invoke(lessonID: Long?) {
-        repository.updateLessonID(lessonID)
+        repository.updateLessonID(id = lessonID)
     }
 }

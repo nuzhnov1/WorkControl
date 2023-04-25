@@ -24,4 +24,8 @@
     <string name="teacher_service_IO_error">network error</string>
     <string name="teacher_service_security_error">permission denied</string>
     <string name="teacher_service_unknown_error">unknown error</string>
+
+    <!-- Lesson type: -->
+    <string name="lecture_lesson_type">Lecture</string>
+    <string name="practice_lesson_type">Practice</string>
 </resources>

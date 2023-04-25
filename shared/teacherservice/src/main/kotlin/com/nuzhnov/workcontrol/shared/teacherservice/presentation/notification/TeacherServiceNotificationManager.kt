@@ -1,8 +1,8 @@
 package com.nuzhnov.workcontrol.shared.teacherservice.presentation.notification
 
+import com.nuzhnov.workcontrol.shared.teacherservice.presentation.resources.*
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceState
 import com.nuzhnov.workcontrol.shared.teacherservice.domen.model.TeacherServiceState.*
-import com.nuzhnov.workcontrol.shared.teacherservice.presentation.resources.*
 import com.nuzhnov.workcontrol.shared.teacherservice.R
 import com.nuzhnov.workcontrol.shared.notification.getContentPendingIntent
 import com.nuzhnov.workcontrol.shared.notification.getNotificationBuilderTemplate
@@ -13,10 +13,10 @@ import androidx.core.app.NotificationManagerCompat
 
 internal class TeacherServiceNotificationManager(
     val applicationContext: Context,
-    val notificationChannelID: String,
     val notificationID: Int,
-    val contentActivityClass: Class<*>,
-    val initState: TeacherServiceState
+    contentActivityClass: Class<*>,
+    notificationChannelID: String,
+    initState: TeacherServiceState
 ) {
 
     private val notificationManager = NotificationManagerCompat.from(applicationContext)
