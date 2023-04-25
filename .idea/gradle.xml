@@ -16,14 +16,14 @@
             <option value="$PROJECT_DIR$/common/util" />
             <option value="$PROJECT_DIR$/common/visitcontrol" />
             <option value="$PROJECT_DIR$/common/visitcontrol/debug" />
-            <option value="$PROJECT_DIR$/shared" />
-            <option value="$PROJECT_DIR$/shared/database" />
-            <option value="$PROJECT_DIR$/shared/models" />
-            <option value="$PROJECT_DIR$/shared/notification" />
-            <option value="$PROJECT_DIR$/shared/resources" />
-            <option value="$PROJECT_DIR$/shared/studentservice" />
-            <option value="$PROJECT_DIR$/shared/teacherservice" />
-            <option value="$PROJECT_DIR$/shared/util" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/database" />
+            <option value="$PROJECT_DIR$/core/models" />
+            <option value="$PROJECT_DIR$/core/notification" />
+            <option value="$PROJECT_DIR$/core/resources" />
+            <option value="$PROJECT_DIR$/core/studentservice" />
+            <option value="$PROJECT_DIR$/core/teacherservice" />
+            <option value="$PROJECT_DIR$/core/util" />
           </set>
         </option>
       </GradleProjectSettings>
