@@ -1,7 +1,7 @@
-package com.nuzhnov.workcontrol.shared.visitservice.data.remote.api
+package com.nuzhnov.workcontrol.shared.studentservice.data.api
 
-import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
-import com.nuzhnov.workcontrol.core.visitcontrol.visitor.Visitor
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
+import com.nuzhnov.workcontrol.common.visitcontrol.visitor.Visitor
 import java.net.InetAddress
 import javax.inject.Inject
 
@@ -13,6 +13,6 @@ internal class VisitorApiImpl @Inject constructor(private val visitor: Visitor) 
         serverPort: Int,
         visitorID: VisitorID
     ) {
-        visitor.start(serverAddress, serverPort, visitorID)
+        visitor.startVisit(serverAddress, serverPort, visitorID)
     }
 }

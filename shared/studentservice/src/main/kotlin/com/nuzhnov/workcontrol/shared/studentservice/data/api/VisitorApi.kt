@@ -1,7 +1,7 @@
-package com.nuzhnov.workcontrol.shared.visitservice.data.remote.api
+package com.nuzhnov.workcontrol.shared.studentservice.data.api
 
-import com.nuzhnov.workcontrol.core.visitcontrol.model.VisitorID
-import com.nuzhnov.workcontrol.core.visitcontrol.visitor.VisitorState
+import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
+import com.nuzhnov.workcontrol.common.visitcontrol.visitor.VisitorState
 import kotlinx.coroutines.flow.StateFlow
 import java.net.InetAddress
 

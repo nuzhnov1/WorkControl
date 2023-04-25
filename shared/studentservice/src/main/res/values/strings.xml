@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common: -->
+    <string name="student_service_title">Student service</string>
+    <string name="student_service_description">
+        Service for connecting to the nearest student tracking service
+    </string>
+
+    <!-- Statuses -->
+    <string name="student_service_not_initialized_status">Not initialized</string>
+    <string name="student_service_init_failed_status">Initialization failed</string>
+    <string name="student_service_ready_to_run_status">Ready to run</string>
+    <string name="student_service_discovering_status">Discovering nearby services</string>
+    <string name="student_service_resolving_service_status">Resolving the service "%1$s"</string>
+    <string name="student_service_connecting_status">Connecting to the service</string>
+    <string name="student_service_running_status">The connection is established</string>
+    <string name="student_service_stopped_status">Stopped</string>
+    <string name="student_service_stopped_by_error_status">Stopped by error: %1$s</string>
+
+    <!-- Errors: -->
+    <string name="student_service_discovering_services_failed_error">
+        error when discovering nearby services
+    </string>
+    <string name="student_service_resolving_service_failed_error">
+        error when resolving the service
+    </string>
+    <string name="student_service_connection_failed_error">connection failed</string>
+    <string name="student_service_break_connection_error">connection is broken</string>
+    <string name="student_service_bad_connection_error">bad connection</string>
+    <string name="student_service_disconnection_error">disconnected</string>
+    <string name="student_service_IO_error">network error</string>
+    <string name="student_service_security_error">permission denied</string>
+    <string name="student_service_unknown_error">unknown error</string>
+</resources>
