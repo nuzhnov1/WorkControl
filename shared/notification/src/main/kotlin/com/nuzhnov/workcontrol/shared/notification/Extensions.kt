@@ -1,6 +1,5 @@
 package com.nuzhnov.workcontrol.shared.notification
 
-import com.nuzhnov.workcontrol.shared.util.checkPermissionGranted
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -8,6 +7,7 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -66,6 +66,10 @@ fun NotificationManagerCompat.notifyIfPermissionGranted(
     if (applicationContext.checkPermissionGranted(Manifest.permission.POST_NOTIFICATIONS)) {
         notify(notificationID, notification)
     }
+}
+
+internal fun Context.checkPermissionGranted(permission: String): Boolean {
+    return checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 }
 
 // TODO: move this to the another module

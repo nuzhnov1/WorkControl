@@ -41,6 +41,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":shared:util"))
     implementation("androidx.core:core-ktx:1.10.0")
 }
