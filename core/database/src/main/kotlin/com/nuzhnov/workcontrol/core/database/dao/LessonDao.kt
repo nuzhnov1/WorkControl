@@ -49,7 +49,7 @@ interface LessonDao : BaseDao<LessonEntity> {
 
         const val FETCH_BY_TEACHER_ID_AND_STATE_QUERY = """
             SELECT * FROM lesson
-            WHERE teacher_id = :teacherID AND state = :state"
+            WHERE teacher_id = :teacherID AND state = :state
         """
 
         const val FETCH_BY_TEACHER_ID_STATE_AND_DISCIPLINE_ID_QUERY = """

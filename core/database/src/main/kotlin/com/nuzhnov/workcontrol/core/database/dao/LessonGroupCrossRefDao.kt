@@ -15,6 +15,6 @@ interface LessonGroupCrossRefDao : BaseDao<LessonGroupCrossRefEntity> {
 
 
     private companion object {
-        const val FETCH_QUERY = "SELECT * FROM lesson_group_cross_ref"
+        const val FETCH_QUERY = "SELECT * FROM lesson_student_group_cross_ref"
     }
 }

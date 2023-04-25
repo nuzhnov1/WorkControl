@@ -26,8 +26,8 @@ interface GroupDao : BaseDao<GroupEntity> {
 
 
     private companion object {
-        const val FETCH_QUERY = "SELECT * FROM group"
-        const val FETCH_BY_FACULTY_ID_QUERY = "SELECT * FROM group WHERE faculty_id = :facultyID"
-        const val FETCH_BY_GROUP_ID_QUERY = "SELECT * FROM group WHERE id = :groupID"
+        const val FETCH_QUERY = "SELECT * FROM student_group"
+        const val FETCH_BY_FACULTY_ID_QUERY = "SELECT * FROM student_group WHERE faculty_id = :facultyID"
+        const val FETCH_BY_GROUP_ID_QUERY = "SELECT * FROM student_group WHERE id = :groupID"
     }
 }

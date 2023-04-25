@@ -27,7 +27,7 @@ interface DisciplineDao : BaseDao<DisciplineEntity> {
             SELECT d.id, d.name FROM discipline AS d
                 INNER JOIN teacher_discipline_cross_ref AS ref ON d.id = ref.discipline_id
                 INNER JOIN teacher AS t ON ref.teacher_id = t.id
-            WHERE teacher.id = :teacherID
+            WHERE t.id = :teacherID
         """
     }
 }

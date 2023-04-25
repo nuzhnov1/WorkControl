@@ -22,6 +22,6 @@ interface RoomDao : BaseDao<RoomEntity> {
 
     private companion object {
         const val FETCH_QUERY = "SELECT * FROM room"
-        const val FETCH_BY_BUILDING_ID_QUERY = "SELECT * FROM room WHERE building_id = buildingID"
+        const val FETCH_BY_BUILDING_ID_QUERY = "SELECT * FROM room WHERE building_id = :buildingID"
     }
 }

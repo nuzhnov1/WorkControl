@@ -22,6 +22,6 @@ interface StudentDao : BaseDao<StudentEntity> {
 
     private companion object {
         const val FETCH_QUERY = "SELECT * FROM student"
-        const val FETCH_BY_GROUP_ID_QUERY = "SELECT * FROM student WHERE group_id = :groupID"
+        const val FETCH_BY_GROUP_ID_QUERY = "SELECT * FROM student WHERE student_group_id = :groupID"
     }
 }

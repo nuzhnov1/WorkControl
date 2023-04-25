@@ -12,7 +12,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 
 @[Module InstallIn(SingletonComponent::class)]
-interface DatabaseModule {
+object DatabaseModule {
+
     @[Provides Singleton]
     fun provideBuildingDao(appDatabase: AppDatabase): BuildingDao =
         appDatabase.getBuildingDao()

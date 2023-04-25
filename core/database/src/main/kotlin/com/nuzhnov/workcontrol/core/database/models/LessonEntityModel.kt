@@ -18,7 +18,7 @@ data class LessonEntityModel(
         associateBy = Junction(
             value = LessonGroupCrossRefEntity::class,
             parentColumn = "lesson_id",
-            entityColumn = "group_id"
+            entityColumn = "student_group_id"
         )
     )
     val groupWithFaculty: List<GroupWithFaculty>,

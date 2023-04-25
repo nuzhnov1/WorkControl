@@ -21,7 +21,7 @@ import androidx.room.TypeConverters
         TeacherDisciplineCrossRefEntity::class,
         TeacherEntity::class
     ],
-
+    exportSchema = false,
     version = 1
 )
 @TypeConverters(Converters::class)
