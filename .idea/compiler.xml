@@ -2,6 +2,10 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.5">
+      <module name="WorkControl.core.notification" target="1.8" />
+      <module name="WorkControl.core.studentservice" target="1.8" />
+      <module name="WorkControl.core.teacherservice" target="1.8" />
+      <module name="WorkControl.core.util" target="1.8" />
       <module name="WorkControl.shared.database" target="1.8" />
       <module name="WorkControl.shared.notification" target="1.8" />
       <module name="WorkControl.shared.resources" target="1.8" />
