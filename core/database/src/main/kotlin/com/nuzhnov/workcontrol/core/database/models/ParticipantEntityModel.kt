@@ -9,9 +9,9 @@ data class ParticipantEntityModel(
     @Embedded
     val participantEntity: ParticipantEntity,
 
-    @Relation(parentColumn = "student_id", entityColumn = "id")
+    @Relation(parentColumn = "student_id", entityColumn = "student_id")
     val studentEntity: StudentEntity,
 
-    @Relation(parentColumn = "lesson_id", entityColumn = "id")
+    @Relation(parentColumn = "lesson_id", entityColumn = "lesson_id")
     val lessonEntityModel: LessonEntityModel
 )

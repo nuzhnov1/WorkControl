@@ -2,7 +2,7 @@ package com.nuzhnov.workcontrol.core.database
 
 import com.nuzhnov.workcontrol.core.database.entity.*
 import com.nuzhnov.workcontrol.core.database.dao.*
-import com.nuzhnov.workcontrol.core.database.converter.Converters
+import com.nuzhnov.workcontrol.core.database.converter.DateTimeTzConverter
 import androidx.room.RoomDatabase
 import androidx.room.Database
 import androidx.room.TypeConverters
@@ -12,7 +12,7 @@ import androidx.room.TypeConverters
         BuildingEntity::class,
         DisciplineEntity::class,
         FacultyEntity::class,
-        GroupEntity::class,
+        StudentGroupEntity::class,
         LessonEntity::class,
         LessonGroupCrossRefEntity::class,
         ParticipantEntity::class,
@@ -24,7 +24,7 @@ import androidx.room.TypeConverters
     exportSchema = false,
     version = 1
 )
-@TypeConverters(Converters::class)
+@TypeConverters(DateTimeTzConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getBuildingDao(): BuildingDao
     abstract fun getDisciplineDao(): DisciplineDao

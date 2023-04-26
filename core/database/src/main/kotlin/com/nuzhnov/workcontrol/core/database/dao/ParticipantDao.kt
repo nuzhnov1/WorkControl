@@ -10,7 +10,7 @@ import androidx.room.*
 @Dao
 interface ParticipantDao : BaseDao<ParticipantEntity> {
     @Query(FETCH_QUERY)
-    override fun getEntitiesFlow(): Flow<List<ParticipantEntity>>
+    fun getEntitiesFlow(): Flow<List<ParticipantEntity>>
 
     @[Transaction Query(FETCH_BY_LESSON_ID_QUERY)]
     fun getParticipantsOfLessonFlow(lessonID: Long): Flow<List<ParticipantEntityModel>>
@@ -19,7 +19,7 @@ interface ParticipantDao : BaseDao<ParticipantEntity> {
     fun getParticipantsWithLessonsFlow(studentID: Long): Flow<List<ParticipantEntityModel>>
 
     @Query(FETCH_QUERY)
-    override suspend fun getEntities(): List<ParticipantEntity>
+    suspend fun getEntities(): List<ParticipantEntity>
 
     @[Transaction Query(FETCH_BY_LESSON_ID_QUERY)]
     suspend fun getParticipantsOfLesson(lessonID: Long): List<ParticipantEntityModel>
@@ -34,7 +34,7 @@ interface ParticipantDao : BaseDao<ParticipantEntity> {
     suspend fun updateActivity(vararg participantActivity: ParticipantActivity)
 
     @Query(CLEAR_QUERY)
-    override suspend fun clear()
+    suspend fun clear()
 
 
     private companion object {

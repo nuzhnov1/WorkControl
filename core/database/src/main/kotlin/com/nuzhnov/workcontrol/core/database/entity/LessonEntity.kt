@@ -6,14 +6,13 @@ import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
 import androidx.room.ColumnInfo
 import com.soywiz.klock.DateTimeTz
-import com.soywiz.klock.TimeSpan
 
 @Entity(
     tableName = "lesson",
     foreignKeys = [
         ForeignKey(
             entity = DisciplineEntity::class,
-            parentColumns = ["id"],
+            parentColumns = ["discipline_id"],
             childColumns = ["discipline_id"],
             onDelete = ForeignKey.RESTRICT,
             onUpdate = ForeignKey.RESTRICT
@@ -21,7 +20,7 @@ import com.soywiz.klock.TimeSpan
 
         ForeignKey(
             entity = TeacherEntity::class,
-            parentColumns = ["id"],
+            parentColumns = ["teacher_id"],
             childColumns = ["teacher_id"],
             onDelete = ForeignKey.RESTRICT,
             onUpdate = ForeignKey.RESTRICT
@@ -29,7 +28,7 @@ import com.soywiz.klock.TimeSpan
 
         ForeignKey(
             entity = RoomEntity::class,
-            parentColumns = ["id"],
+            parentColumns = ["room_id"],
             childColumns = ["room_id"],
             onDelete = ForeignKey.RESTRICT,
             onUpdate = ForeignKey.RESTRICT
@@ -37,15 +36,23 @@ import com.soywiz.klock.TimeSpan
     ]
 )
 data class LessonEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    @ColumnInfo(name = "discipline_id", index = true) val disciplineID: Long,
-    @ColumnInfo(name = "teacher_id", index = true) val teacherID: Long,
-    @ColumnInfo(name = "room_id", index = true) val roomID: Long,
+    @[PrimaryKey(autoGenerate = true) ColumnInfo(name = "lesson_id")]
+    val lessonID: Long,
+    @ColumnInfo(name = "discipline_id", index = true)
+    val disciplineID: Long,
+    @ColumnInfo(name = "teacher_id", index = true)
+    val teacherID: Long,
+    @ColumnInfo(name = "room_id", index = true)
+    val roomID: Long,
     val type: Lesson.Type,
     val theme: String,
-    @ColumnInfo(name = "visit_type") val visitType: Lesson.VisitType,
-    @ColumnInfo(name = "start_time") val startTime: DateTimeTz?,
-    @ColumnInfo(name = "planned_duration") val plannedDuration: TimeSpan,
-    @ColumnInfo(name = "actual_duration") val actualDuration: TimeSpan,
+    @ColumnInfo(name = "visit_type")
+    val visitType: Lesson.VisitType,
+    @ColumnInfo(name = "start_time")
+    val startTime: DateTimeTz?,
+    @ColumnInfo(name = "planned_duration")
+    val plannedDuration: Double,
+    @ColumnInfo(name = "actual_duration")
+    val actualDuration: Double,
     val state: Lesson.State
 )

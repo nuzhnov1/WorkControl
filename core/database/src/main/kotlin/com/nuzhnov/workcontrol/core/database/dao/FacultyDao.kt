@@ -1,5 +1,6 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
+import android.database.sqlite.SQLiteConstraintException
 import com.nuzhnov.workcontrol.core.database.entity.FacultyEntity
 import kotlinx.coroutines.flow.Flow
 import androidx.room.Dao
@@ -8,10 +9,18 @@ import androidx.room.Query
 @Dao
 interface FacultyDao : BaseDao<FacultyEntity> {
     @Query(FETCH_QUERY)
-    override fun getEntitiesFlow(): Flow<List<FacultyEntity>>
+    fun getEntitiesFlow(): Flow<List<FacultyEntity>>
 
     @Query(FETCH_QUERY)
-    override suspend fun getEntities(): List<FacultyEntity>
+    suspend fun getEntities(): List<FacultyEntity>
+
+    suspend fun clear() = getEntities().forEach { entity ->
+        runCatching { delete(entity) }.onFailure { cause ->
+            if (cause !is SQLiteConstraintException) {
+                throw cause
+            }
+        }
+    }
 
 
     private companion object {

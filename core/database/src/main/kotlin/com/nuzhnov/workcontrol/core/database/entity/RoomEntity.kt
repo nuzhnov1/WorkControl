@@ -10,7 +10,7 @@ import androidx.room.ColumnInfo
     foreignKeys = [
         ForeignKey(
             entity = BuildingEntity::class,
-            parentColumns = ["id"],
+            parentColumns = ["building_id"],
             childColumns = ["building_id"],
             onDelete = ForeignKey.RESTRICT,
             onUpdate = ForeignKey.RESTRICT
@@ -18,7 +18,9 @@ import androidx.room.ColumnInfo
     ]
 )
 data class RoomEntity(
-    @PrimaryKey(autoGenerate = false) val id: Long,
+    @[PrimaryKey(autoGenerate = false) ColumnInfo(name = "room_id")]
+    val id: Long,
     val name: String,
-    @ColumnInfo(name = "building_id", index = true) val buildingID: Long
+    @ColumnInfo(name = "building_id", index = true)
+    val buildingID: Long
 )

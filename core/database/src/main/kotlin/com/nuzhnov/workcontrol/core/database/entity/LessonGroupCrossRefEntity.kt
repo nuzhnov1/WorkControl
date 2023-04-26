@@ -10,15 +10,15 @@ import androidx.room.ColumnInfo
     foreignKeys = [
         ForeignKey(
             entity = LessonEntity::class,
-            parentColumns = ["id"],
+            parentColumns = ["lesson_id"],
             childColumns = ["lesson_id"],
             onUpdate = ForeignKey.RESTRICT,
             onDelete = ForeignKey.RESTRICT
         ),
 
         ForeignKey(
-            entity = GroupEntity::class,
-            parentColumns = ["id"],
+            entity = StudentGroupEntity::class,
+            parentColumns = ["student_group_id"],
             childColumns = ["student_group_id"],
             onUpdate = ForeignKey.RESTRICT,
             onDelete = ForeignKey.RESTRICT

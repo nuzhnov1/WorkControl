@@ -13,22 +13,22 @@ data class LessonEntityModel(
     val lessonEntity: LessonEntity,
 
     @Relation(
-        parentColumn = "id",
-        entityColumn = "id",
+        parentColumn = "lesson_id",
+        entityColumn = "student_group_id",
         associateBy = Junction(
             value = LessonGroupCrossRefEntity::class,
             parentColumn = "lesson_id",
             entityColumn = "student_group_id"
         )
     )
-    val groupWithFaculty: List<GroupWithFaculty>,
+    val studentGroupWithFaculty: List<StudentGroupWithFaculty>,
 
-    @Relation(parentColumn = "teacher_id", entityColumn = "id")
+    @Relation(parentColumn = "teacher_id", entityColumn = "teacher_id")
     val teacherEntity: TeacherEntity,
 
-    @Relation(parentColumn = "discipline_id", entityColumn = "id")
+    @Relation(parentColumn = "discipline_id", entityColumn = "discipline_id")
     val disciplineEntity: DisciplineEntity,
 
-    @Relation(parentColumn = "room_id", entityColumn = "id")
+    @Relation(parentColumn = "room_id", entityColumn = "room_id")
     val roomWithBuilding: RoomWithBuilding
 )

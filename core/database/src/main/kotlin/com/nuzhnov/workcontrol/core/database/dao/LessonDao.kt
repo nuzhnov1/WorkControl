@@ -1,5 +1,6 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
+import android.database.sqlite.SQLiteConstraintException
 import com.nuzhnov.workcontrol.core.database.entity.LessonEntity
 import com.nuzhnov.workcontrol.core.database.models.LessonEntityModel
 import com.nuzhnov.workcontrol.core.models.Lesson
@@ -9,7 +10,7 @@ import androidx.room.*
 @Dao
 interface LessonDao : BaseDao<LessonEntity> {
     @Query(FETCH_QUERY)
-    override fun getEntitiesFlow(): Flow<List<LessonEntity>>
+    fun getEntitiesFlow(): Flow<List<LessonEntity>>
 
     @[Transaction Query(FETCH_BY_TEACHER_ID_AND_STATE_QUERY)]
     fun getTeacherLessonsFlow(
@@ -25,7 +26,7 @@ interface LessonDao : BaseDao<LessonEntity> {
     ): Flow<List<LessonEntityModel>>
 
     @Query(FETCH_QUERY)
-    override suspend fun getEntities(): List<LessonEntity>
+    suspend fun getEntities(): List<LessonEntity>
 
     @[Transaction Query(FETCH_BY_TEACHER_ID_AND_STATE_QUERY)]
     suspend fun getTeacherLessons(
@@ -41,7 +42,7 @@ interface LessonDao : BaseDao<LessonEntity> {
     ): List<LessonEntityModel>
 
     @Query(CLEAR_QUERY)
-    override suspend fun clear()
+    suspend fun clear()
 
 
     private companion object {

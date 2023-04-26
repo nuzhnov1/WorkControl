@@ -9,5 +9,5 @@ data class ParticipantActivity(
     @ColumnInfo(name = "lesson_id") val lessonID: Long,
     @ColumnInfo(name = "is_active") val isActive: Boolean,
     @ColumnInfo(name = "last_visit") val lastVisit: DateTimeTz?,
-    @ColumnInfo(name = "total_visit_duration") val totalVisitDuration: TimeSpan
+    @ColumnInfo(name = "total_visit_duration") val totalVisitDuration: Double
 )
