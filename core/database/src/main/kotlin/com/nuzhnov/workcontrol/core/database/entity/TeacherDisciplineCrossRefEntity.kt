@@ -10,7 +10,7 @@ import androidx.room.ColumnInfo
     foreignKeys = [
         ForeignKey(
             entity = TeacherEntity::class,
-            parentColumns = ["teacher_id"],
+            parentColumns = ["id"],
             childColumns = ["teacher_id"],
             onUpdate = ForeignKey.RESTRICT,
             onDelete = ForeignKey.RESTRICT
@@ -18,7 +18,7 @@ import androidx.room.ColumnInfo
 
         ForeignKey(
             entity = DisciplineEntity::class,
-            parentColumns = ["discipline_id"],
+            parentColumns = ["id"],
             childColumns = ["discipline_id"],
             onUpdate = ForeignKey.RESTRICT,
             onDelete = ForeignKey.RESTRICT

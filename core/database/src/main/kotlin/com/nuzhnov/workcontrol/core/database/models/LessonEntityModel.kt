@@ -1,9 +1,6 @@
 package com.nuzhnov.workcontrol.core.database.models
 
-import com.nuzhnov.workcontrol.core.database.entity.LessonEntity
-import com.nuzhnov.workcontrol.core.database.entity.LessonGroupCrossRefEntity
-import com.nuzhnov.workcontrol.core.database.entity.DisciplineEntity
-import com.nuzhnov.workcontrol.core.database.entity.TeacherEntity
+import com.nuzhnov.workcontrol.core.database.entity.*
 import androidx.room.Embedded
 import androidx.room.Relation
 import androidx.room.Junction
@@ -13,8 +10,9 @@ data class LessonEntityModel(
     val lessonEntity: LessonEntity,
 
     @Relation(
-        parentColumn = "lesson_id",
-        entityColumn = "student_group_id",
+        entity = StudentGroupEntity::class,
+        parentColumn = "id",
+        entityColumn = "id",
         associateBy = Junction(
             value = LessonGroupCrossRefEntity::class,
             parentColumn = "lesson_id",
@@ -23,12 +21,12 @@ data class LessonEntityModel(
     )
     val studentGroupWithFaculty: List<StudentGroupWithFaculty>,
 
-    @Relation(parentColumn = "teacher_id", entityColumn = "teacher_id")
+    @Relation(parentColumn = "teacher_id", entityColumn = "id")
     val teacherEntity: TeacherEntity,
 
-    @Relation(parentColumn = "discipline_id", entityColumn = "discipline_id")
+    @Relation(parentColumn = "discipline_id", entityColumn = "id")
     val disciplineEntity: DisciplineEntity,
 
-    @Relation(parentColumn = "room_id", entityColumn = "room_id")
+    @Relation(entity = RoomEntity::class, parentColumn = "room_id", entityColumn = "id")
     val roomWithBuilding: RoomWithBuilding
 )

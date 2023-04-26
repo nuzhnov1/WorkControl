@@ -8,6 +8,7 @@ import androidx.room.Relation
 data class RoomWithBuilding(
     @Embedded
     val roomEntity: RoomEntity,
-    @Relation(parentColumn = "building_id", entityColumn = "building_id", entity = BuildingEntity::class)
-    val buildingEntity: List<BuildingEntity>
+
+    @Relation(parentColumn = "building_id", entityColumn = "id")
+    val buildingEntity: BuildingEntity
 )

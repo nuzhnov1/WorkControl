@@ -2,7 +2,6 @@ package com.nuzhnov.workcontrol.core.database.models
 
 import androidx.room.ColumnInfo
 import com.soywiz.klock.DateTimeTz
-import com.soywiz.klock.TimeSpan
 
 data class ParticipantActivity(
     @ColumnInfo(name = "student_id") val studentID: Long,

@@ -8,6 +8,7 @@ import androidx.room.Relation
 data class StudentGroupWithFaculty(
     @Embedded
     val studentGroupEntity: StudentGroupEntity,
-    @Relation(parentColumn = "faculty_id", entityColumn = "faculty_id", entity = FacultyEntity::class)
-    val facultyEntity: List<FacultyEntity>
+
+    @Relation(parentColumn = "faculty_id", entityColumn = "id")
+    val facultyEntity: FacultyEntity
 )

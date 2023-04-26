@@ -10,7 +10,7 @@ import androidx.room.ColumnInfo
     foreignKeys = [
         ForeignKey(
             entity = LessonEntity::class,
-            parentColumns = ["lesson_id"],
+            parentColumns = ["id"],
             childColumns = ["lesson_id"],
             onUpdate = ForeignKey.RESTRICT,
             onDelete = ForeignKey.RESTRICT
@@ -18,7 +18,7 @@ import androidx.room.ColumnInfo
 
         ForeignKey(
             entity = StudentGroupEntity::class,
-            parentColumns = ["student_group_id"],
+            parentColumns = ["id"],
             childColumns = ["student_group_id"],
             onUpdate = ForeignKey.RESTRICT,
             onDelete = ForeignKey.RESTRICT
@@ -27,5 +27,5 @@ import androidx.room.ColumnInfo
 )
 data class LessonGroupCrossRefEntity(
     @ColumnInfo(name = "lesson_id", index = true) val lessonID: Long,
-    @ColumnInfo(name = "student_group_id", index = true) val groupID: Long
+    @ColumnInfo(name = "student_group_id", index = true) val studentGroupID: Long
 )
