@@ -2,6 +2,7 @@ package com.nuzhnov.workcontrol.core.database.dao
 
 import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
 import com.nuzhnov.workcontrol.core.database.models.ParticipantEntityModel
+import com.nuzhnov.workcontrol.core.database.models.ParticipantWithLesson
 import com.nuzhnov.workcontrol.core.database.models.ParticipantUpdatableData
 import com.nuzhnov.workcontrol.core.database.models.ParticipantActivity
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +17,7 @@ interface ParticipantDao : BaseDao<ParticipantEntity> {
     fun getParticipantsOfLessonFlow(lessonID: Long): Flow<List<ParticipantEntityModel>>
 
     @[Transaction Query(FETCH_BY_STUDENT_ID_QUERY)]
-    fun getParticipantsWithLessonsFlow(studentID: Long): Flow<List<ParticipantEntityModel>>
+    fun getParticipantsWithLessonsFlow(studentID: Long): Flow<List<ParticipantWithLesson>>
 
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<ParticipantEntity>
@@ -25,7 +26,7 @@ interface ParticipantDao : BaseDao<ParticipantEntity> {
     suspend fun getParticipantsOfLesson(lessonID: Long): List<ParticipantEntityModel>
 
     @[Transaction Query(FETCH_BY_STUDENT_ID_QUERY)]
-    suspend fun getParticipantWithLessons(studentID: Long): List<ParticipantEntityModel>
+    suspend fun getParticipantWithLessons(studentID: Long): List<ParticipantWithLesson>
 
     @Update(entity = ParticipantEntity::class)
     suspend fun updateData(vararg participantUpdatableData: ParticipantUpdatableData)

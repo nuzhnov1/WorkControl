@@ -5,7 +5,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
 import androidx.room.ColumnInfo
-import com.soywiz.klock.DateTimeTz
 
 @Entity(
     tableName = "lesson",
@@ -43,7 +42,7 @@ data class LessonEntity(
     val type: Lesson.Type,
     val theme: String,
     @ColumnInfo(name = "visit_type") val visitType: Lesson.VisitType,
-    @ColumnInfo(name = "start_time") val startTime: DateTimeTz?,
+    @ColumnInfo(name = "start_time") val startTime: Long?,
     @ColumnInfo(name = "planned_duration") val plannedDuration: Double,
     @ColumnInfo(name = "actual_duration") val actualDuration: Double,
     val state: Lesson.State

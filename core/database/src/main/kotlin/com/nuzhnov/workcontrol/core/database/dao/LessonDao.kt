@@ -1,6 +1,5 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
-import android.database.sqlite.SQLiteConstraintException
 import com.nuzhnov.workcontrol.core.database.entity.LessonEntity
 import com.nuzhnov.workcontrol.core.database.models.LessonEntityModel
 import com.nuzhnov.workcontrol.core.models.Lesson

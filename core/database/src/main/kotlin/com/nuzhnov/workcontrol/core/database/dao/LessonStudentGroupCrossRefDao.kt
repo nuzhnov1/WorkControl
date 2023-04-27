@@ -1,13 +1,13 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
-import android.database.sqlite.SQLiteConstraintException
 import com.nuzhnov.workcontrol.core.database.entity.LessonGroupCrossRefEntity
 import kotlinx.coroutines.flow.Flow
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
 
 @Dao
-interface LessonGroupCrossRefDao : BaseDao<LessonGroupCrossRefEntity> {
+interface LessonStudentGroupCrossRefDao : BaseDao<LessonGroupCrossRefEntity> {
     @Query(FETCH_QUERY)
     fun getEntitiesFlow(): Flow<List<LessonGroupCrossRefEntity>>
 

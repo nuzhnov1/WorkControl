@@ -1,8 +1,8 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
-import android.database.sqlite.SQLiteConstraintException
 import com.nuzhnov.workcontrol.core.database.entity.DisciplineEntity
 import kotlinx.coroutines.flow.Flow
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
 
@@ -33,10 +33,10 @@ interface DisciplineDao : BaseDao<DisciplineEntity> {
         const val FETCH_QUERY = "SELECT * FROM discipline"
 
         const val FETCH_BY_TEACHER_ID_QUERY = """
-            SELECT d.discipline_id, d.name FROM discipline AS d
-                INNER JOIN teacher_discipline_cross_ref AS ref ON d.discipline_id = ref.discipline_id
-                INNER JOIN teacher AS t ON ref.teacher_id = t.teacher_id
-            WHERE t.teacher_id = :teacherID
+            SELECT d.id, d.name FROM discipline AS d
+                INNER JOIN teacher_discipline_cross_ref AS ref ON d.id = ref.discipline_id
+                INNER JOIN teacher AS t ON ref.teacher_id = t.id
+            WHERE t.id = :teacherID
         """
     }
 }

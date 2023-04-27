@@ -2,10 +2,8 @@ package com.nuzhnov.workcontrol.core.database
 
 import com.nuzhnov.workcontrol.core.database.entity.*
 import com.nuzhnov.workcontrol.core.database.dao.*
-import com.nuzhnov.workcontrol.core.database.converter.DateTimeTzConverter
 import androidx.room.RoomDatabase
 import androidx.room.Database
-import androidx.room.TypeConverters
 
 @Database(
     entities = [
@@ -24,14 +22,13 @@ import androidx.room.TypeConverters
     exportSchema = false,
     version = 1
 )
-@TypeConverters(DateTimeTzConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getBuildingDao(): BuildingDao
     abstract fun getDisciplineDao(): DisciplineDao
     abstract fun getFacultyDao(): FacultyDao
-    abstract fun getGroupDao(): GroupDao
+    abstract fun getStudentGroupDao(): StudentGroupDao
     abstract fun getLessonDao(): LessonDao
-    abstract fun getLessonGroupCrossRefDao(): LessonGroupCrossRefDao
+    abstract fun getLessonStudentGroupCrossRefDao(): LessonStudentGroupCrossRefDao
     abstract fun getParticipantDao(): ParticipantDao
     abstract fun getRoomDao(): RoomDao
     abstract fun getStudentDao(): StudentDao

@@ -27,16 +27,17 @@ object DatabaseModule {
         appDatabase.getFacultyDao()
 
     @[Provides Singleton]
-    fun provideGroupDao(appDatabase: AppDatabase): GroupDao =
-        appDatabase.getGroupDao()
+    fun provideStudentGroupDao(appDatabase: AppDatabase): StudentGroupDao =
+        appDatabase.getStudentGroupDao()
 
     @[Provides Singleton]
     fun provideLessonDao(appDatabase: AppDatabase): LessonDao =
         appDatabase.getLessonDao()
 
     @[Provides Singleton]
-    fun provideLessonGroupCrossRefDao(appDatabase: AppDatabase): LessonGroupCrossRefDao =
-        appDatabase.getLessonGroupCrossRefDao()
+    fun provideLessonGroupCrossRefDao(
+        appDatabase: AppDatabase
+    ): LessonStudentGroupCrossRefDao = appDatabase.getLessonStudentGroupCrossRefDao()
 
     @[Provides Singleton]
     fun provideParticipantDao(appDatabase: AppDatabase): ParticipantDao =

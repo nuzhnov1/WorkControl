@@ -1,8 +1,8 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
-import android.database.sqlite.SQLiteConstraintException
 import com.nuzhnov.workcontrol.core.database.entity.FacultyEntity
 import kotlinx.coroutines.flow.Flow
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
 

@@ -3,7 +3,6 @@ package com.nuzhnov.workcontrol.core.database.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ColumnInfo
-import com.soywiz.klock.DateTimeTz
 
 @Entity(
     tableName = "participant",
@@ -30,7 +29,7 @@ data class ParticipantEntity(
     @ColumnInfo(name = "student_id", index = true) val studentID: Long,
     @ColumnInfo(name = "lesson_id", index = true) val lessonID: Long,
     @ColumnInfo(name = "is_active") val isActive: Boolean,
-    @ColumnInfo(name = "last_visit") val lastVisit: DateTimeTz?,
+    @ColumnInfo(name = "last_visit") val lastVisit: Long?,
     @ColumnInfo(name = "total_visit_duration") val totalVisitDuration: Double,
     @ColumnInfo(name = "is_marked") val isMarked: Boolean,
     @ColumnInfo(name = "theory_assessment") val theoryAssessment: Byte?,
