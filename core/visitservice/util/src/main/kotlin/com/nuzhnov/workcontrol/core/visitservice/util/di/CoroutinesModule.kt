@@ -13,7 +13,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
 @[Module InstallIn(SingletonComponent::class)]
-object CoroutinesModule {
+internal object CoroutinesModule {
 
     @[Provides Singleton ApplicationCoroutineScope]
     fun provideApplicationCoroutineScope(

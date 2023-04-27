@@ -50,7 +50,7 @@ internal class ControlServerImpl : ControlServer {
 
 
     override suspend fun start(
-        address: InetAddress,
+        address: InetAddress?,
         port: Int,
         backlog: Int,
         maxAcceptConnectionAttempts: Int
@@ -94,7 +94,7 @@ internal class ControlServerImpl : ControlServer {
     }
 
     private fun initProperties(
-        address: InetAddress,
+        address: InetAddress?,
         port: Int,
         backlog: Int,
         maxAcceptConnectionAttempts: Int
@@ -103,7 +103,10 @@ internal class ControlServerImpl : ControlServer {
             throw IllegalArgumentException("maxAcceptConnectionAttempts < 0")
         }
 
-        this.address = address
+        if (address != null) {
+            this.address = address
+        }
+
         this.port = port
         this.backlog = backlog
         this.maxAcceptConnectionAttempts = maxAcceptConnectionAttempts
@@ -166,7 +169,10 @@ internal class ControlServerImpl : ControlServer {
         serverSelector = Selector.open()
         serverChannel = ServerSocketChannel.open().apply {
             val socket = socket()
-            val serverSocketAddress = InetSocketAddress(address, port)
+            val serverSocketAddress = when {
+                ::address.isInitialized -> InetSocketAddress(address, port)
+                else -> InetSocketAddress(port)
+            }
 
             configureBlocking(/* block = */ false)
             socket.bind(serverSocketAddress, backlog)

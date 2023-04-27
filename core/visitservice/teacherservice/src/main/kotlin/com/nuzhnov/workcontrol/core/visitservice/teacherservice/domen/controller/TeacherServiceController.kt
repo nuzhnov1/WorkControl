@@ -2,7 +2,7 @@ package com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.controlle
 
 import com.nuzhnov.workcontrol.core.models.Lesson
 
-interface TeacherServiceController {
+internal interface TeacherServiceController {
     fun startTeacherService(
         lesson: Lesson,
         boundActivityClass: Class<*>,
