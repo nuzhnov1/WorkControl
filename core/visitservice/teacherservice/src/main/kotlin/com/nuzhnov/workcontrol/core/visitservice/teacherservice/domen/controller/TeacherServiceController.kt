@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.controller
 
-import com.nuzhnov.workcontrol.core.visitservice.models.Lesson
+import com.nuzhnov.workcontrol.core.models.Lesson
 
 interface TeacherServiceController {
     fun startTeacherService(

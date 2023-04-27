@@ -1,9 +1,9 @@
 package com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.datasource
 
 import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.IODispatcher
-import com.nuzhnov.workcontrol.core.visitservice.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.visitservice.database.models.ParticipantActivity
-import com.nuzhnov.workcontrol.core.visitservice.database.dao.ParticipantDao
+import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
+import com.nuzhnov.workcontrol.core.database.models.ParticipantActivity
+import com.nuzhnov.workcontrol.core.database.dao.ParticipantDao
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

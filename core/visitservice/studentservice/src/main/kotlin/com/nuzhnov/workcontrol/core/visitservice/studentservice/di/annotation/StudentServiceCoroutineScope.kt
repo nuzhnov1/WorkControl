@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.core.visitservice.studentservice.di.annotations
+package com.nuzhnov.workcontrol.core.visitservice.studentservice.di.annotation
 
 import javax.inject.Qualifier
 

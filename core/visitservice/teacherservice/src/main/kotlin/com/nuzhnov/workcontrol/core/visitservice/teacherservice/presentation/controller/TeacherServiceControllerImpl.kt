@@ -5,7 +5,7 @@ import com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.res
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.controller.TeacherServiceController
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.usecase.internal.UpdateTeacherServiceNameUseCase
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.usecase.internal.UpdateLessonIdUseCase
-import com.nuzhnov.workcontrol.core.visitservice.models.Lesson
+import com.nuzhnov.workcontrol.core.models.Lesson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import android.content.Context

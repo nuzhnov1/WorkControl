@@ -1,25 +1,21 @@
-package com.nuzhnov.workcontrol.core.visitservice.util.di
+package com.nuzhnov.workcontrol.core.visitservice.teacherservice.di
 
-import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.ApplicationCoroutineScope
+import com.nuzhnov.workcontrol.core.visitservice.teacherservice.di.annotation.TeacherServiceCoroutineScope
 import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import javax.inject.Singleton
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 
 @[Module InstallIn(SingletonComponent::class)]
-object CoroutinesModule {
+internal object CoroutinesModule {
 
-    @[Provides Singleton ApplicationCoroutineScope]
-    fun provideApplicationCoroutineScope(
+    @[Provides ServiceScoped TeacherServiceCoroutineScope]
+    fun provideTeacherServiceCoroutineScope(
         @IODispatcher dispatcher: CoroutineDispatcher
     ): CoroutineScope = CoroutineScope(context = dispatcher + Job())
-
-    @[Provides Singleton IODispatcher]
-    fun provideIODispatcher(): CoroutineDispatcher = Dispatchers.IO
 }

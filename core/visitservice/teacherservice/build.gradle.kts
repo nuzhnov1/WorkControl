@@ -51,6 +51,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation("androidx.core:core-ktx:1.10.0")
     implementation("com.google.dagger:hilt-android:2.44")
+    implementation("com.soywiz.korlibs.klock:klock-android:2.2.0")
 
     kapt("com.google.dagger:hilt-android-compiler:2.44")
 

@@ -8,7 +8,7 @@ import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.Stud
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceError.*
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand.*
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.di.annotations.StudentServiceCoroutineScope
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.di.annotation.StudentServiceCoroutineScope
 import com.nuzhnov.workcontrol.core.visitservice.util.constant.VISIT_CONTROL_PROTOCOL_NAME
 import com.nuzhnov.workcontrol.core.visitservice.util.extensions.getSerializable
 import kotlinx.coroutines.*

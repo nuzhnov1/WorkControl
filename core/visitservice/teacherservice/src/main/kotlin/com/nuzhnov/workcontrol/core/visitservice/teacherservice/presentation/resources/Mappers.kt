@@ -3,7 +3,7 @@ package com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.re
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceError
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.R
-import com.nuzhnov.workcontrol.core.visitservice.models.Lesson
+import com.nuzhnov.workcontrol.core.models.Lesson
 import android.content.Context
 
 
