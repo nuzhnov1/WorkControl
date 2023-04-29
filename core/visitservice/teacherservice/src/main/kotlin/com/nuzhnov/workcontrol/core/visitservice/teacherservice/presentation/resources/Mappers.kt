@@ -3,14 +3,8 @@ package com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.re
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceError
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.R
-import com.nuzhnov.workcontrol.core.models.Lesson
 import android.content.Context
 
-
-internal fun Lesson.Type.toResourceString(context: Context): String = when (this) {
-    Lesson.Type.LECTURE -> context.getString(R.string.lecture_lesson_type)
-    Lesson.Type.PRACTICE -> context.getString(R.string.practice_lesson_type)
-}
 
 internal fun TeacherServiceState.toResourceString(context: Context): String = context
     .applicationContext

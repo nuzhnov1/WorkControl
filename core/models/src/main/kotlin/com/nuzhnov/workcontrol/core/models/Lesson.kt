@@ -9,7 +9,6 @@ data class Lesson(
     val discipline: Discipline,
     val teacher: Teacher,
     val room: Room,
-    val type: Type,
     val theme: String,
     val visitType: VisitType,
     val startTime: DateTimeTz? = null,
@@ -35,11 +34,6 @@ data class Lesson(
         }
     }
 
-
-    enum class Type {
-        LECTURE,
-        PRACTICE
-    }
 
     enum class VisitType {
         INTRAMURAL,

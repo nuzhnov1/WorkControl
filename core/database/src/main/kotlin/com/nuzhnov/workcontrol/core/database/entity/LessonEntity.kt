@@ -39,7 +39,6 @@ data class LessonEntity(
     @ColumnInfo(name = "discipline_id", index = true) val disciplineID: Long,
     @ColumnInfo(name = "teacher_id", index = true) val teacherID: Long,
     @ColumnInfo(name = "room_id", index = true) val roomID: Long,
-    val type: Lesson.Type,
     val theme: String,
     @ColumnInfo(name = "visit_type") val visitType: Lesson.VisitType,
     @ColumnInfo(name = "start_time") val startTime: Long?,

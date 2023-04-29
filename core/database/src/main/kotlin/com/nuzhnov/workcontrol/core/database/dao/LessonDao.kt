@@ -1,32 +1,12 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
 import com.nuzhnov.workcontrol.core.database.entity.LessonEntity
-import com.nuzhnov.workcontrol.core.database.models.LessonEntityModel
+import com.nuzhnov.workcontrol.core.database.model.LessonEntityModel
 import com.nuzhnov.workcontrol.core.models.Lesson
-import kotlinx.coroutines.flow.Flow
 import androidx.room.*
 
 @Dao
 interface LessonDao : BaseDao<LessonEntity> {
-    @Query(FETCH_QUERY)
-    fun getEntitiesFlow(): Flow<List<LessonEntity>>
-
-    @[Transaction Query(FETCH_BY_TEACHER_ID_AND_STATE_QUERY)]
-    fun getTeacherLessonsFlow(
-        teacherID: Long,
-        state: Lesson.State
-    ): Flow<List<LessonEntityModel>>
-
-    @[Transaction Query(FETCH_BY_TEACHER_ID_STATE_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherDisciplineLessonsFlow(
-        teacherID: Long,
-        state: Lesson.State,
-        disciplineID: Long
-    ): Flow<List<LessonEntityModel>>
-
-    @Query(FETCH_QUERY)
-    suspend fun getEntities(): List<LessonEntity>
-
     @[Transaction Query(FETCH_BY_TEACHER_ID_AND_STATE_QUERY)]
     suspend fun getTeacherLessons(
         teacherID: Long,
@@ -45,8 +25,6 @@ interface LessonDao : BaseDao<LessonEntity> {
 
 
     private companion object {
-        const val FETCH_QUERY = "SELECT * FROM lesson"
-
         const val FETCH_BY_TEACHER_ID_AND_STATE_QUERY = """
             SELECT * FROM lesson
             WHERE teacher_id = :teacherID AND state = :state

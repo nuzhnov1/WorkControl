@@ -3,7 +3,7 @@ package com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.mapper
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceError
 import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.database.models.ParticipantActivity
+import com.nuzhnov.workcontrol.core.database.model.ParticipantActivity
 import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
 import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerState
 import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerError

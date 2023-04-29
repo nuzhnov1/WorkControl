@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.core.database.models
+package com.nuzhnov.workcontrol.core.database.model
 
 import com.nuzhnov.workcontrol.core.database.entity.*
 import androidx.room.Embedded

@@ -1,7 +1,6 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
 import com.nuzhnov.workcontrol.core.database.entity.DisciplineEntity
-import kotlinx.coroutines.flow.Flow
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
@@ -10,12 +9,6 @@ import androidx.room.Query
 interface DisciplineDao : BaseDao<DisciplineEntity> {
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<DisciplineEntity>
-
-    @Query(FETCH_BY_TEACHER_ID_QUERY)
-    fun getTeacherDisciplinesFlow(teacherID: Long): Flow<List<DisciplineEntity>>
-
-    @Query(FETCH_QUERY)
-    fun getEntitiesFlow(): Flow<List<DisciplineEntity>>
 
     @Query(FETCH_BY_TEACHER_ID_QUERY)
     suspend fun getTeacherDisciplines(teacherID: Long): List<DisciplineEntity>

@@ -48,6 +48,5 @@ internal class TeacherServiceControllerImpl @Inject constructor(
     }
 
     private fun Lesson.toServiceName(): String =
-        "${discipline.name.replaceFirstChar { char -> char.uppercase() }}. " +
-        "${type.toResourceString(context)}. $theme. ${teacher.name}"
+        "${discipline.name.replaceFirstChar { char -> char.uppercase() }}. $theme. ${teacher.name}"
 }

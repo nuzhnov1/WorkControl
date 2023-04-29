@@ -1,23 +1,17 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
 import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.database.models.ParticipantEntityModel
-import com.nuzhnov.workcontrol.core.database.models.ParticipantWithLesson
-import com.nuzhnov.workcontrol.core.database.models.ParticipantUpdatableData
-import com.nuzhnov.workcontrol.core.database.models.ParticipantActivity
+import com.nuzhnov.workcontrol.core.database.model.ParticipantEntityModel
+import com.nuzhnov.workcontrol.core.database.model.ParticipantWithLesson
+import com.nuzhnov.workcontrol.core.database.model.ParticipantUpdatableData
+import com.nuzhnov.workcontrol.core.database.model.ParticipantActivity
 import kotlinx.coroutines.flow.Flow
 import androidx.room.*
 
 @Dao
 interface ParticipantDao : BaseDao<ParticipantEntity> {
-    @Query(FETCH_QUERY)
-    fun getEntitiesFlow(): Flow<List<ParticipantEntity>>
-
     @[Transaction Query(FETCH_BY_LESSON_ID_QUERY)]
     fun getParticipantsOfLessonFlow(lessonID: Long): Flow<List<ParticipantEntityModel>>
-
-    @[Transaction Query(FETCH_BY_STUDENT_ID_QUERY)]
-    fun getParticipantsWithLessonsFlow(studentID: Long): Flow<List<ParticipantWithLesson>>
 
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<ParticipantEntity>
