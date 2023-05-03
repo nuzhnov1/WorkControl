@@ -37,6 +37,11 @@ android {
         java.targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -47,14 +52,11 @@ dependencies {
     implementation(project(":common:visitcontrol"))
     implementation(project(":core:visitservice:util"))
     implementation(project(":core:visitservice:notification"))
+    implementation(project(":core:model"))
     implementation("androidx.core:core-ktx:1.10.0")
     implementation("com.google.dagger:hilt-android:2.44")
 
     kapt("com.google.dagger:hilt-android-compiler:2.44")
-
-    testImplementation("junit:junit:4.13.2")
-
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
 }
 
 kapt {

@@ -9,7 +9,6 @@ import dagger.hilt.components.SingletonComponent
 
 @[Module InstallIn(SingletonComponent::class)]
 internal object VisitorControlApiModule {
-
     @[Provides Singleton]
     fun provideVisitor() = Visitor.getDefaultVisitor()
 }

@@ -1,5 +1,7 @@
 package com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.controller
 
+import com.nuzhnov.workcontrol.core.model.Student
+
 internal interface StudentServiceController {
     fun discoverServices(
         boundActivity: Class<*>,
@@ -8,7 +10,7 @@ internal interface StudentServiceController {
 
     fun connectToService(
         serviceName: String,
-        studentID: Long,
+        student: Student,
         boundActivity: Class<*>,
         notificationChannelID: String
     )

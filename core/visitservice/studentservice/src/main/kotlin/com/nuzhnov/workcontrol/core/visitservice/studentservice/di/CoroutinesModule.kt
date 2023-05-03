@@ -13,7 +13,6 @@ import dagger.hilt.components.SingletonComponent
 
 @[Module InstallIn(SingletonComponent::class)]
 internal object CoroutinesModule {
-
     @[Provides ServiceScoped StudentServiceCoroutineScope]
     fun provideStudentServiceCoroutineScope(
         @IODispatcher dispatcher: CoroutineDispatcher

@@ -5,6 +5,7 @@ import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.controller
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.UpdateStudentIdUseCase
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.ClearNsdDiscoveredServicesUseCase
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand.*
+import com.nuzhnov.workcontrol.core.model.Student
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import android.content.Context
@@ -41,11 +42,11 @@ internal class StudentServiceControllerImpl @Inject constructor(
 
     override fun connectToService(
         serviceName: String,
-        studentID: Long,
+        student: Student,
         boundActivity: Class<*>,
         notificationChannelID: String
     ) {
-        updateStudentIdUseCase(studentID = studentID)
+        updateStudentIdUseCase(studentID = student.id)
 
         Intent(context, NsdStudentService::class.java).apply {
             putExtra(

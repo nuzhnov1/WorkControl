@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.StateFlow
 import java.net.InetAddress
 import android.net.nsd.NsdServiceInfo
 
-
 internal interface StudentServiceRepository {
     val discoveredServicesFlow: Flow<Set<DiscoveredService>>
     val serviceState: StateFlow<StudentServiceState>
