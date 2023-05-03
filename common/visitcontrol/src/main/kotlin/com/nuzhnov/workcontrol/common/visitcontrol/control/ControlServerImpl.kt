@@ -143,9 +143,9 @@ internal class ControlServerImpl : ControlServer {
 
     private fun ControlServerState.toNextStateOnNormalCompletion(): ControlServerState =
         when (this) {
-            is Running -> Stopped(address, port)
+            is Running                  -> Stopped(address, port)
             is StoppedAcceptConnections -> StoppedByError(address, port, error, cause)
-            else -> this
+            else                        -> this
         }
 
     private fun ControlServerException.toControlServerState(): ControlServerState =

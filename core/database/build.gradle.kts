@@ -37,17 +37,21 @@ android {
         java.targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
 }
 
 dependencies {
-    implementation(project(":core:models"))
+    implementation(project(":core:model"))
     implementation("androidx.room:room-runtime:2.5.1")
     implementation("androidx.room:room-ktx:2.5.1")
     implementation("com.google.dagger:hilt-android:2.44")
-    implementation("com.soywiz.korlibs.klock:klock-jvm:2.2.0")
 
     kapt("androidx.room:room-compiler:2.5.1")
     kapt("com.google.dagger:hilt-android-compiler:2.44")

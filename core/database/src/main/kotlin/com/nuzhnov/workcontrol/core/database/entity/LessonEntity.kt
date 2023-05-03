@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.database.entity
 
-import com.nuzhnov.workcontrol.core.models.Lesson
+import com.nuzhnov.workcontrol.core.model.Lesson
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
@@ -43,6 +43,7 @@ data class LessonEntity(
     @ColumnInfo(name = "visit_type") val visitType: Lesson.VisitType,
     @ColumnInfo(name = "start_time") val startTime: Long?,
     @ColumnInfo(name = "planned_duration") val plannedDuration: Double,
-    @ColumnInfo(name = "actual_duration") val actualDuration: Double,
-    val state: Lesson.State
+    @ColumnInfo(name = "actual_duration") val actualDuration: Double?,
+    val state: Lesson.State,
+    @ColumnInfo(name = "is_synchronized") val isSynchronised: Boolean
 )

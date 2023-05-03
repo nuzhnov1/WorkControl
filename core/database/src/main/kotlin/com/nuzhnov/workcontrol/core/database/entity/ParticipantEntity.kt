@@ -38,5 +38,6 @@ data class ParticipantEntity(
     @ColumnInfo(name = "prudence_assessment") val prudenceAssessment: Byte?,
     @ColumnInfo(name = "creativity_assessment") val creativityAssessment: Byte?,
     @ColumnInfo(name = "preparation_assessment") val preparationAssessment: Byte?,
-    val note: String?
+    val note: String?,
+    @ColumnInfo(name = "is_synchronized") val isSynchronized: Boolean
 )

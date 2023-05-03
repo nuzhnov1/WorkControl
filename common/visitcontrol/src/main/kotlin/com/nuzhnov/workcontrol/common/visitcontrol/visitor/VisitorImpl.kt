@@ -120,9 +120,9 @@ internal class VisitorImpl : Visitor {
 
     private fun VisitorState.toNextStateOnNormalCompletion(): VisitorState =
         when (this) {
-            is Connecting -> Stopped(serverAddress, serverPort, visitorID)
-            is Running -> Stopped(serverAddress, serverPort, visitorID)
-            else -> this
+            is Connecting   -> Stopped(serverAddress, serverPort, visitorID)
+            is Running      -> Stopped(serverAddress, serverPort, visitorID)
+            else            -> this
         }
 
     private fun VisitorException.toVisitorState(): VisitorState =
