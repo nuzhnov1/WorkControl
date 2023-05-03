@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.core.visitservice.notification
+package com.nuzhnov.workcontrol.core.visitservice.notification.constant
 
 import android.net.Uri
 import android.provider.Settings

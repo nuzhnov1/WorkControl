@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.core.visitservice.util.extensions
+package com.nuzhnov.workcontrol.core.visitservice.util.extension
 
 import java.io.Serializable
 import android.content.Intent
