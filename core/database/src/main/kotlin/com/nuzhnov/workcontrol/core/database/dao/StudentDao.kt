@@ -11,7 +11,7 @@ import androidx.room.Transaction
 @Dao
 interface StudentDao : BaseDao<StudentEntity> {
     @Query(FETCH_BY_GROUP_ID_QUERY)
-    fun getStudentsOfGroup(groupID: Long): Flow<List<StudentEntity>>
+    fun getStudentsOfGroupFlow(groupID: Long): Flow<List<StudentEntity>>
 
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<StudentEntity>

@@ -13,11 +13,8 @@ interface ParticipantDao : BaseDao<ParticipantEntity> {
     @[Transaction Query(FETCH_BY_LESSON_ID_QUERY)]
     fun getParticipantsFlow(lessonID: Long): Flow<List<ParticipantModel>>
 
-    @[Transaction Query(FETCH_BY_STUDENT_ID_QUERY)]
-    fun getStudentParticipationOfLessons(studentID: Long): Flow<List<ParticipantLessonModel>>
-
     @[Transaction Query(FETCH_BY_STUDENT_AND_TEACHER_ID_QUERY)]
-    fun getStudentParticipationOfTeacherLessons(
+    fun getStudentParticipationOfLessonsFlow(
         studentID: Long,
         teacherID: Long
     ): Flow<List<ParticipantLessonModel>>
@@ -35,10 +32,6 @@ interface ParticipantDao : BaseDao<ParticipantEntity> {
     private companion object {
         const val FETCH_BY_LESSON_ID_QUERY = """
             SELECT * FROM participant WHERE lesson_id = :lessonID
-        """
-
-        const val FETCH_BY_STUDENT_ID_QUERY = """
-            SELECT * FROM participant WHERE student_id = :studentID
         """
 
         const val FETCH_BY_STUDENT_AND_TEACHER_ID_QUERY = """

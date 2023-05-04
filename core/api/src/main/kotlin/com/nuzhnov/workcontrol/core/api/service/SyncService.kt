@@ -2,39 +2,35 @@ package com.nuzhnov.workcontrol.core.api.service
 
 import com.nuzhnov.workcontrol.core.api.dto.university.*
 import com.nuzhnov.workcontrol.core.api.dto.lesson.*
-import com.nuzhnov.workcontrol.core.api.dto.user.TeacherModelDTO
 import com.nuzhnov.workcontrol.core.api.dto.user.StudentModelDTO
+import com.nuzhnov.workcontrol.core.api.annotation.PermittedTo
+import com.nuzhnov.workcontrol.core.model.Session.Role
 import retrofit2.http.POST
 import retrofit2.http.Body
 
 interface SyncService {
-    @POST("/buildings?list")
+    @[POST("/buildings?list") PermittedTo(Role.TEACHER)]
     suspend fun getBuildings(@Body buildingIDList: List<Long>): List<BuildingDTO>
 
-    @POST("/rooms?list")
+    @[POST("/rooms?list") PermittedTo(Role.TEACHER)]
     suspend fun getRooms(@Body roomIDList: List<Long>): List<RoomModelDTO>
 
-    @POST("/disciplines?list")
-    suspend fun getDisciplines(@Body disciplineIDList: List<Long>): List<DisciplineDTO>
-
-    @POST("/faculties?list")
+    @[POST("/faculties?list") PermittedTo(Role.TEACHER)]
     suspend fun getFaculties(@Body facultyIDList: List<Long>): List<FacultyDTO>
 
-    @POST("/groups?list")
+    @[POST("/groups?list") PermittedTo(Role.TEACHER)]
     suspend fun getGroups(@Body groupIDList: List<Long>): List<GroupModelDTO>
 
-    @POST("/students?list")
+    @[POST("/students?list") PermittedTo(Role.TEACHER)]
     suspend fun getStudents(@Body studentIDList: List<Long>): List<StudentModelDTO>
 
-    @POST("/teachers?list")
-    suspend fun getTeachers(@Body teacherIDList: List<Long>): List<TeacherModelDTO>
-
-    @POST("/lessons?list")
-    suspend fun getLessons(@Body lessonIDList: List<Long>): List<LessonDTO>
-
-    @POST("/lessons?new")
+    // Примечание: на сервере должна осуществляться проверка на то, что занятие было создано
+    // данным преподавателем с его дисциплиной
+    @[POST("/lessons?new") PermittedTo(Role.TEACHER)]
     suspend fun postNewLessons(@Body newLessonDTOList: List<NewLessonDTO>)
 
-    @POST("/participants?update")
+    // Примечание: на сервере должна осуществляться проверка на то, что участники могут обновляться
+    // только для занятий данного преподавателя
+    @[POST("/participants?update") PermittedTo(Role.TEACHER)]
     suspend fun postUpdatedParticipants(@Body updatedParticipantDTOList: List<UpdatedParticipantDTO>)
 }

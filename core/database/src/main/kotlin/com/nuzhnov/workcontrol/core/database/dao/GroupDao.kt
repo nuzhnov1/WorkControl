@@ -9,7 +9,7 @@ import androidx.room.Query
 @Dao
 interface GroupDao : BaseDao<GroupEntity> {
     @Query(FETCH_BY_FACULTY_ID_QUERY)
-    fun getFacultyGroups(facultyID: Long): Flow<List<GroupEntity>>
+    fun getFacultyGroupsFlow(facultyID: Long): Flow<List<GroupEntity>>
 
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<GroupEntity>

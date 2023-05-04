@@ -9,13 +9,13 @@ import androidx.room.*
 @Dao
 interface LessonDao : BaseDao<LessonEntity> {
     @[Transaction Query(FETCH_BY_TEACHER_ID_AND_STATE_QUERY)]
-    fun getTeacherLessonsFlow(
+    fun getLessonsFlow(
         teacherID: Long,
         state: State
     ): Flow<List<LessonModel>>
 
     @[Transaction Query(FETCH_BY_TEACHER_ID_STATE_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherDisciplineLessonsFlow(
+    fun getDisciplineLessonsFlow(
         teacherID: Long,
         disciplineID: Long,
         state: State
