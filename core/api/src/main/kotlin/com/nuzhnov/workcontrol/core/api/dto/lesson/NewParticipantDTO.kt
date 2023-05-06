@@ -19,7 +19,7 @@ import com.squareup.moshi.JsonClass
  * }
  */
 @JsonClass(generateAdapter = true)
-data class NewParticipantPostedDTO(
+data class NewParticipantDTO(
     @Json(name = "student_id") val studentID: Long,
     @Json(name = "total_visit_duration") val totalVisitDuration: Double,
     @Json(name = "is_marked") val isMarked: Boolean,

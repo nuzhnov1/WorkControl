@@ -23,17 +23,17 @@ import androidx.room.Database
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun getBuildingDao(): BuildingDao
-    abstract fun getRoomDao(): RoomDao
-    abstract fun getDisciplineDao(): DisciplineDao
-    abstract fun getFacultyDao(): FacultyDao
-    abstract fun getGroupDao(): GroupDao
-    abstract fun getStudentDao(): StudentDao
-    abstract fun getTeacherDao(): TeacherDao
-    abstract fun getTeacherDisciplineCrossRefDao(): TeacherDisciplineCrossRefDao
-    abstract fun getLessonDao(): LessonDao
-    abstract fun getLessonGroupCrossRefDao(): LessonGroupCrossRefDao
-    abstract fun getParticipantDao(): ParticipantDao
+    abstract fun getBuildingDAO(): BuildingDAO
+    abstract fun getRoomDAO(): RoomDAO
+    abstract fun getDisciplineDAO(): DisciplineDAO
+    abstract fun getFacultyDAO(): FacultyDAO
+    abstract fun getGroupDAO(): GroupDAO
+    abstract fun getStudentDAO(): StudentDAO
+    abstract fun getTeacherDAO(): TeacherDAO
+    abstract fun getTeacherDisciplineCrossRefDAO(): TeacherDisciplineCrossRefDAO
+    abstract fun getLessonDAO(): LessonDAO
+    abstract fun getLessonGroupCrossRefDAO(): LessonGroupCrossRefDAO
+    abstract fun getParticipantDAO(): ParticipantDAO
 
 
     internal companion object {

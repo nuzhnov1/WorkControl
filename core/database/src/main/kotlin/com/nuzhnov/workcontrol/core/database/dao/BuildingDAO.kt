@@ -1,19 +1,18 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
-import com.nuzhnov.workcontrol.core.database.entity.TeacherEntity
-import com.nuzhnov.workcontrol.core.database.entity.model.TeacherModel
+import com.nuzhnov.workcontrol.core.database.entity.BuildingEntity
+import kotlinx.coroutines.flow.Flow
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Transaction
 
 @Dao
-interface TeacherDao : BaseDao<TeacherEntity> {
+interface BuildingDAO : BaseDAO<BuildingEntity> {
     @Query(FETCH_QUERY)
-    suspend fun getEntities(): List<TeacherEntity>
+    fun getEntitiesFlow(): Flow<List<BuildingEntity>>
 
-    @[Transaction Query(FETCH_BY_ID_QUERY)]
-    suspend fun getTeacher(id: Long): TeacherModel?
+    @Query(FETCH_QUERY)
+    suspend fun getEntities(): List<BuildingEntity>
 
     suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
@@ -27,7 +26,6 @@ interface TeacherDao : BaseDao<TeacherEntity> {
 
 
     private companion object {
-        const val FETCH_QUERY = "SELECT * FROM teacher"
-        const val FETCH_BY_ID_QUERY = "SELECT * FROM teacher WHERE id = :id"
+        const val FETCH_QUERY = "SELECT * FROM building"
     }
 }

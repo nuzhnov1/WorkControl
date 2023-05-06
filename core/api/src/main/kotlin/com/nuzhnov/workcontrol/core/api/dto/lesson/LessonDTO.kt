@@ -77,7 +77,7 @@ data class LessonDTO(
     @Json(name = "discipline") val disciplineDTO: DisciplineDTO,
     @Json(name = "teacher") val teacherDTO: TeacherDTO,
     @Json(name = "room") val roomModelDTO: RoomModelDTO,
-    val groups: List<GroupModelDTO>,
+    @Json(name = "groups") val groupModelDTOList: List<GroupModelDTO>,
     val theme: String,
     @Json(name = "visit_type") val visitType: Lesson.VisitType,
     @Json(name = "start_time") val startTime: Long?,

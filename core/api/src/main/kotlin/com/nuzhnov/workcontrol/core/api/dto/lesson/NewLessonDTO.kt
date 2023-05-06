@@ -54,5 +54,5 @@ data class NewLessonDTO(
     @Json(name = "start_time") val startTime: Long?,
     @Json(name = "planned_duration") val plannedDuration: Double,
     @Json(name = "actual_duration") val actualDuration: Double?,
-    val participants: List<NewParticipantPostedDTO>
+    @Json(name = "participants") val newParticipantDTOList: List<NewParticipantDTO>
 )

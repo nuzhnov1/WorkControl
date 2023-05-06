@@ -1,18 +1,18 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
-import com.nuzhnov.workcontrol.core.database.entity.DisciplineEntity
+import com.nuzhnov.workcontrol.core.database.entity.FacultyEntity
 import kotlinx.coroutines.flow.Flow
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
 
 @Dao
-interface DisciplineDao : BaseDao<DisciplineEntity> {
+interface FacultyDAO : BaseDAO<FacultyEntity> {
     @Query(FETCH_QUERY)
-    fun getEntitiesFlow(): Flow<List<DisciplineEntity>>
+    fun getEntitiesFlow(): Flow<List<FacultyEntity>>
 
     @Query(FETCH_QUERY)
-    suspend fun getEntities(): List<DisciplineEntity>
+    suspend fun getEntities(): List<FacultyEntity>
 
     suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
@@ -26,6 +26,6 @@ interface DisciplineDao : BaseDao<DisciplineEntity> {
 
 
     private companion object {
-        const val FETCH_QUERY = "SELECT * FROM discipline"
+        const val FETCH_QUERY = "SELECT * FROM faculty"
     }
 }

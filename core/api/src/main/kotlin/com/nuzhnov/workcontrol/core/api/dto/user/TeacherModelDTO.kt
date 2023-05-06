@@ -30,5 +30,5 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class TeacherModelDTO(
     @Json(name = "teacher") val teacherDTO: TeacherDTO,
-    val disciplines: List<DisciplineDTO>
+    val disciplineDTOList: List<DisciplineDTO>
 )

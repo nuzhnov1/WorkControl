@@ -7,7 +7,7 @@ import androidx.room.Dao
 import androidx.room.Query
 
 @Dao
-interface RoomDao : BaseDao<RoomEntity> {
+interface RoomDAO : BaseDAO<RoomEntity> {
     @Query(FETCH_BY_BUILDING_ID_QUERY)
     fun getBuildingRoomsFlow(buildingID: Long): Flow<List<RoomEntity>>
 

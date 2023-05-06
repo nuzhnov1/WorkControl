@@ -1,18 +1,19 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
-import com.nuzhnov.workcontrol.core.database.entity.GroupEntity
-import kotlinx.coroutines.flow.Flow
+import com.nuzhnov.workcontrol.core.database.entity.TeacherEntity
+import com.nuzhnov.workcontrol.core.database.entity.model.TeacherModel
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 
 @Dao
-interface GroupDao : BaseDao<GroupEntity> {
-    @Query(FETCH_BY_FACULTY_ID_QUERY)
-    fun getFacultyGroupsFlow(facultyID: Long): Flow<List<GroupEntity>>
-
+interface TeacherDAO : BaseDAO<TeacherEntity> {
     @Query(FETCH_QUERY)
-    suspend fun getEntities(): List<GroupEntity>
+    suspend fun getEntities(): List<TeacherEntity>
+
+    @[Transaction Query(FETCH_BY_ID_QUERY)]
+    suspend fun getTeacher(id: Long): TeacherModel?
 
     suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
@@ -26,10 +27,7 @@ interface GroupDao : BaseDao<GroupEntity> {
 
 
     private companion object {
-        const val FETCH_QUERY = "SELECT * FROM student_group"
-
-        const val FETCH_BY_FACULTY_ID_QUERY = """
-            SELECT * FROM student_group WHERE faculty_id = :facultyID
-        """
+        const val FETCH_QUERY = "SELECT * FROM teacher"
+        const val FETCH_BY_ID_QUERY = "SELECT * FROM teacher WHERE id = :id"
     }
 }

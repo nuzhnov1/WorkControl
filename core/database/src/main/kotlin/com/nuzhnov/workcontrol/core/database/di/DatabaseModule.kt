@@ -14,48 +14,48 @@ import dagger.hilt.components.SingletonComponent
 @[Module InstallIn(SingletonComponent::class)]
 internal object DatabaseModule {
     @[Provides Singleton]
-    fun provideBuildingDao(appDatabase: AppDatabase): BuildingDao =
-        appDatabase.getBuildingDao()
+    fun provideBuildingDAO(appDatabase: AppDatabase): BuildingDAO =
+        appDatabase.getBuildingDAO()
 
     @[Provides Singleton]
-    fun provideRoomDao(appDatabase: AppDatabase): RoomDao =
-        appDatabase.getRoomDao()
+    fun provideRoomDAO(appDatabase: AppDatabase): RoomDAO =
+        appDatabase.getRoomDAO()
 
     @[Provides Singleton]
-    fun provideDisciplineDao(appDatabase: AppDatabase): DisciplineDao =
-        appDatabase.getDisciplineDao()
+    fun provideDisciplineDAO(appDatabase: AppDatabase): DisciplineDAO =
+        appDatabase.getDisciplineDAO()
 
     @[Provides Singleton]
-    fun provideFacultyDao(appDatabase: AppDatabase): FacultyDao =
-        appDatabase.getFacultyDao()
+    fun provideFacultyDAO(appDatabase: AppDatabase): FacultyDAO =
+        appDatabase.getFacultyDAO()
 
     @[Provides Singleton]
-    fun provideGroupDao(appDatabase: AppDatabase): GroupDao =
-        appDatabase.getGroupDao()
+    fun provideGroupDAO(appDatabase: AppDatabase): GroupDAO =
+        appDatabase.getGroupDAO()
 
     @[Provides Singleton]
-    fun provideStudentDao(appDatabase: AppDatabase): StudentDao =
-        appDatabase.getStudentDao()
+    fun provideStudentDAO(appDatabase: AppDatabase): StudentDAO =
+        appDatabase.getStudentDAO()
 
     @[Provides Singleton]
-    fun provideTeacherDao(appDatabase: AppDatabase): TeacherDao =
-        appDatabase.getTeacherDao()
+    fun provideTeacherDAO(appDatabase: AppDatabase): TeacherDAO =
+        appDatabase.getTeacherDAO()
 
     @[Provides Singleton]
-    fun provideTeacherDisciplineCrossRefDao(appDatabase: AppDatabase): TeacherDisciplineCrossRefDao =
-        appDatabase.getTeacherDisciplineCrossRefDao()
+    fun provideTeacherDisciplineCrossRefDAO(appDatabase: AppDatabase): TeacherDisciplineCrossRefDAO =
+        appDatabase.getTeacherDisciplineCrossRefDAO()
 
     @[Provides Singleton]
-    fun provideLessonDao(appDatabase: AppDatabase): LessonDao =
-        appDatabase.getLessonDao()
+    fun provideLessonDAO(appDatabase: AppDatabase): LessonDAO =
+        appDatabase.getLessonDAO()
 
     @[Provides Singleton]
-    fun provideLessonGroupCrossRefDao(appDatabase: AppDatabase): LessonGroupCrossRefDao =
-        appDatabase.getLessonGroupCrossRefDao()
+    fun provideLessonGroupCrossRefDAO(appDatabase: AppDatabase): LessonGroupCrossRefDAO =
+        appDatabase.getLessonGroupCrossRefDAO()
 
     @[Provides Singleton]
-    fun provideParticipantDao(appDatabase: AppDatabase): ParticipantDao =
-        appDatabase.getParticipantDao()
+    fun provideParticipantDAO(appDatabase: AppDatabase): ParticipantDAO =
+        appDatabase.getParticipantDAO()
 
     @[Provides Singleton]
     fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase = Room

@@ -1,18 +1,18 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
-import com.nuzhnov.workcontrol.core.database.entity.BuildingEntity
+import com.nuzhnov.workcontrol.core.database.entity.GroupEntity
 import kotlinx.coroutines.flow.Flow
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
 
 @Dao
-interface BuildingDao : BaseDao<BuildingEntity> {
-    @Query(FETCH_QUERY)
-    fun getEntitiesFlow(): Flow<List<BuildingEntity>>
+interface GroupDAO : BaseDAO<GroupEntity> {
+    @Query(FETCH_BY_FACULTY_ID_QUERY)
+    fun getFacultyGroupsFlow(facultyID: Long): Flow<List<GroupEntity>>
 
     @Query(FETCH_QUERY)
-    suspend fun getEntities(): List<BuildingEntity>
+    suspend fun getEntities(): List<GroupEntity>
 
     suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
@@ -26,6 +26,10 @@ interface BuildingDao : BaseDao<BuildingEntity> {
 
 
     private companion object {
-        const val FETCH_QUERY = "SELECT * FROM building"
+        const val FETCH_QUERY = "SELECT * FROM student_group"
+
+        const val FETCH_BY_FACULTY_ID_QUERY = """
+            SELECT * FROM student_group WHERE faculty_id = :facultyID
+        """
     }
 }

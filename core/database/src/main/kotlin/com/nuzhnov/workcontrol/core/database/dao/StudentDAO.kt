@@ -9,7 +9,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 
 @Dao
-interface StudentDao : BaseDao<StudentEntity> {
+interface StudentDAO : BaseDAO<StudentEntity> {
     @Query(FETCH_BY_GROUP_ID_QUERY)
     fun getStudentsOfGroupFlow(groupID: Long): Flow<List<StudentEntity>>
 

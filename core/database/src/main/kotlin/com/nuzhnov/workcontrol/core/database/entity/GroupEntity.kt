@@ -12,8 +12,8 @@ import androidx.room.ColumnInfo
             entity = FacultyEntity::class,
             parentColumns = ["id"],
             childColumns = ["faculty_id"],
-            onDelete = ForeignKey.CASCADE,
-            onUpdate = ForeignKey.CASCADE
+            onDelete = ForeignKey.RESTRICT,
+            onUpdate = ForeignKey.RESTRICT
         )
     ]
 )

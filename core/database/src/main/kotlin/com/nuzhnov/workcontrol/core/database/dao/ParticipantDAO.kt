@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import androidx.room.*
 
 @Dao
-interface ParticipantDao : BaseDao<ParticipantEntity> {
+interface ParticipantDAO : BaseDAO<ParticipantEntity> {
     @[Transaction Query(FETCH_BY_LESSON_ID_QUERY)]
     fun getParticipantsFlow(lessonID: Long): Flow<List<ParticipantModel>>
 
@@ -22,6 +22,9 @@ interface ParticipantDao : BaseDao<ParticipantEntity> {
     @Query(FETCH_BY_LESSON_ID_QUERY)
     suspend fun getEntities(lessonID: Long): List<ParticipantEntity>
 
+    @Query(FETCH_BY_LESSON_ID_LIST_QUERY)
+    suspend fun getEntities(lessonIDList: List<Long>): List<ParticipantEntity>
+
     @Update(entity = ParticipantEntity::class)
     suspend fun updateData(vararg participantUpdatableModel: ParticipantUpdatableModel)
 
@@ -32,6 +35,10 @@ interface ParticipantDao : BaseDao<ParticipantEntity> {
     private companion object {
         const val FETCH_BY_LESSON_ID_QUERY = """
             SELECT * FROM participant WHERE lesson_id = :lessonID
+        """
+
+        const val FETCH_BY_LESSON_ID_LIST_QUERY = """
+            SELECT * FROM participant WHERE lesson_id IN (:lessonIDList)
         """
 
         const val FETCH_BY_STUDENT_AND_TEACHER_ID_QUERY = """

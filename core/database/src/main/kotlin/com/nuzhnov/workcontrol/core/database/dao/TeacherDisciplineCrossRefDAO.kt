@@ -4,4 +4,4 @@ import com.nuzhnov.workcontrol.core.database.entity.TeacherDisciplineCrossRefEnt
 import androidx.room.Dao
 
 @Dao
-interface TeacherDisciplineCrossRefDao : BaseDao<TeacherDisciplineCrossRefEntity>
+interface TeacherDisciplineCrossRefDAO : BaseDAO<TeacherDisciplineCrossRefEntity>

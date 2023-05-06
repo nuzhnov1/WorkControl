@@ -1,5 +1,6 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
+import com.nuzhnov.workcontrol.core.database.entity.model.LessonWithParticipantEntity
 import com.nuzhnov.workcontrol.core.database.entity.LessonEntity
 import com.nuzhnov.workcontrol.core.database.entity.model.LessonModel
 import com.nuzhnov.workcontrol.core.model.Lesson.State
@@ -7,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import androidx.room.*
 
 @Dao
-interface LessonDao : BaseDao<LessonEntity> {
+interface LessonDAO : BaseDAO<LessonEntity> {
     @[Transaction Query(FETCH_BY_TEACHER_ID_AND_STATE_QUERY)]
     fun getLessonsFlow(
         teacherID: Long,
@@ -22,10 +23,10 @@ interface LessonDao : BaseDao<LessonEntity> {
     ): Flow<List<LessonModel>>
 
     @Query(FETCH_BY_STATE_QUERY)
-    suspend fun getLessons(state: State)
+    suspend fun getEntities(state: State): List<LessonEntity>
 
-    @Query(CLEAR_SYNCHRONIZED_BY_STATE_QUERY)
-    suspend fun clearSynchronizedByState(state: State)
+    @[Transaction Query(FETCH_BY_STATE_QUERY)]
+    suspend fun getEntitiesWithParticipants(state: State): List<LessonWithParticipantEntity>
 
 
     private companion object {
@@ -39,10 +40,6 @@ interface LessonDao : BaseDao<LessonEntity> {
         const val FETCH_BY_TEACHER_ID_STATE_AND_DISCIPLINE_ID_QUERY = """
             SELECT * FROM lesson
             WHERE teacher_id = :teacherID AND state = :state AND discipline_id = :disciplineID
-        """
-
-        const val CLEAR_SYNCHRONIZED_BY_STATE_QUERY = """
-            DELETE FROM lesson WHERE state = :state AND is_synchronized = true 
         """
     }
 }

@@ -3,7 +3,7 @@ package com.nuzhnov.workcontrol.core.database.dao
 import androidx.room.Upsert
 import androidx.room.Delete
 
-interface BaseDao<T> {
+interface BaseDAO<T> {
     @Upsert
     suspend fun insertOrUpdate(vararg entity: T)
 
