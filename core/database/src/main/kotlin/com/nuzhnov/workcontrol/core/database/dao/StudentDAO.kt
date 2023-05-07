@@ -2,7 +2,6 @@ package com.nuzhnov.workcontrol.core.database.dao
 
 import com.nuzhnov.workcontrol.core.database.entity.StudentEntity
 import com.nuzhnov.workcontrol.core.database.entity.model.StudentModel
-import kotlinx.coroutines.flow.Flow
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
@@ -11,7 +10,7 @@ import androidx.room.Transaction
 @Dao
 interface StudentDAO : BaseDAO<StudentEntity> {
     @Query(FETCH_BY_GROUP_ID_QUERY)
-    fun getStudentsOfGroupFlow(groupID: Long): Flow<List<StudentEntity>>
+    suspend fun getStudentsOfGroup(groupID: Long): List<StudentEntity>
 
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<StudentEntity>

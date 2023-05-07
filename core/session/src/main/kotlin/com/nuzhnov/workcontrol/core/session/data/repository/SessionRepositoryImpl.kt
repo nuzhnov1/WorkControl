@@ -5,6 +5,7 @@ import com.nuzhnov.workcontrol.core.session.data.datasource.SessionLocalDataSour
 import com.nuzhnov.workcontrol.core.session.data.datasource.UserRemoteDataSource
 import com.nuzhnov.workcontrol.core.session.data.datasource.UserLocalDataSource
 import com.nuzhnov.workcontrol.core.session.data.mapper.toLoginResult
+import com.nuzhnov.workcontrol.core.session.data.mapper.toFailureLoginResult
 import com.nuzhnov.workcontrol.core.session.data.mapper.toSession
 import com.nuzhnov.workcontrol.core.session.domen.repository.SessionRepository
 import com.nuzhnov.workcontrol.core.session.domen.model.LoginResult
@@ -38,7 +39,7 @@ internal class SessionRepositoryImpl @Inject constructor(
                     getUserDataResponse.toLoginResult()
                 }
 
-                is Response.Failure -> authorizationResponse.toLoginResult()
+                is Response.Failure -> authorizationResponse.toFailureLoginResult()
             }
         }
         .onFailure { logout() }

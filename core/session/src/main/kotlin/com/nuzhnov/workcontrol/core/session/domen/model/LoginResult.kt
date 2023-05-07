@@ -4,11 +4,11 @@ sealed interface LoginResult {
     data class Success(val userData: UserData) : LoginResult
 
     sealed interface Failure : LoginResult {
-        object WrongLogin : LoginResult
-        object WrongPassword : LoginResult
-        object TooManyRequests : LoginResult
-        object ServiceError : LoginResult
-        object NetworkError : LoginResult
-        object UnknownError : LoginResult
+        object WrongLogin : Failure
+        object WrongPassword : Failure
+        object TooManyRequests : Failure
+        object ServiceError : Failure
+        object NetworkError : Failure
+        object UnknownError : Failure
     }
 }

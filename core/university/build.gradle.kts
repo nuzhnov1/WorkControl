@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nuzhnov.workcontrol.core.session"
+    namespace = "com.nuzhnov.workcontrol.core.university"
     compileSdk = 33
 
     defaultConfig {
@@ -51,7 +51,6 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:api"))
     implementation(project(":core:database"))
-    implementation(project(":core:preferences"))
     implementation(project(":core:util:coroutines"))
     implementation("com.google.dagger:hilt-android:2.44")
 

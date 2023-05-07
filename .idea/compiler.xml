@@ -2,16 +2,20 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.5">
+      <module name="WorkControl.core.api.test" target="1.8" />
       <module name="WorkControl.core.notification" target="1.8" />
+      <module name="WorkControl.core.room" target="1.8" />
       <module name="WorkControl.core.studentservice" target="1.8" />
       <module name="WorkControl.core.teacherservice" target="1.8" />
-      <module name="WorkControl.core.util" target="1.8" />
       <module name="WorkControl.shared.database" target="1.8" />
       <module name="WorkControl.shared.notification" target="1.8" />
       <module name="WorkControl.shared.resources" target="1.8" />
       <module name="WorkControl.shared.studentservice" target="1.8" />
       <module name="WorkControl.shared.teacherservice" target="1.8" />
       <module name="WorkControl.shared.util" target="1.8" />
+      <module name="WorkControl.util.network" target="1.8" />
+      <module name="WorkControl.util.network.main" target="1.8" />
+      <module name="WorkControl.util.network.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,7 +1,6 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
 import com.nuzhnov.workcontrol.core.database.entity.GroupEntity
-import kotlinx.coroutines.flow.Flow
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
@@ -9,7 +8,7 @@ import androidx.room.Query
 @Dao
 interface GroupDAO : BaseDAO<GroupEntity> {
     @Query(FETCH_BY_FACULTY_ID_QUERY)
-    fun getFacultyGroupsFlow(facultyID: Long): Flow<List<GroupEntity>>
+    suspend fun getFacultyGroups(facultyID: Long): List<GroupEntity>
 
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<GroupEntity>

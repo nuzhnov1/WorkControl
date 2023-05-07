@@ -57,7 +57,7 @@ internal class WorkRepositoryImpl @Inject constructor(
     private companion object {
         const val SYNC_LOCAL_DATA_WORK_NAME = "Work on synchronizing local user data with a remote service"
         const val CLEAR_LOCAL_DATA_WORK_NAME = "Work on cleaning up local user data"
-        const val SYNC_LOCAL_DATA_WORK_TIME_INTERVAL_HOUR = 12L
-        const val CLEAR_LOCAL_DATA_WORK_TIME_INTERVAL_HOUR = 4L
+        const val SYNC_LOCAL_DATA_WORK_TIME_INTERVAL_HOUR = 24L
+        const val CLEAR_LOCAL_DATA_WORK_TIME_INTERVAL_HOUR = 12L
     }
 }
