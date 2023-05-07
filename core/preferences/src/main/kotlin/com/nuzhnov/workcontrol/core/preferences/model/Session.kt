@@ -1,17 +1,13 @@
 package com.nuzhnov.workcontrol.core.preferences.model
 
+import com.nuzhnov.workcontrol.core.model.Role
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class SessionPreferences(
+data class Session(
     val id: Long,
     val login: String,
     @Json(name = "authorization_token") val authorizationToken: String,
     val role: Role
-) {
-    enum class Role {
-        TEACHER,
-        STUDENT
-    }
-}
+)

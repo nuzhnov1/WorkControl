@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.api.util
 
 
-suspend inline fun <T : Any> safeApiCall(
+suspend inline fun <T> safeApiCall(
     crossinline apiCall: suspend () -> T
-): ResponseResult<T> = runCatching { apiCall() }.toResponseResult()
+): Response<T> = runCatching { apiCall() }.toResponseResult()

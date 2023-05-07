@@ -1,8 +1,9 @@
 package com.nuzhnov.workcontrol.core.work.data.work.clear
 
 import com.nuzhnov.workcontrol.core.database.dao.StudentDAO
+import com.nuzhnov.workcontrol.core.database.util.safeTransactionExecute
 import com.nuzhnov.workcontrol.core.preferences.AppPreferences
-import com.nuzhnov.workcontrol.core.preferences.model.SessionPreferences.Role
+import com.nuzhnov.workcontrol.core.model.Role
 import javax.inject.Inject
 
 internal class ClearStudentsWork @Inject constructor(
@@ -10,11 +11,11 @@ internal class ClearStudentsWork @Inject constructor(
     private val appPreferences: AppPreferences
 ) {
 
-    suspend operator fun invoke(): Result<Unit> = runCatching {
-        val sessionPreferences = appPreferences.getSessionPreferences()
+    suspend operator fun invoke(): Result<Unit> = safeTransactionExecute {
+        val session = appPreferences.getSession()
 
-        if (sessionPreferences?.role == Role.STUDENT) {
-            studentDAO.clear(sessionPreferences.id)
+        if (session?.role == Role.STUDENT) {
+            studentDAO.clear(session.id)
         } else {
             studentDAO.clear()
         }

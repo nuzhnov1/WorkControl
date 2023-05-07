@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.model
 
-data class StudentGroup(
+data class Group(
     val id: Long,
     val name: String,
     val course: Byte,

@@ -11,5 +11,5 @@ import dagger.hilt.components.SingletonComponent
 @[Module InstallIn(SingletonComponent::class)]
 internal interface WorkModule {
     @[Binds Singleton]
-    fun bindWorkRepository(workRepositoryImpl: WorkRepositoryImpl): WorkRepository
+    fun bindWorkRepository(instance: WorkRepositoryImpl): WorkRepository
 }

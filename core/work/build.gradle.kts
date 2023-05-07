@@ -52,6 +52,7 @@ dependencies {
     implementation(project(":core:api"))
     implementation(project(":core:database"))
     implementation(project(":core:preferences"))
+    implementation(project(":core:util:coroutines"))
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("androidx.hilt:hilt-work:1.0.0")
     implementation("com.google.dagger:hilt-android:2.44")

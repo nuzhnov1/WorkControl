@@ -1,5 +1,6 @@
 package com.nuzhnov.workcontrol.core.api.dto.authorization
 
+import com.nuzhnov.workcontrol.core.model.Role
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -16,9 +17,4 @@ data class SessionDTO(
     val id: Long,
     @Json(name = "authorization_token") val authorizationToken: String,
     val role: Role
-) {
-    enum class Role {
-        TEACHER,
-        STUDENT
-    }
-}
+)

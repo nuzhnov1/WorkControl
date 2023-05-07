@@ -32,6 +32,11 @@ internal fun RoomModelDTO.toRoomEntity(): RoomEntity = RoomEntity(
     buildingID = buildingDTO.id
 )
 
+internal fun DisciplineDTO.toDisciplineEntity(): DisciplineEntity = DisciplineEntity(
+    id = id,
+    name = name
+)
+
 internal fun FacultyDTO.toFacultyEntity(): FacultyEntity = FacultyEntity(
     id = id,
     name = name
@@ -55,11 +60,6 @@ internal fun TeacherModelDTO.toTeacherEntity(): TeacherEntity = TeacherEntity(
     id = teacherDTO.id,
     name = teacherDTO.name,
     email = teacherDTO.email
-)
-
-internal fun DisciplineDTO.toDisciplineEntity(): DisciplineEntity = DisciplineEntity(
-    id = id,
-    name = name
 )
 
 internal fun Pair<LessonEntity, Iterable<ParticipantEntity>>.toNewLessonDTO(): NewLessonDTO =

@@ -14,7 +14,7 @@ internal class ServiceAuthenticator @Inject constructor(
             return null
         }
 
-        val token = appPreferences.getSessionPreferencesSync()?.authorizationToken ?: return null
+        val token = appPreferences.getSessionSync()?.authorizationToken ?: return null
 
         return response.request.newBuilder()
             .addHeader(Headers.X_ACCESS_TOKEN, token)

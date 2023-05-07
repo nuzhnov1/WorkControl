@@ -2,7 +2,7 @@ package com.nuzhnov.workcontrol.core.work.data.work.sync
 
 import com.nuzhnov.workcontrol.core.api.service.UserService
 import com.nuzhnov.workcontrol.core.preferences.AppPreferences
-import com.nuzhnov.workcontrol.core.preferences.model.SessionPreferences.Role
+import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.database.dao.*
 import com.nuzhnov.workcontrol.core.database.entity.TeacherDisciplineCrossRefEntity
 import com.nuzhnov.workcontrol.core.work.data.mapper.*
@@ -20,7 +20,7 @@ internal class SyncUserDataWork @Inject constructor(
 ) {
 
     suspend operator fun invoke(): Result<Unit> = runCatching {
-        val currentRole = appPreferences.getSessionPreferences()?.role ?: return@runCatching
+        val currentRole = appPreferences.getSession()?.role ?: return@runCatching
 
         when (currentRole) {
             Role.STUDENT -> syncStudentData()

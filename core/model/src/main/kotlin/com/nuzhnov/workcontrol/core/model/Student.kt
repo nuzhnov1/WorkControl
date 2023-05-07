@@ -4,5 +4,5 @@ data class Student(
     val id: Long,
     val name: String,
     val email: String,
-    val studentGroup: StudentGroup
+    val group: Group
 )

@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.preferences
 
-import com.nuzhnov.workcontrol.core.preferences.model.SessionPreferences
+import com.nuzhnov.workcontrol.core.preferences.model.Session
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,7 +20,7 @@ import com.squareup.moshi.JsonAdapter
 class AppPreferences @Inject internal constructor(
     @ApplicationContext private val context: Context,
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher,
-    private val sessionPreferencesAdapter: JsonAdapter<SessionPreferences>
+    private val sessionAdapter: JsonAdapter<Session>
 ) {
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
@@ -28,37 +28,33 @@ class AppPreferences @Inject internal constructor(
     )
 
 
-    suspend fun getSessionPreferences(): SessionPreferences? =
-        withContext(context = coroutineDispatcher) {
-            val key = stringPreferencesKey(SESSION_PREFERENCES_KEY)
-            val jsonString = context.dataStore.data
-                .map { preferences -> preferences[key] }
-                .firstOrNull()
+    suspend fun getSession(): Session? = withContext(context = coroutineDispatcher) {
+        val key = stringPreferencesKey(SESSION_KEY)
+        val jsonString = context.dataStore.data
+            .map { preferences -> preferences[key] }
+            .firstOrNull()
 
-            jsonString?.run { sessionPreferencesAdapter.fromJson(/* string = */ this) }
-        }
+        jsonString?.run { sessionAdapter.fromJson(/* string = */ this) }
+    }
 
-    suspend fun setSessionPreferences(value: SessionPreferences): Unit =
-        withContext(context = coroutineDispatcher) {
-            val key = stringPreferencesKey(SESSION_PREFERENCES_KEY)
-            val jsonString = sessionPreferencesAdapter.toJson(value)
+    suspend fun setSession(value: Session): Unit = withContext(context = coroutineDispatcher) {
+        val key = stringPreferencesKey(SESSION_KEY)
+        val jsonString = sessionAdapter.toJson(value)
 
-            context.dataStore.edit { preferences -> preferences[key] = jsonString }
-        }
+        context.dataStore.edit { preferences -> preferences[key] = jsonString }
+    }
 
-    suspend fun removeSessionPreferences(): Unit =
-        withContext(context = coroutineDispatcher) {
-            val key = stringPreferencesKey(SESSION_PREFERENCES_KEY)
+    suspend fun removeSession(): Unit = withContext(context = coroutineDispatcher) {
+        val key = stringPreferencesKey(SESSION_KEY)
 
-            context.dataStore.edit { preferences -> preferences.remove(key) }
-        }
+        context.dataStore.edit { preferences -> preferences.remove(key) }
+    }
 
-    fun getSessionPreferencesSync(): SessionPreferences? =
-        runBlocking { getSessionPreferences() }
+    fun getSessionSync(): Session? = runBlocking { getSession() }
 
 
     private companion object {
         const val PREFERENCES_FILENAME = "preferences.json"
-        const val SESSION_PREFERENCES_KEY = "USER_PREFERENCES_KEY"
+        const val SESSION_KEY = "SESSION_KEY"
     }
 }
