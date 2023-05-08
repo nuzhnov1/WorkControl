@@ -1,29 +1,27 @@
 package com.nuzhnov.workcontrol.core.university.domen.repository
 
-import com.nuzhnov.workcontrol.core.university.domen.model.UniversityData
 import com.nuzhnov.workcontrol.core.model.*
+import com.nuzhnov.workcontrol.core.university.domen.model.LoadStatus
+import kotlinx.coroutines.flow.Flow
 
 internal interface UniversityRepository {
-    suspend fun getBuildings(
-        isRefresh: Boolean
-    ): Result<UniversityData<List<Building>>>
+    fun getBuildingsFlow(): Flow<List<Building>>
 
-    suspend fun getBuildingRooms(
-        building: Building,
-        isRefresh: Boolean
-    ): Result<UniversityData<List<Room>>>
+    fun getBuildingRoomsFlow(building: Building): Flow<List<Room>>
 
-    suspend fun getFaculties(
-        isRefresh: Boolean
-    ): Result<UniversityData<List<Faculty>>>
+    fun getFacultiesFlow(): Flow<List<Faculty>>
 
-    suspend fun getFacultyGroups(
-        faculty: Faculty,
-        isRefresh: Boolean
-    ): Result<UniversityData<List<Group>>>
+    fun getFacultyGroupsFlow(faculty: Faculty): Flow<List<Group>>
 
-    suspend fun getStudentsOfGroup(
-        group: Group,
-        isRefresh: Boolean
-    ): Result<UniversityData<List<Student>>>
+    fun getStudentsOfGroupFlow(group: Group): Flow<List<Student>>
+
+    suspend fun loadBuildings(): LoadStatus
+
+    suspend fun loadBuildingsRooms(building: Building): LoadStatus
+
+    suspend fun loadFaculties(): LoadStatus
+
+    suspend fun loadFacultyGroups(faculty: Faculty): LoadStatus
+
+    suspend fun loadStudentsOfGroup(group: Group): LoadStatus
 }
