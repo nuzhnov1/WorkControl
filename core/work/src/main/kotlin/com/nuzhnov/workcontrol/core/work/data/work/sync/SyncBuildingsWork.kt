@@ -1,8 +1,10 @@
 package com.nuzhnov.workcontrol.core.work.data.work.sync
 
-import com.nuzhnov.workcontrol.core.work.data.mapper.toBuildingEntity
 import com.nuzhnov.workcontrol.core.api.service.SyncService
+import com.nuzhnov.workcontrol.core.api.dto.university.BuildingDTO
 import com.nuzhnov.workcontrol.core.database.dao.BuildingDAO
+import com.nuzhnov.workcontrol.core.mapper.toBuildingEntity
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject
 
 internal class SyncBuildingsWork @Inject constructor(
@@ -10,15 +12,16 @@ internal class SyncBuildingsWork @Inject constructor(
     private val buildingDAO: BuildingDAO
 ) {
 
-    suspend operator fun invoke(): Result<Unit> = runCatching {
+    suspend operator fun invoke(): Result<Unit> = safeExecute {
         val buildingIDList = buildingDAO.getEntities().map { buildingEntity -> buildingEntity.id }
 
         if (buildingIDList.isEmpty()) {
-            return@runCatching
+            return@safeExecute
         }
 
         syncService.getBuildings(buildingIDList)
-            .map { buildingDTO -> buildingDTO.toBuildingEntity() }
-            .run { buildingDAO.insertOrUpdate(*this.toTypedArray()) }
+            .map(BuildingDTO::toBuildingEntity)
+            .toTypedArray()
+            .let { entities -> buildingDAO.insertOrUpdate(*entities) }
     }
 }

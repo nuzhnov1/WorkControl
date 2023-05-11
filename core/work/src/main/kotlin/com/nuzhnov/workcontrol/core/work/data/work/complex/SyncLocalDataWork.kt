@@ -9,13 +9,11 @@ internal class SyncLocalDataWork @Inject constructor(
     private val syncFacultiesWork: SyncFacultiesWork,
     private val syncGroupsWork: SyncGroupsWork,
     private val syncStudentsWork: SyncStudentsWork,
-    private val syncUserDataWork: SyncUserDataWork,
     private val syncLessonsWork: SyncLessonsWork
 ) {
 
     suspend operator fun invoke(): Result<Unit> {
         val workResultList = listOf(
-            syncUserDataWork(),
             syncLessonsWork(),
             syncStudentsWork(),
             syncGroupsWork(),

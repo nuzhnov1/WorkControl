@@ -1,16 +1,15 @@
 package com.nuzhnov.workcontrol.core.work.data.work.clear
 
 import com.nuzhnov.workcontrol.core.database.dao.LessonDAO
-import com.nuzhnov.workcontrol.core.database.util.safeTransactionExecute
-import com.nuzhnov.workcontrol.core.model.Lesson.State
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject
 
 internal class ClearLessonsWork @Inject constructor(
     private val lessonDAO: LessonDAO
 ) {
 
-    suspend operator fun invoke(): Result<Unit> = safeTransactionExecute {
-        lessonDAO.getEntitiesWithParticipants(state = State.FINISHED)
+    suspend operator fun invoke(): Result<Unit> = safeExecute {
+        lessonDAO.getFinishedEntitiesWithParticipants()
             .filter { complexEntity ->
                 val isLessonSync = complexEntity.lessonEntity.isSynchronised
                 val isAllParticipantsSync = complexEntity
@@ -20,6 +19,7 @@ internal class ClearLessonsWork @Inject constructor(
                 isLessonSync && isAllParticipantsSync
             }
             .map { complexEntity -> complexEntity.lessonEntity }
-            .run { lessonDAO.delete(*this.toTypedArray()) }
+            .toTypedArray()
+            .run { lessonDAO.delete(*this) }
     }
 }

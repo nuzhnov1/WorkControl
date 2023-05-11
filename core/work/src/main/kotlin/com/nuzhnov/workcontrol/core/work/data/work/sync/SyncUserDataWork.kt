@@ -1,11 +1,13 @@
 package com.nuzhnov.workcontrol.core.work.data.work.sync
 
 import com.nuzhnov.workcontrol.core.api.service.UserService
+import com.nuzhnov.workcontrol.core.api.dto.university.DisciplineDTO
 import com.nuzhnov.workcontrol.core.preferences.AppPreferences
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.database.dao.*
 import com.nuzhnov.workcontrol.core.database.entity.TeacherDisciplineCrossRefEntity
-import com.nuzhnov.workcontrol.core.work.data.mapper.*
+import com.nuzhnov.workcontrol.core.mapper.*
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject
 
 internal class SyncUserDataWork @Inject constructor(
@@ -19,8 +21,8 @@ internal class SyncUserDataWork @Inject constructor(
     private val teacherDisciplineCrossRefDAO: TeacherDisciplineCrossRefDAO
 ) {
 
-    suspend operator fun invoke(): Result<Unit> = runCatching {
-        val currentRole = appPreferences.getSession()?.role ?: return@runCatching
+    suspend operator fun invoke(): Result<Unit> = safeExecute {
+        val currentRole = appPreferences.getSession()?.role ?: return@safeExecute
 
         when (currentRole) {
             Role.STUDENT -> syncStudentData()
@@ -28,33 +30,37 @@ internal class SyncUserDataWork @Inject constructor(
         }
     }
 
-    private suspend fun syncStudentData(): Unit = userService.getStudent().run {
-        val facultyEntity = this.groupModelDTO.facultyDTO.toFacultyEntity()
-        val groupEntity = this.groupModelDTO.toGroupEntity()
-        val studentEntity = this.toStudentEntity()
+    private suspend fun syncStudentData(): Unit = userService
+        .getStudent()
+        .let { studentModelDTO ->
+            val facultyEntity = studentModelDTO.groupModelDTO.facultyDTO.toFacultyEntity()
+            val groupEntity = studentModelDTO.groupModelDTO.toGroupEntity()
+            val studentEntity = studentModelDTO.toStudentEntity()
 
-        facultyDAO.insertOrUpdate(facultyEntity)
-        groupDAO.insertOrUpdate(groupEntity)
-        studentDAO.insertOrUpdate(studentEntity)
-    }
+            facultyDAO.insertOrUpdate(facultyEntity)
+            groupDAO.insertOrUpdate(groupEntity)
+            studentDAO.insertOrUpdate(studentEntity)
+        }
 
-    private suspend fun syncTeacherData(): Unit = userService.getTeacher().run {
-        val teacherEntity = this.toTeacherEntity()
-        val disciplineEntityArray = this.disciplineDTOList
-            .map { disciplineDTO -> disciplineDTO.toDisciplineEntity() }
-            .toTypedArray()
+    private suspend fun syncTeacherData(): Unit = userService
+        .getTeacher()
+        .let { teacherModelDTO ->
+            val teacherEntity = teacherModelDTO.toTeacherEntity()
+            val disciplineEntityArray = teacherModelDTO.disciplineDTOList
+                .map(DisciplineDTO::toDisciplineEntity)
+                .toTypedArray()
 
-        val teacherDisciplineCrossRefEntityArray = disciplineEntityArray
-            .map { disciplineEntity ->
-                TeacherDisciplineCrossRefEntity(
-                    teacherID = teacherEntity.id,
-                    disciplineID = disciplineEntity.id
-                )
-            }
-            .toTypedArray()
+            val teacherDisciplineCrossRefEntityArray = disciplineEntityArray
+                .map { disciplineEntity ->
+                    TeacherDisciplineCrossRefEntity(
+                        teacherID = teacherEntity.id,
+                        disciplineID = disciplineEntity.id
+                    )
+                }
+                .toTypedArray()
 
-        teacherDAO.insertOrUpdate(teacherEntity)
-        disciplineDAO.insertOrUpdate(*disciplineEntityArray)
-        teacherDisciplineCrossRefDAO.insertOrUpdate(*teacherDisciplineCrossRefEntityArray)
-    }
+            teacherDAO.insertOrUpdate(teacherEntity)
+            disciplineDAO.insertOrUpdate(*disciplineEntityArray)
+            teacherDisciplineCrossRefDAO.insertOrUpdate(*teacherDisciplineCrossRefEntityArray)
+        }
 }
