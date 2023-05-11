@@ -9,12 +9,13 @@ data class Lesson(
     val discipline: Discipline,
     val teacher: Teacher,
     val room: Room,
+    val associatedGroups: List<Group>,
     val theme: String,
-    val visitType: VisitType,
+    val type: Type,
     val startTime: DateTimeTz? = null,
     val plannedDuration: TimeSpan = DEFAULT_PLANNED_DURATION,
     val actualDuration: TimeSpan? = null,
-    val state: State = State.CREATED
+    val state: State
 ) {
 
     init {
@@ -35,17 +36,18 @@ data class Lesson(
     }
 
 
-    enum class VisitType {
-        INTRAMURAL,
-        REMOTE,
-        MIX
+    enum class Type {
+        LECTURE,
+        SEMINAR,
+        PRACTICE
     }
 
     enum class State {
         CREATED,
-        STARTED,
+        ACTIVE,
         FINISHED
     }
+
 
     companion object {
         val THEME_LENGTH_RANGE = 1..150
