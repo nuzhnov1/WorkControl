@@ -79,7 +79,7 @@ fun NotificationManagerCompat.notifyIfPermissionGranted(
     }
 }
 
-internal fun Context.checkPermissionGranted(permission: String): Boolean {
+private fun Context.checkPermissionGranted(permission: String): Boolean {
     return checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 }
 
