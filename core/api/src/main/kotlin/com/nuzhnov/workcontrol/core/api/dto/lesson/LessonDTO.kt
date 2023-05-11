@@ -65,7 +65,7 @@ import com.squareup.moshi.JsonClass
  *      ],
  *
  *      theme: "Pointers",
- *      visit_type: "INTRAMURAL",
+ *      type: "PRACTICE",
  *      start_time: 1394980193481,
  *      planned_duration: 1928129837123.93481,
  *      actual_duration: 98733498934857839457.993483847539
@@ -79,7 +79,7 @@ data class LessonDTO(
     @Json(name = "room") val roomModelDTO: RoomModelDTO,
     @Json(name = "groups") val groupModelDTOList: List<GroupModelDTO>,
     val theme: String,
-    @Json(name = "visit_type") val visitType: Lesson.VisitType,
+    val type: Lesson.Type,
     @Json(name = "start_time") val startTime: Long?,
     @Json(name = "planned_duration") val plannedDuration: Double,
     @Json(name = "actual_duration") val actualDuration: Double?

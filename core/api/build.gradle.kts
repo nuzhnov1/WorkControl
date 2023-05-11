@@ -50,6 +50,7 @@ android {
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:preferences"))
+    implementation(project(":core:util:coroutines"))
     implementation("com.google.dagger:hilt-android:2.44")
     implementation("com.squareup.moshi:moshi:1.14.0")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")

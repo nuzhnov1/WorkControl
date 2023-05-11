@@ -61,7 +61,7 @@ import com.squareup.moshi.JsonClass
  *          ],
  *
  *          theme: "Pointers",
- *          visit_type: "INTRAMURAL",
+ *          type: "PRACTICE",
  *          start_time: 1394980193481,
  *          planned_duration: 1928129837123.93481,
  *          actual_duration: 98733498934857839457.993483847539
