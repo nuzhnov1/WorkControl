@@ -6,7 +6,6 @@ import com.nuzhnov.workcontrol.core.api.util.safeApiCall
 import com.nuzhnov.workcontrol.core.api.util.Response
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class UniversityRemoteDataSource @Inject constructor(
@@ -15,27 +14,27 @@ internal class UniversityRemoteDataSource @Inject constructor(
 ) {
 
     suspend fun getBuildingsDTO(): Response<List<BuildingDTO>> =
-        withContext(context = coroutineDispatcher) {
-            safeApiCall { universityService.getBuildings() }
+        safeApiCall(context = coroutineDispatcher) {
+            universityService.getBuildings()
         }
 
     suspend fun getRoomsDTO(buildingID: Long): Response<List<RoomDTO>> =
-        withContext(context = coroutineDispatcher) {
-            safeApiCall { universityService.getBuildingRooms(buildingID) }
+        safeApiCall(context = coroutineDispatcher) {
+            universityService.getBuildingRooms(buildingID)
         }
 
     suspend fun getFacultiesDTO(): Response<List<FacultyDTO>> =
-        withContext(context = coroutineDispatcher) {
-            safeApiCall { universityService.getFaculties() }
+        safeApiCall(context = coroutineDispatcher) {
+            universityService.getFaculties()
         }
 
     suspend fun getGroupsDTO(facultyID: Long): Response<List<GroupDTO>> =
-        withContext(context = coroutineDispatcher) {
-            safeApiCall { universityService.getFacultyGroups(facultyID) }
+        safeApiCall(context = coroutineDispatcher) {
+            universityService.getFacultyGroups(facultyID)
         }
 
     suspend fun getStudentsDTO(groupID: Long): Response<List<StudentDTO>> =
-        withContext(context = coroutineDispatcher) {
-            safeApiCall { universityService.getStudentsOfGroup(groupID) }
+        safeApiCall(context = coroutineDispatcher) {
+            universityService.getStudentsOfGroup(groupID)
         }
 }

@@ -1,27 +1,27 @@
 package com.nuzhnov.workcontrol.core.university.domen.repository
 
 import com.nuzhnov.workcontrol.core.model.*
-import com.nuzhnov.workcontrol.core.university.domen.model.LoadStatus
+import com.nuzhnov.workcontrol.core.model.util.LoadResult
 import kotlinx.coroutines.flow.Flow
 
 internal interface UniversityRepository {
-    fun getBuildingsFlow(): Flow<List<Building>>
+    fun getBuildingsFlow(): Flow<LoadResult<List<Building>>>
 
-    fun getBuildingRoomsFlow(building: Building): Flow<List<Room>>
+    fun getBuildingRoomsFlow(building: Building): Flow<LoadResult<List<Room>>>
 
-    fun getFacultiesFlow(): Flow<List<Faculty>>
+    fun getFacultiesFlow(): Flow<LoadResult<List<Faculty>>>
 
-    fun getFacultyGroupsFlow(faculty: Faculty): Flow<List<Group>>
+    fun getFacultyGroupsFlow(faculty: Faculty): Flow<LoadResult<List<Group>>>
 
-    fun getStudentsOfGroupFlow(group: Group): Flow<List<Student>>
+    fun getStudentsOfGroupFlow(group: Group): Flow<LoadResult<List<Student>>>
 
-    suspend fun loadBuildings(): LoadStatus
+    suspend fun loadBuildings(): LoadResult<List<Building>>
 
-    suspend fun loadBuildingsRooms(building: Building): LoadStatus
+    suspend fun loadBuildingsRooms(building: Building): LoadResult<List<Room>>
 
-    suspend fun loadFaculties(): LoadStatus
+    suspend fun loadFaculties(): LoadResult<List<Faculty>>
 
-    suspend fun loadFacultyGroups(faculty: Faculty): LoadStatus
+    suspend fun loadFacultyGroups(faculty: Faculty): LoadResult<List<Group>>
 
-    suspend fun loadStudentsOfGroup(group: Group): LoadStatus
+    suspend fun loadStudentsOfGroup(group: Group): LoadResult<List<Student>>
 }

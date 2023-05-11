@@ -2,9 +2,11 @@ package com.nuzhnov.workcontrol.core.university.data.datasource
 
 import com.nuzhnov.workcontrol.core.database.dao.*
 import com.nuzhnov.workcontrol.core.database.entity.*
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 internal class UniversityLocalDataSource @Inject constructor(
@@ -16,33 +18,48 @@ internal class UniversityLocalDataSource @Inject constructor(
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun getBuildingEntities(): List<BuildingEntity> =
-        withContext(context = coroutineDispatcher) { buildingDAO.getEntities() }
+    fun getBuildingEntitiesFlow(): Flow<List<BuildingEntity>> = buildingDAO
+        .getEntitiesFlow()
+        .flowOn(context = coroutineDispatcher)
 
-    suspend fun getRoomEntities(buildingID: Long): List<RoomEntity> =
-        withContext(context = coroutineDispatcher) { roomDAO.getBuildingRooms(buildingID) }
+    fun getRoomEntitiesFlow(buildingID: Long): Flow<List<RoomEntity>> = roomDAO
+        .getEntitiesFlow(buildingID)
+        .flowOn(context = coroutineDispatcher)
 
-    suspend fun getFacultyEntities(): List<FacultyEntity> =
-        withContext(context = coroutineDispatcher) { facultyDAO.getEntities() }
+    fun getFacultyEntitiesFlow(): Flow<List<FacultyEntity>> = facultyDAO
+        .getEntitiesFlow()
+        .flowOn(context = coroutineDispatcher)
 
-    suspend fun getGroupEntities(facultyID: Long): List<GroupEntity> =
-        withContext(context = coroutineDispatcher) { groupDAO.getFacultyGroups(facultyID) }
+    fun getGroupEntitiesFlow(facultyID: Long): Flow<List<GroupEntity>> = groupDAO
+        .getEntitiesFlow(facultyID)
+        .flowOn(context = coroutineDispatcher)
 
-    suspend fun getStudentEntities(groupID: Long): List<StudentEntity> =
-        withContext(context = coroutineDispatcher) { studentDAO.getStudentsOfGroup(groupID) }
+    fun getStudentEntitiesFlow(groupID: Long): Flow<List<StudentEntity>> = studentDAO
+        .getEntitiesFlow(groupID)
+        .flowOn(context = coroutineDispatcher)
 
-    suspend fun saveBuildingEntities(vararg buildingEntity: BuildingEntity): Unit =
-        withContext(context = coroutineDispatcher) { buildingDAO.insertOrUpdate(*buildingEntity) }
+    suspend fun saveBuildingEntities(vararg buildingEntity: BuildingEntity): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) {
+            buildingDAO.insertOrUpdate(*buildingEntity)
+        }
 
-    suspend fun saveRoomEntities(vararg roomEntity: RoomEntity): Unit =
-        withContext(context = coroutineDispatcher) { roomDAO.insertOrUpdate(*roomEntity) }
+    suspend fun saveRoomEntities(vararg roomEntity: RoomEntity): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) {
+            roomDAO.insertOrUpdate(*roomEntity)
+        }
 
-    suspend fun saveFacultyEntities(vararg facultyEntity: FacultyEntity): Unit =
-        withContext(context = coroutineDispatcher) { facultyDAO.insertOrUpdate(*facultyEntity) }
+    suspend fun saveFacultyEntities(vararg facultyEntity: FacultyEntity): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) {
+            facultyDAO.insertOrUpdate(*facultyEntity)
+        }
 
-    suspend fun saveGroupEntities(vararg groupEntity: GroupEntity): Unit =
-        withContext(context = coroutineDispatcher) { groupDAO.insertOrUpdate(*groupEntity) }
+    suspend fun saveGroupEntities(vararg groupEntity: GroupEntity): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) {
+            groupDAO.insertOrUpdate(*groupEntity)
+        }
 
-    suspend fun saveStudentEntities(vararg studentEntity: StudentEntity): Unit =
-        withContext(context = coroutineDispatcher) { studentDAO.insertOrUpdate(*studentEntity) }
+    suspend fun saveStudentEntities(vararg studentEntity: StudentEntity): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) {
+            studentDAO.insertOrUpdate(*studentEntity)
+        }
 }

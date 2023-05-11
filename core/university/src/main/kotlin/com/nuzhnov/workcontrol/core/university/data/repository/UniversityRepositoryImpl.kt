@@ -2,16 +2,14 @@ package com.nuzhnov.workcontrol.core.university.data.repository
 
 import com.nuzhnov.workcontrol.core.university.data.datasource.UniversityRemoteDataSource
 import com.nuzhnov.workcontrol.core.university.data.datasource.UniversityLocalDataSource
-import com.nuzhnov.workcontrol.core.university.data.mapper.*
 import com.nuzhnov.workcontrol.core.university.domen.repository.UniversityRepository
-import com.nuzhnov.workcontrol.core.university.domen.model.LoadStatus
 import com.nuzhnov.workcontrol.core.api.dto.university.*
 import com.nuzhnov.workcontrol.core.api.util.Response
-import com.nuzhnov.workcontrol.core.database.util.safeTransactionExecute
+import com.nuzhnov.workcontrol.core.database.entity.*
+import com.nuzhnov.workcontrol.core.mapper.*
 import com.nuzhnov.workcontrol.core.model.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
+import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 internal class UniversityRepositoryImpl @Inject constructor(
@@ -19,184 +17,158 @@ internal class UniversityRepositoryImpl @Inject constructor(
     private val universityLocalDataSource: UniversityLocalDataSource
 ) : UniversityRepository {
 
-    private val cachedBuildings = MutableStateFlow<List<Building>?>(value = null)
-    private val cachedRooms = mutableMapOf<Long, MutableStateFlow<List<Room>?>>()
-    private val cachedFaculties = MutableStateFlow<List<Faculty>?>(value = null)
-    private val cachedGroups = mutableMapOf<Long, MutableStateFlow<List<Group>?>>()
-    private val cachedStudents = mutableMapOf<Long, MutableStateFlow<List<Student>?>>()
-
-
-    override fun getBuildingsFlow(): Flow<List<Building>> = cachedBuildings.map { buildings ->
-        buildings ?: safeGetTransaction(defaultValue = listOf()) {
-            universityLocalDataSource
-                .getBuildingEntities()
-                .map { buildingEntity -> buildingEntity.toBuilding() }
-        }
-    }
-
-    override fun getBuildingRoomsFlow(building: Building): Flow<List<Room>> {
-        val buildingID = building.id
-        val roomsFlow = cachedRooms[buildingID] ?: MutableStateFlow<List<Room>?>(value = null)
-
-        cachedRooms[buildingID] = roomsFlow
-
-        return roomsFlow.map { rooms ->
-            rooms ?: safeGetTransaction(defaultValue = listOf()) {
-                universityLocalDataSource
-                    .getRoomEntities(buildingID)
-                    .map { roomEntity -> roomEntity.toRoom(building) }
+    override fun getBuildingsFlow(): Flow<LoadResult<List<Building>>> =
+        universityLocalDataSource
+            .getBuildingEntitiesFlow()
+            .map { buildingEntityList ->
+                if (buildingEntityList.isEmpty()) {
+                    loadBuildings()
+                } else {
+                    LoadResult.Success(
+                        data = buildingEntityList.map(BuildingEntity::toBuilding)
+                    )
+                }
             }
-        }
-    }
 
-    override fun getFacultiesFlow(): Flow<List<Faculty>> = cachedFaculties.map { faculties ->
-        faculties ?: safeGetTransaction(defaultValue = listOf()) {
-            universityLocalDataSource
-                .getFacultyEntities()
-                .map { facultyEntity -> facultyEntity.toFaculty() }
-        }
-    }
-
-    override fun getFacultyGroupsFlow(faculty: Faculty): Flow<List<Group>> {
-        val facultyID = faculty.id
-        val groupsFlow = cachedGroups[facultyID] ?: MutableStateFlow<List<Group>?>(value = null)
-
-        cachedGroups[facultyID] = groupsFlow
-
-        return groupsFlow.map { groups ->
-            groups ?: safeGetTransaction(defaultValue = listOf()) {
-                universityLocalDataSource
-                    .getGroupEntities(facultyID)
-                    .map { groupEntity -> groupEntity.toGroup(faculty) }
+    override fun getBuildingRoomsFlow(building: Building): Flow<LoadResult<List<Room>>> =
+        universityLocalDataSource
+            .getRoomEntitiesFlow(buildingID = building.id)
+            .map { roomEntityList ->
+                if (roomEntityList.isEmpty()) {
+                    loadBuildingsRooms(building)
+                } else {
+                    LoadResult.Success(
+                        data = roomEntityList.map { roomEntity -> roomEntity.toRoom(building) }
+                    )
+                }
             }
-        }
-    }
 
-    override fun getStudentsOfGroupFlow(group: Group): Flow<List<Student>> {
-        val groupID = group.id
-        val studentsFlow = cachedStudents[groupID] ?: MutableStateFlow<List<Student>?>(value = null)
-
-        cachedStudents[groupID] = studentsFlow
-
-        return studentsFlow.map { students ->
-            students ?: safeGetTransaction(defaultValue = listOf()) {
-                universityLocalDataSource
-                    .getStudentEntities(groupID)
-                    .map { studentEntity -> studentEntity.toStudent(group) }
+    override fun getFacultiesFlow(): Flow<LoadResult<List<Faculty>>> =
+        universityLocalDataSource
+            .getFacultyEntitiesFlow()
+            .map { facultyEntityList ->
+                if (facultyEntityList.isEmpty()) {
+                    loadFaculties()
+                } else {
+                    LoadResult.Success(
+                        data = facultyEntityList.map(FacultyEntity::toFaculty)
+                    )
+                }
             }
-        }
-    }
 
-    override suspend fun loadBuildings(): LoadStatus {
+    override fun getFacultyGroupsFlow(faculty: Faculty): Flow<LoadResult<List<Group>>> =
+        universityLocalDataSource
+            .getGroupEntitiesFlow(facultyID = faculty.id)
+            .map { groupEntityList ->
+                if (groupEntityList.isEmpty()) {
+                    loadFacultyGroups(faculty)
+                } else {
+                    LoadResult.Success(
+                        data = groupEntityList.map { groupEntity -> groupEntity.toGroup(faculty) }
+                    )
+                }
+            }
+
+    override fun getStudentsOfGroupFlow(group: Group): Flow<LoadResult<List<Student>>> =
+        universityLocalDataSource
+            .getStudentEntitiesFlow(groupID = group.id)
+            .map { studentEntityList ->
+                if (studentEntityList.isEmpty()) {
+                    loadStudentsOfGroup(group)
+                } else {
+                    LoadResult.Success(
+                        data = studentEntityList.map {
+                                studentEntity -> studentEntity.toStudent(group)
+                        }
+                    )
+                }
+            }
+
+    override suspend fun loadBuildings(): LoadResult<List<Building>> {
         val response = universityRemoteDataSource.getBuildingsDTO()
 
         if (response is Response.Success<List<BuildingDTO>>) {
             val buildingDTOList = response.value
-            val buildingList = buildingDTOList.map { buildingDTO -> buildingDTO.toBuilding() }
-
-            val buildingEntityArray = buildingList
-                .map { building -> building.toBuildingEntity() }
+            val buildingEntityArray = buildingDTOList
+                .map(BuildingDTO::toBuildingEntity)
                 .toTypedArray()
 
-            cachedBuildings.value = buildingList
-
-            safeTransactionExecute {
-                universityLocalDataSource.saveBuildingEntities(*buildingEntityArray)
-            }
+            universityLocalDataSource.saveBuildingEntities(*buildingEntityArray)
         }
 
-        return response.toLoadStatus()
+        return response.toLoadResult { buildingDTOList ->
+            buildingDTOList.map(BuildingDTO::toBuilding)
+        }
     }
 
-    override suspend fun loadBuildingsRooms(building: Building): LoadStatus {
+    override suspend fun loadBuildingsRooms(building: Building): LoadResult<List<Room>> {
         val buildingID = building.id
-        val roomsFlow = cachedRooms[buildingID] ?: MutableStateFlow<List<Room>?>(value = null)
         val response = universityRemoteDataSource.getRoomsDTO(buildingID)
 
         if (response is Response.Success<List<RoomDTO>>) {
             val roomDTOList = response.value
-            val roomList = roomDTOList.map { roomDTO -> roomDTO.toRoom(building) }
-            val roomEntityList = roomList.map { room -> room.toRoomEntity() }.toTypedArray()
+            val roomEntityArray = roomDTOList
+                .map { roomDTO -> roomDTO.toRoomEntity(building) }
+                .toTypedArray()
 
-            roomsFlow.value = roomList
-            cachedRooms[buildingID] = roomsFlow
-
-            safeTransactionExecute {
-                universityLocalDataSource.saveRoomEntities(*roomEntityList)
-            }
+            universityLocalDataSource.saveRoomEntities(*roomEntityArray)
         }
 
-        return response.toLoadStatus()
+        return response.toLoadResult { roomDTOList ->
+            roomDTOList.map { roomDTO -> roomDTO.toRoom(building) }
+        }
     }
 
-    override suspend fun loadFaculties(): LoadStatus {
+    override suspend fun loadFaculties(): LoadResult<List<Faculty>> {
         val response = universityRemoteDataSource.getFacultiesDTO()
 
         if (response is Response.Success<List<FacultyDTO>>) {
             val facultyDTOList = response.value
-            val facultyList = facultyDTOList.map { facultyDTO -> facultyDTO.toFaculty() }
-
-            val facultyEntityArray = facultyList
-                .map { faculty -> faculty.toFacultyEntity() }
+            val facultyEntityArray = facultyDTOList
+                .map(FacultyDTO::toFacultyEntity)
                 .toTypedArray()
 
-            cachedFaculties.value = facultyList
-
-            safeTransactionExecute {
-                universityLocalDataSource.saveFacultyEntities(*facultyEntityArray)
-            }
+            universityLocalDataSource.saveFacultyEntities(*facultyEntityArray)
         }
 
-        return response.toLoadStatus()
+        return response.toLoadResult { facultyDTOList ->
+            facultyDTOList.map(FacultyDTO::toFaculty)
+        }
     }
 
-    override suspend fun loadFacultyGroups(faculty: Faculty): LoadStatus {
+    override suspend fun loadFacultyGroups(faculty: Faculty): LoadResult<List<Group>> {
         val facultyID = faculty.id
-        val groupsFlow = cachedGroups[facultyID] ?: MutableStateFlow<List<Group>?>(value = null)
         val response = universityRemoteDataSource.getGroupsDTO(facultyID)
 
         if (response is Response.Success<List<GroupDTO>>) {
             val groupDTOList = response.value
-            val groupList = groupDTOList.map { groupDTO -> groupDTO.toGroup(faculty) }
-            val groupEntityList = groupList.map { group -> group.toGroupEntity() }.toTypedArray()
+            val groupEntityArray = groupDTOList
+                .map { groupDTO -> groupDTO.toGroupEntity(faculty) }
+                .toTypedArray()
 
-            groupsFlow.value = groupList
-            cachedGroups[facultyID] = groupsFlow
-
-            safeTransactionExecute {
-                universityLocalDataSource.saveGroupEntities(*groupEntityList)
-            }
+            universityLocalDataSource.saveGroupEntities(*groupEntityArray)
         }
 
-        return response.toLoadStatus()
+        return response.toLoadResult { groupDTOList ->
+            groupDTOList.map { groupDTO -> groupDTO.toGroup(faculty) }
+        }
     }
 
-    override suspend fun loadStudentsOfGroup(group: Group): LoadStatus {
+    override suspend fun loadStudentsOfGroup(group: Group): LoadResult<List<Student>> {
         val groupID = group.id
-        val studentsFlow = cachedStudents[groupID] ?: MutableStateFlow<List<Student>?>(value = null)
         val response = universityRemoteDataSource.getStudentsDTO(groupID)
 
         if (response is Response.Success<List<StudentDTO>>) {
             val studentDTOList = response.value
-            val studentList = studentDTOList.map { studentDTO -> studentDTO.toStudent(group) }
-
-            val studentEntityArray = studentList
-                .map { student -> student.toStudentEntity() }
+            val studentEntityArray = studentDTOList
+                .map { studentDTO -> studentDTO.toStudentEntity(group) }
                 .toTypedArray()
 
-            studentsFlow.value = studentList
-            cachedStudents[groupID] = studentsFlow
-
-            safeTransactionExecute {
-                universityLocalDataSource.saveStudentEntities(*studentEntityArray)
-            }
+            universityLocalDataSource.saveStudentEntities(*studentEntityArray)
         }
 
-        return response.toLoadStatus()
+        return response.toLoadResult { studentDTOList ->
+            studentDTOList.map { studentDTO -> studentDTO.toStudent(group) }
+        }
     }
-
-    private suspend inline fun <T> safeGetTransaction(
-        defaultValue: T,
-        crossinline transaction: suspend () -> T
-    ): T = safeTransactionExecute(transaction).getOrDefault(defaultValue)
 }
