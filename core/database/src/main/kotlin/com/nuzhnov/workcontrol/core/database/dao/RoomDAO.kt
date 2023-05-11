@@ -1,17 +1,18 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
 import com.nuzhnov.workcontrol.core.database.entity.RoomEntity
+import kotlinx.coroutines.flow.Flow
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
 
 @Dao
 interface RoomDAO : BaseDAO<RoomEntity> {
-    @Query(FETCH_BY_BUILDING_ID_QUERY)
-    suspend fun getBuildingRooms(buildingID: Long): List<RoomEntity>
-
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<RoomEntity>
+
+    @Query(FETCH_BY_BUILDING_ID_QUERY)
+    fun getEntitiesFlow(buildingID: Long): Flow<List<RoomEntity>>
 
     suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
         .filterNot { entity -> entity.id in exceptionID }

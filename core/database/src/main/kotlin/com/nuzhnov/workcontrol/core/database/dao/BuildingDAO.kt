@@ -1,6 +1,7 @@
 package com.nuzhnov.workcontrol.core.database.dao
 
 import com.nuzhnov.workcontrol.core.database.entity.BuildingEntity
+import kotlinx.coroutines.flow.Flow
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
@@ -9,6 +10,9 @@ import androidx.room.Query
 interface BuildingDAO : BaseDAO<BuildingEntity> {
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<BuildingEntity>
+
+    @Query(FETCH_QUERY)
+    fun getEntitiesFlow(): Flow<List<BuildingEntity>>
 
     suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
