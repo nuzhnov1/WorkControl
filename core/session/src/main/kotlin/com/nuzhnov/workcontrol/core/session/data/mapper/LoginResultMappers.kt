@@ -25,3 +25,8 @@ private fun Response.Failure.HttpClientError.BadRequest.toFailureLoginResult(): 
         LoginErrorMessages.WRONG_PASSWORD -> LoginResult.Failure.WrongPassword
         else -> LoginResult.Failure.UnknownError
     }
+
+internal fun Result<LoginResult>.unwrap(): LoginResult = fold(
+    onSuccess = { it },
+    onFailure = { LoginResult.Failure.UnknownError }
+)

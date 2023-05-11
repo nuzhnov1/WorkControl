@@ -6,7 +6,6 @@ import com.nuzhnov.workcontrol.core.api.util.Response
 import com.nuzhnov.workcontrol.core.api.util.safeApiCall
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class SessionRemoteDataSource @Inject constructor(
@@ -15,7 +14,5 @@ internal class SessionRemoteDataSource @Inject constructor(
 ) {
 
     suspend fun login(login: String, password: String): Response<SessionDTO> =
-        withContext(context = coroutineDispatcher) {
-            safeApiCall { authorizationService.login(login, password) }
-        }
+        safeApiCall(context = coroutineDispatcher) { authorizationService.login(login, password) }
 }

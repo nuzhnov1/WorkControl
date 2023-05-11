@@ -1,15 +1,17 @@
 package com.nuzhnov.workcontrol.core.session.data.datasource
 
-import com.nuzhnov.workcontrol.core.session.data.mapper.*
+import com.nuzhnov.workcontrol.core.session.data.mapper.toUserData
 import com.nuzhnov.workcontrol.core.session.domen.model.UserData
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
 import com.nuzhnov.workcontrol.core.database.entity.TeacherDisciplineCrossRefEntity
 import com.nuzhnov.workcontrol.core.database.dao.*
+import com.nuzhnov.workcontrol.core.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.mapper.*
 import com.nuzhnov.workcontrol.core.model.Discipline
 import com.nuzhnov.workcontrol.core.model.Role
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 internal class UserLocalDataSource @Inject constructor(
@@ -23,28 +25,38 @@ internal class UserLocalDataSource @Inject constructor(
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun getUserData(): UserData? =
-        withContext(context = coroutineDispatcher) {
-            val session = appPreferences.getSession() ?: return@withContext null
-            val sessionID = session.id
+    fun getUserDataFlow(): Flow<UserData?> = appPreferences
+        .getSessionFlow()
+        .transform { session ->
+            when (session?.role) {
+                Role.TEACHER -> teacherDAO
+                    .getTeacherFlow(id = session.id)
+                    .map { teacherModel -> teacherModel?.toUserData() }
+                    .flowOn(context = coroutineDispatcher)
+                    .collect { userData -> emit(userData) }
 
-            when (session.role) {
-                Role.TEACHER -> teacherDAO.getTeacher(id = sessionID)?.toUserData()
-                Role.STUDENT -> studentDAO.getStudent(id = sessionID)?.toUserData()
+                Role.STUDENT -> studentDAO
+                    .getStudentFlow(id = session.id)
+                    .map { studentModel -> studentModel?.toUserData() }
+                    .flowOn(context = coroutineDispatcher)
+                    .collect { userData -> emit(userData) }
+
+                null -> emit(value = null)
             }
         }
+        .flowOn(context = coroutineDispatcher)
 
-    suspend fun saveUserData(userData: UserData): Unit =
-        withContext(context = coroutineDispatcher) {
+    suspend fun saveUserData(userData: UserData): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) {
             when (userData) {
                 is UserData.TeacherData -> saveTeacherData(teacherData = userData)
                 is UserData.StudentData -> saveStudentData(studentData = userData)
             }
         }
 
-    suspend fun removeUserData(): Unit =
-        withContext(context = coroutineDispatcher) {
-            val session = appPreferences.getSession() ?: return@withContext
+    suspend fun removeUserData(): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) {
+            val session = appPreferences.getSession() ?: return@safeExecute
             val sessionID = session.id
 
             when (session.role) {

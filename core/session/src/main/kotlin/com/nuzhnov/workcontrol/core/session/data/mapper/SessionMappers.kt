@@ -4,9 +4,8 @@ import com.nuzhnov.workcontrol.core.api.dto.authorization.SessionDTO
 import com.nuzhnov.workcontrol.core.preferences.model.Session
 
 
-internal fun SessionDTO.toSession(login: String): Session = Session(
+internal fun SessionDTO.toSession(): Session = Session(
     id = id,
-    login = login,
     authorizationToken = authorizationToken,
     role = role
 )

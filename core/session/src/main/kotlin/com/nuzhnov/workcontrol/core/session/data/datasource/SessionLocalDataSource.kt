@@ -2,9 +2,9 @@ package com.nuzhnov.workcontrol.core.session.data.datasource
 
 import com.nuzhnov.workcontrol.core.preferences.AppPreferences
 import com.nuzhnov.workcontrol.core.preferences.model.Session
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class SessionLocalDataSource @Inject constructor(
@@ -12,18 +12,12 @@ internal class SessionLocalDataSource @Inject constructor(
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun getSavedLogin(): String? =
-        withContext(context = coroutineDispatcher) {
-            appPreferences.getSession()?.login
-        }
+    suspend fun getSession(): Result<Session?> =
+        safeExecute(context = coroutineDispatcher) { appPreferences.getSession() }
 
-    suspend fun saveSession(session: Session): Unit =
-        withContext(context = coroutineDispatcher) {
-            appPreferences.setSession(session)
-        }
+    suspend fun saveSession(session: Session): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) { appPreferences.setSession(session) }
 
-    suspend fun removeSession(): Unit =
-        withContext(context = coroutineDispatcher) {
-            appPreferences.removeSession()
-        }
+    suspend fun removeSession(): Result<Unit> =
+        safeExecute(context = coroutineDispatcher) { appPreferences.removeSession() }
 }

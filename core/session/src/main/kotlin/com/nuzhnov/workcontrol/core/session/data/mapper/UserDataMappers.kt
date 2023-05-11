@@ -7,6 +7,9 @@ import com.nuzhnov.workcontrol.core.api.dto.user.TeacherModelDTO
 import com.nuzhnov.workcontrol.core.database.entity.DisciplineEntity
 import com.nuzhnov.workcontrol.core.database.entity.model.StudentModel
 import com.nuzhnov.workcontrol.core.database.entity.model.TeacherModel
+import com.nuzhnov.workcontrol.core.mapper.toDiscipline
+import com.nuzhnov.workcontrol.core.mapper.toStudent
+import com.nuzhnov.workcontrol.core.mapper.toTeacher
 
 
 internal fun StudentModelDTO.toUserData(): UserData = UserData.StudentData(

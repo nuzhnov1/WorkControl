@@ -10,6 +10,7 @@ class LoginUseCase @Inject internal constructor(
 
     suspend operator fun invoke(
         login: String,
-        password: String
-    ): LoginResult = sessionRepository.login(login, password)
+        password: String,
+        isLoginSave: Boolean
+    ): LoginResult = sessionRepository.login(login, password, isLoginSave)
 }

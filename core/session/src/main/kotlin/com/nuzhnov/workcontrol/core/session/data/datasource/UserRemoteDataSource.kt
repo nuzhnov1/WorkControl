@@ -8,7 +8,6 @@ import com.nuzhnov.workcontrol.core.api.util.safeApiCall
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class UserRemoteDataSource @Inject constructor(
@@ -17,12 +16,10 @@ internal class UserRemoteDataSource @Inject constructor(
 ) {
 
     suspend fun getUserData(role: Role): Response<UserData> =
-        withContext(context = coroutineDispatcher) {
-            safeApiCall {
-                when (role) {
-                    Role.TEACHER -> userService.getTeacher().toUserData()
-                    Role.STUDENT -> userService.getStudent().toUserData()
-                }
+        safeApiCall(context = coroutineDispatcher) {
+            when (role) {
+                Role.TEACHER -> userService.getTeacher().toUserData()
+                Role.STUDENT -> userService.getStudent().toUserData()
             }
         }
 }
