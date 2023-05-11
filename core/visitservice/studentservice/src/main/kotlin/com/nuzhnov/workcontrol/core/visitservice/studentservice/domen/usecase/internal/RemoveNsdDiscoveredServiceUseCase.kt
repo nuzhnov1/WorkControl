@@ -7,7 +7,6 @@ import android.net.nsd.NsdServiceInfo
 internal class RemoveNsdDiscoveredServiceUseCase @Inject constructor(
     private val repository: StudentServiceRepository
 ) {
-    operator fun invoke(nsdService: NsdServiceInfo) {
+    operator fun invoke(nsdService: NsdServiceInfo): Unit =
         repository.removeNsdDiscoveredService(nsdService)
-    }
 }

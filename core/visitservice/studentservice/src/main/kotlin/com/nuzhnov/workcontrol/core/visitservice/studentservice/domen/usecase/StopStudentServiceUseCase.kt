@@ -6,7 +6,5 @@ import javax.inject.Inject
 class StopStudentServiceUseCase @Inject internal constructor(
     private val controller: StudentServiceController
 ) {
-    operator fun invoke() {
-        controller.stopStudentService()
-    }
+    operator fun invoke(): Unit = controller.stopStudentService()
 }

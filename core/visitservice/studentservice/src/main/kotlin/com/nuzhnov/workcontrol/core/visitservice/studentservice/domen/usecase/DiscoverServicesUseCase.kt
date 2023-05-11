@@ -6,7 +6,6 @@ import javax.inject.Inject
 class DiscoverServicesUseCase @Inject internal constructor(
     private val controller: StudentServiceController
 ) {
-    operator fun invoke(boundActivity: Class<*>, notificationChannelID: String) {
+    operator fun invoke(boundActivity: Class<*>, notificationChannelID: String): Unit =
         controller.discoverServices(boundActivity, notificationChannelID)
-    }
 }

@@ -3,8 +3,8 @@ package com.nuzhnov.workcontrol.core.visitservice.studentservice.data.repository
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.api.VisitorApi
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.datasource.StudentServiceLocalDataSource
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.datasource.NsdDiscoveredServicesLocalDataSource
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.mapper.toDiscoveredService
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.mapper.toServiceState
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.mapper.toDiscoveredServicesSet
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.repository.StudentServiceRepository
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.DiscoveredService
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceState
@@ -29,7 +29,12 @@ internal class StudentServiceRepositoryImpl @Inject constructor(
 ) : StudentServiceRepository {
 
     override val discoveredServicesFlow = nsdDiscoveredServicesLocalDataSource
-        .nsdServicesFlow.map { nsdServicesMap -> nsdServicesMap.toDiscoveredServicesSet() }
+        .nsdServicesFlow.map { nsdServicesMap ->
+            nsdServicesMap
+                .values
+                .map(NsdServiceInfo::toDiscoveredService)
+                .toSet()
+        }
 
     override val serviceState = studentServiceLocalDataSource.serviceState
 
@@ -43,31 +48,30 @@ internal class StudentServiceRepositoryImpl @Inject constructor(
     }
 
 
-    override fun updateServiceState(state: StudentServiceState) {
+    override fun updateServiceState(state: StudentServiceState): Unit =
         studentServiceLocalDataSource.updateServiceState(state)
-    }
 
-    override fun updateStudentID(id: Long?) {
+    override fun updateStudentID(id: Long?): Unit =
         studentServiceLocalDataSource.updateStudentID(id)
-    }
 
     override fun getDiscoveredServices(): Set<DiscoveredService> =
-        nsdDiscoveredServicesLocalDataSource.getNsdServices().toDiscoveredServicesSet()
+        nsdDiscoveredServicesLocalDataSource
+            .getNsdServices()
+            .values
+            .map(NsdServiceInfo::toDiscoveredService)
+            .toSet()
 
     override fun getNsdDiscoveredServicesMap(): Map<String, NsdServiceInfo> =
         nsdDiscoveredServicesLocalDataSource.getNsdServices()
 
-    override fun addNsdDiscoveredService(nsdService: NsdServiceInfo) {
+    override fun addNsdDiscoveredService(nsdService: NsdServiceInfo): Unit =
         nsdDiscoveredServicesLocalDataSource.addService(service = nsdService)
-    }
 
-    override fun removeNsdDiscoveredService(nsdService: NsdServiceInfo) {
+    override fun removeNsdDiscoveredService(nsdService: NsdServiceInfo): Unit =
         nsdDiscoveredServicesLocalDataSource.removeDiscoveredService(service = nsdService)
-    }
 
-    override fun clearNsdDiscoveredServices() {
+    override fun clearNsdDiscoveredServices(): Unit =
         nsdDiscoveredServicesLocalDataSource.clearDiscoveredServices()
-    }
 
     override suspend fun startVisit(serverAddress: InetAddress, serverPort: Int) =
         withContext(context = coroutineDispatcher) {

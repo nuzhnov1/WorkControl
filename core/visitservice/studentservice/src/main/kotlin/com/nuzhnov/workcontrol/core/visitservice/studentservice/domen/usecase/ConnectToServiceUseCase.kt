@@ -12,12 +12,10 @@ class ConnectToServiceUseCase @Inject internal constructor(
         student: Student,
         boundActivity: Class<*>,
         notificationChannelID: String
-    ) {
-        controller.connectToService(
-            serviceName = serviceName,
-            student = student,
-            boundActivity = boundActivity,
-            notificationChannelID = notificationChannelID
-        )
-    }
+    ): Unit = controller.connectToService(
+        serviceName = serviceName,
+        student = student,
+        boundActivity = boundActivity,
+        notificationChannelID = notificationChannelID
+    )
 }

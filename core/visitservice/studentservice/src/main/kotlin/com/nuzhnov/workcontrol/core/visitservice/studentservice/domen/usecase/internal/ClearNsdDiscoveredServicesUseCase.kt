@@ -6,7 +6,5 @@ import javax.inject.Inject
 internal class ClearNsdDiscoveredServicesUseCase @Inject constructor(
     private val repository: StudentServiceRepository
 ) {
-    operator fun invoke() {
-        repository.clearNsdDiscoveredServices()
-    }
+    operator fun invoke(): Unit = repository.clearNsdDiscoveredServices()
 }

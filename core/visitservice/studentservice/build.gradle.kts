@@ -48,11 +48,11 @@ android {
 }
 
 dependencies {
-    implementation(project(":common:util"))
-    implementation(project(":common:visitcontrol"))
-    implementation(project(":core:visitservice:util"))
     implementation(project(":core:visitservice:notification"))
+    implementation(project(":core:visitservice:util"))
     implementation(project(":core:model"))
+    implementation(project(":common:visitcontrol"))
+    implementation(project(":common:util"))
     implementation("androidx.core:core-ktx:1.10.0")
     implementation("com.google.dagger:hilt-android:2.44")
 

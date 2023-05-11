@@ -7,7 +7,6 @@ import javax.inject.Inject
 internal class StartVisitUseCase @Inject constructor(
     private val repository: StudentServiceRepository
 ) {
-    suspend operator fun invoke(serverAddress: InetAddress, serverPort: Int) {
+    suspend operator fun invoke(serverAddress: InetAddress, serverPort: Int): Unit =
         repository.startVisit(serverAddress, serverPort)
-    }
 }

@@ -12,15 +12,13 @@ internal class NsdDiscoveredServicesLocalDataSource @Inject constructor() {
 
     fun getNsdServices(): Map<String, NsdServiceInfo> = _nsdServicesFlow.value
 
-    fun addService(service: NsdServiceInfo) {
-        _nsdServicesFlow.applyUpdate { put(service.serviceName, service) }
+    fun addService(service: NsdServiceInfo): Unit = _nsdServicesFlow.applyUpdate {
+        put(service.serviceName, service)
     }
 
-    fun removeDiscoveredService(service: NsdServiceInfo) {
-        _nsdServicesFlow.applyUpdate { remove(service.serviceName) }
+    fun removeDiscoveredService(service: NsdServiceInfo): Unit = _nsdServicesFlow.applyUpdate {
+        remove(service.serviceName)
     }
 
-    fun clearDiscoveredServices() {
-        _nsdServicesFlow.applyUpdate { clear() }
-    }
+    fun clearDiscoveredServices(): Unit = _nsdServicesFlow.applyUpdate { clear() }
 }
