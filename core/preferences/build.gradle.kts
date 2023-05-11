@@ -49,7 +49,6 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
-    implementation(project(":core:util:coroutines"))
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("com.google.dagger:hilt-android:2.44")
     implementation("com.squareup.moshi:moshi:1.14.0")

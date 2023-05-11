@@ -1,12 +1,8 @@
 package com.nuzhnov.workcontrol.core.preferences
 
 import com.nuzhnov.workcontrol.core.preferences.model.Session
-import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -18,9 +14,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import com.squareup.moshi.JsonAdapter
 
 class AppPreferences @Inject internal constructor(
-    @ApplicationContext private val context: Context,
-    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher,
-    private val sessionAdapter: JsonAdapter<Session>
+    private val sessionAdapter: JsonAdapter<Session>,
+    @ApplicationContext private val context: Context
 ) {
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
@@ -28,33 +23,50 @@ class AppPreferences @Inject internal constructor(
     )
 
 
-    suspend fun getSession(): Session? = withContext(context = coroutineDispatcher) {
-        val key = stringPreferencesKey(SESSION_KEY)
-        val jsonString = context.dataStore.data
-            .map { preferences -> preferences[key] }
-            .firstOrNull()
-
-        jsonString?.run { sessionAdapter.fromJson(/* string = */ this) }
-    }
-
-    suspend fun setSession(value: Session): Unit = withContext(context = coroutineDispatcher) {
-        val key = stringPreferencesKey(SESSION_KEY)
-        val jsonString = sessionAdapter.toJson(value)
-
-        context.dataStore.edit { preferences -> preferences[key] = jsonString }
-    }
-
-    suspend fun removeSession(): Unit = withContext(context = coroutineDispatcher) {
-        val key = stringPreferencesKey(SESSION_KEY)
-
-        context.dataStore.edit { preferences -> preferences.remove(key) }
-    }
+    suspend fun getSession(): Session? = getSessionFlow().firstOrNull()
 
     fun getSessionSync(): Session? = runBlocking { getSession() }
+
+    fun getSessionFlow(): Flow<Session?> = context.dataStore
+        .data
+        .map { preferences -> preferences[sessionPreferencesKey] }
+        .map { jsonString -> jsonString?.run { sessionAdapter.fromJson(/* string = */ this) } }
+
+    suspend fun setSession(value: Session) {
+        context.dataStore.edit { preferences ->
+            preferences[sessionPreferencesKey] = sessionAdapter.toJson(value)
+        }
+    }
+
+    suspend fun removeSession() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(sessionPreferencesKey)
+        }
+    }
+
+    fun getLoginFlow(): Flow<String?> = context.dataStore
+        .data
+        .map { preferences -> preferences[sessionPreferencesKey] }
+
+    suspend fun setLogin(value: String) {
+        context.dataStore.edit { preferences ->
+            preferences[loginPreferencesKey] = value
+        }
+    }
+
+    suspend fun removeLogin() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(loginPreferencesKey)
+        }
+    }
 
 
     private companion object {
         const val PREFERENCES_FILENAME = "preferences.json"
         const val SESSION_KEY = "SESSION_KEY"
+        const val LOGIN_KEY = "LOGIN_KEY"
+
+        val sessionPreferencesKey = stringPreferencesKey(SESSION_KEY)
+        val loginPreferencesKey = stringPreferencesKey(LOGIN_KEY)
     }
 }
