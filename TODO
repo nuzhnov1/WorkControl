@@ -1,4 +1,2 @@
 1: Make the visitcontrol library multiplatform (migrate from java.nio to ktor?)
-2: Replace Double to TimeSpan in the entities
-3: Migrate from the Moshi to the kotlinx.serialization
-4: Encoding login and password for example in Base64Encoding
+2: Migrate from the Moshi to the kotlinx.serialization
