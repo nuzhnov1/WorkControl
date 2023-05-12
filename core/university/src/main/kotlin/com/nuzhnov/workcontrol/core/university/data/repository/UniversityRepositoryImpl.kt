@@ -111,7 +111,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
         if (response is Response.Success<List<RoomDTO>>) {
             val roomDTOList = response.value
             val roomEntityArray = roomDTOList
-                .map { roomDTO -> roomDTO.toRoomEntity(building) }
+                .map { roomDTO -> roomDTO.toRoomEntity(buildingID) }
                 .toTypedArray()
 
             universityLocalDataSource
@@ -150,7 +150,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
         if (response is Response.Success<List<GroupDTO>>) {
             val groupDTOList = response.value
             val groupEntityArray = groupDTOList
-                .map { groupDTO -> groupDTO.toGroupEntity(faculty) }
+                .map { groupDTO -> groupDTO.toGroupEntity(facultyID) }
                 .toTypedArray()
 
             universityLocalDataSource
@@ -172,7 +172,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
         if (response is Response.Success<List<StudentDTO>>) {
             val studentDTOList = response.value
             val studentEntityArray = studentDTOList
-                .map { studentDTO -> studentDTO.toStudentEntity(group) }
+                .map { studentDTO -> studentDTO.toStudentEntity(groupID) }
                 .toTypedArray()
 
             universityLocalDataSource.saveStudentEntities(*studentEntityArray)
