@@ -9,6 +9,7 @@ import com.nuzhnov.workcontrol.core.database.entity.*
 import com.nuzhnov.workcontrol.core.mapper.*
 import com.nuzhnov.workcontrol.core.model.*
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
@@ -77,14 +78,14 @@ internal class UniversityRepositoryImpl @Inject constructor(
                     loadStudentsOfGroup(group)
                 } else {
                     LoadResult.Success(
-                        data = studentEntityList.map {
-                                studentEntity -> studentEntity.toStudent(group)
+                        data = studentEntityList.map { studentEntity ->
+                            studentEntity.toStudent(group)
                         }
                     )
                 }
             }
 
-    override suspend fun loadBuildings(): LoadResult<List<Building>> {
+    override suspend fun loadBuildings(): LoadResult<List<Building>> = safeExecute {
         val response = universityRemoteDataSource.getBuildingsDTO()
 
         if (response is Response.Success<List<BuildingDTO>>) {
@@ -93,15 +94,17 @@ internal class UniversityRepositoryImpl @Inject constructor(
                 .map(BuildingDTO::toBuildingEntity)
                 .toTypedArray()
 
-            universityLocalDataSource.saveBuildingEntities(*buildingEntityArray)
+            universityLocalDataSource
+                .saveBuildingEntities(*buildingEntityArray)
+                .getOrThrow()
         }
 
-        return response.toLoadResult { buildingDTOList ->
-            buildingDTOList.map(BuildingDTO::toBuilding)
-        }
-    }
+        response.toLoadResult { buildingDTOList -> buildingDTOList.map(BuildingDTO::toBuilding) }
+    }.unwrap()
 
-    override suspend fun loadBuildingsRooms(building: Building): LoadResult<List<Room>> {
+    override suspend fun loadBuildingsRooms(
+        building: Building
+    ): LoadResult<List<Room>> = safeExecute {
         val buildingID = building.id
         val response = universityRemoteDataSource.getRoomsDTO(buildingID)
 
@@ -111,15 +114,17 @@ internal class UniversityRepositoryImpl @Inject constructor(
                 .map { roomDTO -> roomDTO.toRoomEntity(building) }
                 .toTypedArray()
 
-            universityLocalDataSource.saveRoomEntities(*roomEntityArray)
+            universityLocalDataSource
+                .saveRoomEntities(*roomEntityArray)
+                .getOrThrow()
         }
 
-        return response.toLoadResult { roomDTOList ->
+        response.toLoadResult { roomDTOList ->
             roomDTOList.map { roomDTO -> roomDTO.toRoom(building) }
         }
-    }
+    }.unwrap()
 
-    override suspend fun loadFaculties(): LoadResult<List<Faculty>> {
+    override suspend fun loadFaculties(): LoadResult<List<Faculty>> = safeExecute {
         val response = universityRemoteDataSource.getFacultiesDTO()
 
         if (response is Response.Success<List<FacultyDTO>>) {
@@ -128,15 +133,17 @@ internal class UniversityRepositoryImpl @Inject constructor(
                 .map(FacultyDTO::toFacultyEntity)
                 .toTypedArray()
 
-            universityLocalDataSource.saveFacultyEntities(*facultyEntityArray)
+            universityLocalDataSource
+                .saveFacultyEntities(*facultyEntityArray)
+                .getOrThrow()
         }
 
-        return response.toLoadResult { facultyDTOList ->
-            facultyDTOList.map(FacultyDTO::toFaculty)
-        }
-    }
+        response.toLoadResult { facultyDTOList -> facultyDTOList.map(FacultyDTO::toFaculty) }
+    }.unwrap()
 
-    override suspend fun loadFacultyGroups(faculty: Faculty): LoadResult<List<Group>> {
+    override suspend fun loadFacultyGroups(
+        faculty: Faculty
+    ): LoadResult<List<Group>> = safeExecute {
         val facultyID = faculty.id
         val response = universityRemoteDataSource.getGroupsDTO(facultyID)
 
@@ -146,15 +153,19 @@ internal class UniversityRepositoryImpl @Inject constructor(
                 .map { groupDTO -> groupDTO.toGroupEntity(faculty) }
                 .toTypedArray()
 
-            universityLocalDataSource.saveGroupEntities(*groupEntityArray)
+            universityLocalDataSource
+                .saveGroupEntities(*groupEntityArray)
+                .getOrThrow()
         }
 
-        return response.toLoadResult { groupDTOList ->
+        response.toLoadResult { groupDTOList ->
             groupDTOList.map { groupDTO -> groupDTO.toGroup(faculty) }
         }
-    }
+    }.unwrap()
 
-    override suspend fun loadStudentsOfGroup(group: Group): LoadResult<List<Student>> {
+    override suspend fun loadStudentsOfGroup(
+        group: Group
+    ): LoadResult<List<Student>> = safeExecute {
         val groupID = group.id
         val response = universityRemoteDataSource.getStudentsDTO(groupID)
 
@@ -167,8 +178,8 @@ internal class UniversityRepositoryImpl @Inject constructor(
             universityLocalDataSource.saveStudentEntities(*studentEntityArray)
         }
 
-        return response.toLoadResult { studentDTOList ->
+        response.toLoadResult { studentDTOList ->
             studentDTOList.map { studentDTO -> studentDTO.toStudent(group) }
         }
-    }
+    }.unwrap()
 }
