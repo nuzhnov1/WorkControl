@@ -3,12 +3,12 @@ package com.nuzhnov.workcontrol.core.session.domen.model
 sealed interface LoginResult {
     data class Success(val userData: UserData) : LoginResult
 
-    sealed interface Failure : LoginResult {
-        object WrongLogin : Failure
-        object WrongPassword : Failure
-        object TooManyRequests : Failure
-        object ServiceError : Failure
-        object NetworkError : Failure
-        object UnknownError : Failure
+    sealed class Failure(val cause: Throwable) : LoginResult {
+        class WrongLogin(cause: Throwable) : Failure(cause)
+        class WrongPassword(cause: Throwable) : Failure(cause)
+        class TooManyRequests(cause: Throwable) : Failure(cause)
+        class ServiceError(cause: Throwable) : Failure(cause)
+        class NetworkError(cause: Throwable) : Failure(cause)
+        class UnknownError(cause: Throwable) : Failure(cause)
     }
 }
