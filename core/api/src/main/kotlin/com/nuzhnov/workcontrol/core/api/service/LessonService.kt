@@ -21,14 +21,14 @@ interface LessonService {
     // На сервере должна осуществляться проверка принадлежности запрашиваемого занятия к
     // данному преподавателю. Если занятие не принадлежит преподавателю - выдать ошибку
     @[GET("/participants") PermittedTo(Role.TEACHER)]
-    suspend fun getParticipantsOfFinishedLesson(
+    suspend fun getParticipantsOfFinishedTeacherLesson(
         @Query("lesson_id") lessonID: Long
     ): List<ParticipantModelDTO>
 
     // Примечание: информация о посещениях указанного студента извлекается только относительно
     // занятий данного преподавателя по его токену
     @[GET("/participants") PermittedTo(Role.TEACHER)]
-    suspend fun getStudentParticipationOfFinishedLessons(
+    suspend fun getStudentParticipationOfFinishedTeacherLessons(
         @Query("student_id") studentID: Long
     ): List<ParticipantLessonModelDTO>
 
