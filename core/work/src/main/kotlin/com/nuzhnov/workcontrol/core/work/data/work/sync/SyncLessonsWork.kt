@@ -4,20 +4,27 @@ import com.nuzhnov.workcontrol.core.api.service.SyncService
 import com.nuzhnov.workcontrol.core.database.dao.LessonDAO
 import com.nuzhnov.workcontrol.core.database.dao.ParticipantDAO
 import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
+import com.nuzhnov.workcontrol.core.preferences.AppPreferences
 import com.nuzhnov.workcontrol.core.mapper.toNewLessonDTO
 import com.nuzhnov.workcontrol.core.mapper.toUpdatedParticipantDTO
+import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject
 
 internal class SyncLessonsWork @Inject constructor(
     private val syncService: SyncService,
     private val lessonDAO: LessonDAO,
-    private val participantDAO: ParticipantDAO
+    private val participantDAO: ParticipantDAO,
+    private val appPreferences: AppPreferences
 ) {
 
     suspend operator fun invoke(): Result<Unit> = safeExecute {
-        syncParticipants()
-        syncLessons()
+        val session = appPreferences.getSession()
+
+        if (session?.role == Role.TEACHER) {
+            syncParticipants()
+            syncLessons()
+        }
     }
 
     private suspend fun syncParticipants(): Unit = lessonDAO
