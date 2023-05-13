@@ -1,4 +1,4 @@
-package com.nuzhnov.workcontrol.core.visitservice.util.di.annotation
+package com.nuzhnov.workcontrol.core.util.coroutines.di.annotation
 
 import javax.inject.Qualifier
 
