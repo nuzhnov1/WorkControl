@@ -1,17 +1,18 @@
 package com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.controller
 
 import com.nuzhnov.workcontrol.core.model.Student
+import kotlin.reflect.KClass
 
 internal interface StudentServiceController {
     fun discoverServices(
-        boundActivity: Class<*>,
+        boundActivity: KClass<*>,
         notificationChannelID: String
     )
 
     fun connectToService(
         serviceName: String,
         student: Student,
-        boundActivity: Class<*>,
+        boundActivity: KClass<*>,
         notificationChannelID: String
     )
 

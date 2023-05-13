@@ -2,6 +2,7 @@ package com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase
 
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.controller.StudentServiceController
 import com.nuzhnov.workcontrol.core.model.Student
+import kotlin.reflect.KClass
 import javax.inject.Inject
 
 class ConnectToServiceUseCase @Inject internal constructor(
@@ -10,7 +11,7 @@ class ConnectToServiceUseCase @Inject internal constructor(
     operator fun invoke(
         serviceName: String,
         student: Student,
-        boundActivity: Class<*>,
+        boundActivity: KClass<*>,
         notificationChannelID: String
     ): Unit = controller.connectToService(
         serviceName = serviceName,

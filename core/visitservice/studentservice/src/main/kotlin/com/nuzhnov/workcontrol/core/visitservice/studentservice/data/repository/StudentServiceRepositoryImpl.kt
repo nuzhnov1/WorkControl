@@ -6,18 +6,17 @@ import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.datasource.
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.mapper.toDiscoveredService
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.data.mapper.toServiceState
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.repository.StudentServiceRepository
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.DiscoveredService
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceState
-import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.ApplicationCoroutineScope
-import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.IODispatcher
-import java.net.InetAddress
-import javax.inject.Inject
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.ApplicationCoroutineScope
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
+import java.net.InetAddress
+import javax.inject.Inject
 import android.net.nsd.NsdServiceInfo
 
 internal class StudentServiceRepositoryImpl @Inject constructor(
@@ -30,10 +29,7 @@ internal class StudentServiceRepositoryImpl @Inject constructor(
 
     override val discoveredServicesFlow = nsdDiscoveredServicesLocalDataSource
         .nsdServicesFlow.map { nsdServicesMap ->
-            nsdServicesMap
-                .values
-                .map(NsdServiceInfo::toDiscoveredService)
-                .toSet()
+            nsdServicesMap.values.map(NsdServiceInfo::toDiscoveredService)
         }
 
     override val serviceState = studentServiceLocalDataSource.serviceState
@@ -53,13 +49,6 @@ internal class StudentServiceRepositoryImpl @Inject constructor(
 
     override fun updateStudentID(id: Long?): Unit =
         studentServiceLocalDataSource.updateStudentID(id)
-
-    override fun getDiscoveredServices(): Set<DiscoveredService> =
-        nsdDiscoveredServicesLocalDataSource
-            .getNsdServices()
-            .values
-            .map(NsdServiceInfo::toDiscoveredService)
-            .toSet()
 
     override fun getNsdDiscoveredServicesMap(): Map<String, NsdServiceInfo> =
         nsdDiscoveredServicesLocalDataSource.getNsdServices()

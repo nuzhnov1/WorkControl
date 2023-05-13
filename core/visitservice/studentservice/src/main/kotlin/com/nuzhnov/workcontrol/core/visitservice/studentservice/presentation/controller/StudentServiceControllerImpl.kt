@@ -6,10 +6,11 @@ import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.in
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.ClearNsdDiscoveredServicesUseCase
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand.*
 import com.nuzhnov.workcontrol.core.model.Student
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlin.reflect.KClass
 import javax.inject.Inject
 import android.content.Context
 import android.content.Intent
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 internal class StudentServiceControllerImpl @Inject constructor(
     private val updateStudentIdUseCase: UpdateStudentIdUseCase,
@@ -17,7 +18,7 @@ internal class StudentServiceControllerImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : StudentServiceController {
 
-    override fun discoverServices(boundActivity: Class<*>, notificationChannelID: String) {
+    override fun discoverServices(boundActivity: KClass<*>, notificationChannelID: String) {
         clearNsdDiscoveredServicesUseCase()
 
         Intent(context, NsdStudentService::class.java).apply {
@@ -28,7 +29,7 @@ internal class StudentServiceControllerImpl @Inject constructor(
 
             putExtra(
                 /* name = */ NsdStudentService.CONTENT_ACTIVITY_CLASS_NAME_EXTRA,
-                /* value = */ boundActivity.canonicalName!!
+                /* value = */ boundActivity.java.canonicalName!!
             )
 
             putExtra(
@@ -43,7 +44,7 @@ internal class StudentServiceControllerImpl @Inject constructor(
     override fun connectToService(
         serviceName: String,
         student: Student,
-        boundActivity: Class<*>,
+        boundActivity: KClass<*>,
         notificationChannelID: String
     ) {
         updateStudentIdUseCase(studentID = student.id)
@@ -56,7 +57,7 @@ internal class StudentServiceControllerImpl @Inject constructor(
 
             putExtra(
                 /* name = */ NsdStudentService.CONTENT_ACTIVITY_CLASS_NAME_EXTRA,
-                /* value = */ boundActivity.canonicalName!!
+                /* value = */ boundActivity.java.canonicalName!!
             )
 
             putExtra(

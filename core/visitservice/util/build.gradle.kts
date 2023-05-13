@@ -1,9 +1,7 @@
 plugins {
-    kotlin("kapt")
     kotlin("android")
 
     id("com.android.library")
-    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -11,7 +9,7 @@ android {
     compileSdk = 33
 
     defaultConfig {
-        minSdk = 14
+        minSdk = 1
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -45,14 +43,4 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-}
-
-dependencies {
-    implementation("com.google.dagger:hilt-android:2.44")
-
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
-}
-
-kapt {
-    correctErrorTypes = true
 }

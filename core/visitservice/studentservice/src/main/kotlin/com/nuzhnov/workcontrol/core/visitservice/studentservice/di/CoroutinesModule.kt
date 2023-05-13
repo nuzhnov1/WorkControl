@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.core.visitservice.studentservice.di
 
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.di.annotation.StudentServiceCoroutineScope
-import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.IODispatcher
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

@@ -6,7 +6,6 @@ import javax.inject.Inject
 internal class UpdateTeacherServiceNameUseCase @Inject constructor(
     private val repository: TeacherServiceRepository
 ) {
-    operator fun invoke(serviceName: String?) {
+    operator fun invoke(serviceName: String?): Unit =
         repository.updateServiceName(name = serviceName)
-    }
 }

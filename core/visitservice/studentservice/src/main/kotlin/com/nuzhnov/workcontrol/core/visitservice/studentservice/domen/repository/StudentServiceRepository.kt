@@ -8,11 +8,9 @@ import java.net.InetAddress
 import android.net.nsd.NsdServiceInfo
 
 internal interface StudentServiceRepository {
-    val discoveredServicesFlow: Flow<Set<DiscoveredService>>
+    val discoveredServicesFlow: Flow<List<DiscoveredService>>
     val serviceState: StateFlow<StudentServiceState>
 
-
-    fun getDiscoveredServices(): Set<DiscoveredService>
 
     fun getNsdDiscoveredServicesMap(): Map<String, NsdServiceInfo>
 

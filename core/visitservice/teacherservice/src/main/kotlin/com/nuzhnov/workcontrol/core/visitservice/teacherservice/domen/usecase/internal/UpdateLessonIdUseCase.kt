@@ -6,7 +6,5 @@ import javax.inject.Inject
 internal class UpdateLessonIdUseCase @Inject constructor(
     private val repository: TeacherServiceRepository
 ) {
-    operator fun invoke(lessonID: Long?) {
-        repository.updateLessonID(id = lessonID)
-    }
+    operator fun invoke(lessonID: Long?): Unit = repository.updateLessonID(id = lessonID)
 }

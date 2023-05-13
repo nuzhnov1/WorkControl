@@ -15,7 +15,6 @@ import dagger.hilt.components.SingletonComponent
 
 @[Module InstallIn(SingletonComponent::class)]
 internal interface TeacherServiceModule {
-
     @[Binds Singleton]
     fun bindTeacherServiceController(
         instance: TeacherServiceControllerImpl

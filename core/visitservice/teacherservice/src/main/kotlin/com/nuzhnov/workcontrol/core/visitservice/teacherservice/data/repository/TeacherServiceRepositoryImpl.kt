@@ -4,13 +4,17 @@ import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.api.Control
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.datasource.TeacherServiceLocalDataSource
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.datasource.VisitsRemoteDataSource
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.datasource.ParticipantsLocalDataSource
-import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.mapper.toParticipantActivitiesArray
+import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.mapper.toParticipantActivityModel
+import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.mapper.toVisit
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.mapper.toServiceState
-import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.mapper.toVisitArray
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.repository.TeacherServiceRepository
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState
-import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.ApplicationCoroutineScope
-import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.IODispatcher
+import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceError
+import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.ApplicationCoroutineScope
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
+import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
 import com.nuzhnov.workcontrol.common.util.throttleLatest
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -38,35 +42,67 @@ internal class TeacherServiceRepositoryImpl @Inject constructor(
 
         visitsRemoteDataSource.visitsFlow
             .throttleLatest(UPDATE_TIME_INTERVAL_MS)
-            .onEach { visits ->
-                val lessonID = teacherServiceLocalDataSource.lessonID.value ?: return@onEach
-                val participantsArray = visits.toParticipantActivitiesArray(lessonID)
-
-                participantsLocalDataSource.updateParticipantsActivities(participantsArray)
-            }
+            .onEach { visits -> onVisitsUpdate(visits) }
             .launchIn(scope = applicationCoroutineScope)
     }
 
 
-    override fun updateServiceState(state: TeacherServiceState) {
+    override fun updateServiceState(state: TeacherServiceState): Unit =
         teacherServiceLocalDataSource.updateServiceState(state)
-    }
 
-    override fun updateLessonID(id: Long?) {
+    override fun updateLessonID(id: Long?): Unit =
         teacherServiceLocalDataSource.updateLessonID(id)
-    }
 
-    override fun updateServiceName(name: String?) {
+    override fun updateServiceName(name: String?): Unit =
         teacherServiceLocalDataSource.updateServiceName(name)
+
+    override suspend fun startControl(): Unit = withContext(context = coroutineDispatcher) {
+        when (val lessonID = teacherServiceLocalDataSource.lessonID.value) {
+            null -> updateServiceState(
+                state = TeacherServiceState.StoppedByError(
+                    error = TeacherServiceError.INIT_ERROR
+                )
+            )
+
+            else -> participantsLocalDataSource.getParticipants(lessonID)
+                .onSuccess { participantEntityList ->
+                    val visitArray= participantEntityList
+                        .map(ParticipantEntity::toVisit)
+                        .toTypedArray()
+
+                    api.restoreVisits(*visitArray)
+                    api.startServer()
+                }
+                .onFailure {
+                    updateServiceState(
+                        state = TeacherServiceState.StoppedByError(
+                            error = TeacherServiceError.INIT_ERROR
+                        )
+                    )
+                }
+        }
     }
 
-    override suspend fun startControl() = withContext(context = coroutineDispatcher) {
-        val persistedParticipants = participantsLocalDataSource.getParticipants()
+    private suspend fun onVisitsUpdate(visits: Set<Visit>): Result<Unit> = safeExecute {
+        val lessonID = teacherServiceLocalDataSource.lessonID.value ?: return@safeExecute
+        val lessonParticipantIDSet = participantsLocalDataSource.getParticipants(lessonID)
+            .getOrThrow()
+            .map { participantEntity -> participantEntity.studentID }
+            .toSet()
 
-        api.run {
-            restoreVisits(visitsArray = persistedParticipants.toVisitArray())
-            startServer()
-        }
+        val participantActivityModelArray = visits
+            .filter { visit ->
+                if (visit.visitorID in lessonParticipantIDSet) {
+                    true
+                } else {
+                    api.disconnectVisitor(visitorID = visit.visitorID)
+                    false
+                }
+            }
+            .map { visit -> visit.toParticipantActivityModel(lessonID) }
+            .toTypedArray()
+
+        participantsLocalDataSource.updateParticipantsActivities(*participantActivityModelArray)
     }
 
 

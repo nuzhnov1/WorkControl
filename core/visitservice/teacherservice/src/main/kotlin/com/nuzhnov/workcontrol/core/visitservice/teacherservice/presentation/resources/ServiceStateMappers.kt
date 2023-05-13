@@ -41,7 +41,7 @@ internal fun TeacherServiceState.toResourceString(context: Context): String = co
         }
     }
 
-internal fun TeacherServiceError.toResourceString(context: Context): String = context
+private fun TeacherServiceError.toResourceString(context: Context): String = context
     .applicationContext
     .run {
         when (this@toResourceString) {

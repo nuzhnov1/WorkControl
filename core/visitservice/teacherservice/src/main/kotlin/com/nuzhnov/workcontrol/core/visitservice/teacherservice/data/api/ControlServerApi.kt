@@ -15,7 +15,7 @@ internal interface ControlServerApi {
 
     fun disconnectVisitor(visitorID: VisitorID)
 
-    fun restoreVisits(visitsArray: Array<Visit>)
+    fun restoreVisits(vararg visit: Visit)
 
     fun clearVisits()
 }

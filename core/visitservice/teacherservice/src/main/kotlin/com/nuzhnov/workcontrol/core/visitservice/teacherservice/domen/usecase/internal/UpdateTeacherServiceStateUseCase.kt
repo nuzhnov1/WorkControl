@@ -7,7 +7,6 @@ import javax.inject.Inject
 internal class UpdateTeacherServiceStateUseCase @Inject constructor(
     private val repository: TeacherServiceRepository
 ) {
-    operator fun invoke(serviceState: TeacherServiceState) {
+    operator fun invoke(serviceState: TeacherServiceState): Unit =
         repository.updateServiceState(state = serviceState)
-    }
 }

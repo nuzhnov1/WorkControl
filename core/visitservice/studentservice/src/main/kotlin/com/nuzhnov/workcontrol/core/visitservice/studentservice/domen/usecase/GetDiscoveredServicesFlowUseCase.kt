@@ -8,5 +8,5 @@ import javax.inject.Inject
 class GetDiscoveredServicesFlowUseCase @Inject internal constructor(
     private val repository: StudentServiceRepository
 ) {
-    operator fun invoke(): Flow<Set<DiscoveredService>> = repository.discoveredServicesFlow
+    operator fun invoke(): Flow<List<DiscoveredService>> = repository.discoveredServicesFlow
 }

@@ -4,9 +4,9 @@ import com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.res
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState.*
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.R
-import com.nuzhnov.workcontrol.core.visitservice.notification.getContentPendingIntent
-import com.nuzhnov.workcontrol.core.visitservice.notification.getNotificationBuilderTemplate
-import com.nuzhnov.workcontrol.core.visitservice.notification.notifyIfPermissionGranted
+import com.nuzhnov.workcontrol.core.visitservice.notification.extensions.getContentPendingIntent
+import com.nuzhnov.workcontrol.core.visitservice.notification.extensions.getNotificationBuilderTemplate
+import com.nuzhnov.workcontrol.core.visitservice.notification.extensions.notifyIfPermissionGranted
 import android.app.Notification
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat

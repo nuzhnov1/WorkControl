@@ -1,8 +1,8 @@
 package com.nuzhnov.workcontrol.core.visitservice.notification.resources
 
+import com.nuzhnov.workcontrol.core.visitservice.notification.R
 import android.content.Context
 import androidx.core.content.ContextCompat
-import com.nuzhnov.workcontrol.core.visitservice.notification.R
 
 
 internal val Context.notificationAccentColor

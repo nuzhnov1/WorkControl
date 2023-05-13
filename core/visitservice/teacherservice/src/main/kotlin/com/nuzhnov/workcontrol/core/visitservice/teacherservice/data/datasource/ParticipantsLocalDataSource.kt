@@ -1,23 +1,27 @@
 package com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.datasource
 
-import com.nuzhnov.workcontrol.core.visitservice.util.di.annotation.IODispatcher
 import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.database.model.ParticipantActivity
-import com.nuzhnov.workcontrol.core.database.dao.ParticipantDao
+import com.nuzhnov.workcontrol.core.database.entity.model.update.ParticipantActivityModel
+import com.nuzhnov.workcontrol.core.database.dao.ParticipantDAO
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class ParticipantsLocalDataSource @Inject constructor(
-    private val participantDao: ParticipantDao,
+    private val participantDAO: ParticipantDAO,
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun getParticipants(): List<ParticipantEntity> = withContext(coroutineDispatcher) {
-        participantDao.getEntities()
+    suspend fun getParticipants(
+        lessonID: Long
+    ): Result<List<ParticipantEntity>> = safeExecute(context = coroutineDispatcher) {
+        participantDAO.getEntities(lessonID)
     }
 
-    suspend fun updateParticipantsActivities(participantsActivities: Array<ParticipantActivity>) {
-        participantDao.updateActivity(*participantsActivities)
+    suspend fun updateParticipantsActivities(
+        vararg participantActivityModel: ParticipantActivityModel
+    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
+        participantDAO.updateActivity(*participantActivityModel)
     }
 }

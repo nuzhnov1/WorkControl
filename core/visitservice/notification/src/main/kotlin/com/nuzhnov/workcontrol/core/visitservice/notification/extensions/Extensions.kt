@@ -1,5 +1,8 @@
 package com.nuzhnov.workcontrol.core.visitservice.notification.extensions
 
+import com.nuzhnov.workcontrol.core.visitservice.notification.constant.*
+import com.nuzhnov.workcontrol.core.visitservice.notification.resources.notificationAccentColor
+import com.nuzhnov.workcontrol.core.visitservice.notification.resources.notificationLightColor
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -11,17 +14,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.*
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.NOTIFICATION_BADGE_ICON_TYPE
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.NOTIFICATION_CATEGORY
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.NOTIFICATION_OFF_TIME_MS
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.NOTIFICATION_ON_TIME_MS
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.NOTIFICATION_PRIORITY
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.NOTIFICATION_VISIBILITY
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.notificationSound
-import com.nuzhnov.workcontrol.core.visitservice.notification.constant.notificationVibrationPattern
-import com.nuzhnov.workcontrol.core.visitservice.notification.resources.notificationAccentColor
-import com.nuzhnov.workcontrol.core.visitservice.notification.resources.notificationLightColor
 
 fun Context.getNotificationBuilderTemplate(
     notificationChannel: String

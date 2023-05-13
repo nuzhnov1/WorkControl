@@ -1,7 +1,8 @@
 package com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.usecase
 
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.controller.TeacherServiceController
-import com.nuzhnov.workcontrol.core.models.Lesson
+import com.nuzhnov.workcontrol.core.model.Lesson
+import kotlin.reflect.KClass
 import javax.inject.Inject
 
 class StartLessonUseCase @Inject internal constructor(
@@ -9,13 +10,11 @@ class StartLessonUseCase @Inject internal constructor(
 ) {
     operator fun invoke(
         lesson: Lesson,
-        boundActivityClass: Class<*>,
+        boundActivityClass: KClass<*>,
         notificationChannelID: Long
-    ) {
-        controller.startTeacherService(
-            lesson = lesson,
-            boundActivityClass = boundActivityClass,
-            notificationChannelID = notificationChannelID
-        )
-    }
+    ): Unit = controller.startTeacherService(
+        lesson = lesson,
+        boundActivityClass = boundActivityClass,
+        notificationChannelID = notificationChannelID
+    )
 }

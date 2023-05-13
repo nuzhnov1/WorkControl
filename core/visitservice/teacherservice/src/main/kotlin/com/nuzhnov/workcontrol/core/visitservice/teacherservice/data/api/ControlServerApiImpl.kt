@@ -14,20 +14,14 @@ internal class ControlServerApiImpl @Inject constructor(
     override val serverState = controlServer.state
 
 
-    override suspend fun startServer() {
-        controlServer.start()
-    }
+    override suspend fun startServer(): Unit = controlServer.start()
 
-    override fun disconnectVisitor(visitorID: VisitorID) = controlServer.run {
+    override fun disconnectVisitor(visitorID: VisitorID): Unit = controlServer.run {
         disconnectVisitor(visitorID)
         removeVisits(visitorID)
     }
 
-    override fun restoreVisits(visitsArray: Array<Visit>) {
-        controlServer.updateVisits(*visitsArray)
-    }
+    override fun restoreVisits(vararg visit: Visit): Unit = controlServer.updateVisits(*visit)
 
-    override fun clearVisits() {
-        controlServer.clearVisits()
-    }
+    override fun clearVisits(): Unit = controlServer.clearVisits()
 }

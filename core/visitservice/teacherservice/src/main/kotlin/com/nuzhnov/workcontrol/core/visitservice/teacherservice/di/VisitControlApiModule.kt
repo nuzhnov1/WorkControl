@@ -9,7 +9,6 @@ import dagger.hilt.components.SingletonComponent
 
 @[Module InstallIn(SingletonComponent::class)]
 internal object VisitControlApiModule {
-
     @[Provides Singleton]
     fun provideControlServer(): ControlServer = ControlServer.getDefaultControlServer()
 }
