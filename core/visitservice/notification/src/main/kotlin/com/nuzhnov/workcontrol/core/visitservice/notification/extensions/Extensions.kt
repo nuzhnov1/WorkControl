@@ -66,13 +66,11 @@ fun NotificationManagerCompat.notifyIfPermissionGranted(
 ) {
     val applicationContext = context.applicationContext
 
-    if (applicationContext.checkPermissionGranted(Manifest.permission.POST_NOTIFICATIONS)) {
+    if (applicationContext.checkCallingOrSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+        PackageManager.PERMISSION_GRANTED
+    ) {
         notify(notificationID, notification)
     }
-}
-
-private fun Context.checkPermissionGranted(permission: String): Boolean {
-    return checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 }
 
 // TODO: move this to the another module
