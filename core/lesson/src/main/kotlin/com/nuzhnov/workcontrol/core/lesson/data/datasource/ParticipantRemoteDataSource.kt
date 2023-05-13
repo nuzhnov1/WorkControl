@@ -34,8 +34,9 @@ internal class ParticipantRemoteDataSource @Inject constructor(
             lessonService.getStudentParticipationOfFinishedLessons()
         }
 
-    suspend fun getStudentsOfGroups(groupIDList: List<Long>): Response<Map<Long, StudentDTO>> =
-        safeApiCall(context = coroutineDispatcher) {
-            universityService.getStudentsOfGroups(groupIDList)
-        }
+    suspend fun getStudentsOfGroups(
+        groupIDList: List<Long>
+    ): Response<Map<Long, StudentDTO>> = safeApiCall(context = coroutineDispatcher) {
+        universityService.getStudentsOfGroups(groupIDList)
+    }
 }

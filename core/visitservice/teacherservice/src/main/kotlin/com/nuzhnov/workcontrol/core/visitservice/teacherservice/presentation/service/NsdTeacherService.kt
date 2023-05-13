@@ -23,12 +23,18 @@ import android.os.Build
 
 internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
-    @Inject internal lateinit var getTeacherServiceStateUseCase: GetTeacherServiceStateUseCase
-    @Inject internal lateinit var getTeacherServiceNameUseCase: GetTeacherServiceNameUseCase
-    @Inject internal lateinit var updateTeacherServiceStateUseCase: UpdateTeacherServiceStateUseCase
-    @Inject internal lateinit var updateTeacherServiceNameUseCase: UpdateTeacherServiceNameUseCase
-    @Inject internal lateinit var startControlUseCase: StartControlUseCase
-    @[Inject TeacherServiceCoroutineScope] internal lateinit var coroutineScope: CoroutineScope
+    @Inject
+    internal lateinit var getTeacherServiceStateUseCase: GetTeacherServiceStateUseCase
+    @Inject
+    internal lateinit var getTeacherServiceNameUseCase: GetTeacherServiceNameUseCase
+    @Inject
+    internal lateinit var updateTeacherServiceStateUseCase: UpdateTeacherServiceStateUseCase
+    @Inject
+    internal lateinit var updateTeacherServiceNameUseCase: UpdateTeacherServiceNameUseCase
+    @Inject
+    internal lateinit var startControlUseCase: StartControlUseCase
+    @[Inject TeacherServiceCoroutineScope]
+    internal lateinit var coroutineScope: CoroutineScope
 
     private var state: TeacherServiceState
         get() = getTeacherServiceStateUseCase().value

@@ -92,7 +92,7 @@ internal class ParticipantLocalDataSource @Inject constructor(
         studentDAO.insertOrUpdate(*studentEntityList.toTypedArray())
 
         val attachedParticipantArray = studentEntityList
-            .map { studentEntity -> studentEntity.id}
+            .map { studentEntity -> studentEntity.id }
             .map { studentID ->
                 ParticipantEntity(
                     studentID = studentID,

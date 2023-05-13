@@ -1,6 +1,7 @@
 package com.nuzhnov.workcontrol.core.lesson.domen.repository
 
-import com.nuzhnov.workcontrol.core.model.*
+import com.nuzhnov.workcontrol.core.model.Discipline
+import com.nuzhnov.workcontrol.core.model.Lesson
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
 import kotlinx.coroutines.flow.Flow
 

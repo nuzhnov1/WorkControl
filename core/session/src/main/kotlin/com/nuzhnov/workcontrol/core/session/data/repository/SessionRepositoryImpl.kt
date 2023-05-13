@@ -48,14 +48,14 @@ internal class SessionRepositoryImpl @Inject constructor(
             is Response.Failure -> authorizationResponse.toFailureLoginResult()
         }
     }
-    .onFailure {
-        safeExecute {
-            userLocalDataSource.removeUserData().getOrThrow()
-            sessionLocalDataSource.removeSession().getOrThrow()
-            loginLocalDataSource.removeLogin().getOrThrow()
+        .onFailure {
+            safeExecute {
+                userLocalDataSource.removeUserData().getOrThrow()
+                sessionLocalDataSource.removeSession().getOrThrow()
+                loginLocalDataSource.removeLogin().getOrThrow()
+            }
         }
-    }
-    .unwrap()
+        .unwrap()
 
     override suspend fun logout(): Result<Unit> = safeExecute {
         userLocalDataSource.removeUserData().getOrThrow()

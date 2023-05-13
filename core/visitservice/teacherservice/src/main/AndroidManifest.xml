@@ -12,12 +12,12 @@
     <application>
         <service
             android:name=".presentation.service.NsdTeacherService"
-            android:label="@string/teacher_service_title"
             android:description="@string/teacher_service_description"
-            android:icon="@drawable/teacher_service_small_icon_24"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="connectedDevice" />
+            android:foregroundServiceType="connectedDevice"
+            android:icon="@drawable/teacher_service_small_icon_24"
+            android:label="@string/teacher_service_title" />
     </application>
 
 </manifest>

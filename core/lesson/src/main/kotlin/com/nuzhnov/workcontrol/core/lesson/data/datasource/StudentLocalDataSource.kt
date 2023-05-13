@@ -24,12 +24,13 @@ internal class StudentLocalDataSource @Inject constructor(
                 throw IllegalStateException("permission denied")
             }
 
-            studentDAO.getStudent(id = session.id) ?:
-                throw IllegalStateException("student not found")
+            studentDAO.getStudent(id = session.id)
+                ?: throw IllegalStateException("student not found")
         }
 
-    suspend fun saveStudentEntities(vararg studentEntity: StudentEntity): Result<Unit> =
-        safeExecute(context = coroutineDispatcher) {
-            studentDAO.insertOrUpdate(*studentEntity)
-        }
+    suspend fun saveStudentEntities(
+        vararg studentEntity: StudentEntity
+    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
+        studentDAO.insertOrUpdate(*studentEntity)
+    }
 }

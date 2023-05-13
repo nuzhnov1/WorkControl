@@ -88,17 +88,22 @@ internal class ParticipantRepositoryImpl @Inject constructor(
         lesson: Lesson
     ): LoadResult<List<Participant>> = safeExecute {
         val lessonID = lesson.id
-        val response = participantRemoteDataSource.getParticipantsOfFinishedTeacherLesson(lessonID)
+        val response = participantRemoteDataSource
+            .getParticipantsOfFinishedTeacherLesson(lessonID)
 
         if (response is Response.Success<List<ParticipantModelDTO>>) {
             val participantModelDTOList = response.value
 
             val participantEntityArray = participantModelDTOList
-                .map { participantModelDTO -> participantModelDTO.toParticipantEntity(lessonID) }
+                .map { participantModelDTO ->
+                    participantModelDTO.toParticipantEntity(lessonID)
+                }
                 .toTypedArray()
 
             val studentEntityArray = participantModelDTOList
-                .map { participantModelDTO -> participantModelDTO.studentModelDTO.toStudentEntity() }
+                .map { participantModelDTO ->
+                    participantModelDTO.studentModelDTO.toStudentEntity()
+                }
                 .toTypedArray()
 
             studentLocalDataSource

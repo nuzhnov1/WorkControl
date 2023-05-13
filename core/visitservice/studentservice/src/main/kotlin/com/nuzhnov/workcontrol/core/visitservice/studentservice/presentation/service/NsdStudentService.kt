@@ -1,37 +1,45 @@
 package com.nuzhnov.workcontrol.core.visitservice.studentservice.presentation.service
 
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.presentation.notification.StudentServiceNotificationManager
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.GetStudentServiceStateUseCase
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.*
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceState
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceState.*
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceError.*
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand.*
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.di.annotation.StudentServiceCoroutineScope
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceError.*
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceState
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceState.*
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.GetStudentServiceStateUseCase
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.*
 import com.nuzhnov.workcontrol.core.visitservice.util.constant.VISIT_CONTROL_PROTOCOL_NAME
 import com.nuzhnov.workcontrol.core.visitservice.util.extension.getSerializable
-import kotlinx.coroutines.*
-import javax.inject.Inject
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.di.annotation.StudentServiceCoroutineScope
 import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
+import kotlinx.coroutines.*
+import javax.inject.Inject
 
 internal class NsdStudentService : Service(),
     NsdManager.DiscoveryListener,
     NsdManager.ResolveListener {
 
-    @Inject internal lateinit var getStudentServiceStateUseCase: GetStudentServiceStateUseCase
-    @Inject internal lateinit var getNsdDiscoveredServicesMapUseCase: GetNsdDiscoveredServicesMapUseCase
-    @Inject internal lateinit var updateStudentServiceStateUseCase: UpdateStudentServiceStateUseCase
-    @Inject internal lateinit var addNsdDiscoveredServiceUseCase: AddNsdDiscoveredServiceUseCase
-    @Inject internal lateinit var removeNsdDiscoveredServiceUseCase: RemoveNsdDiscoveredServiceUseCase
-    @Inject internal lateinit var clearNsdDiscoveredServicesUseCase: ClearNsdDiscoveredServicesUseCase
-    @Inject internal lateinit var startVisitUseCase: StartVisitUseCase
-    @[Inject StudentServiceCoroutineScope] internal lateinit var coroutineScope: CoroutineScope
+    @Inject
+    internal lateinit var getStudentServiceStateUseCase: GetStudentServiceStateUseCase
+    @Inject
+    internal lateinit var getNsdDiscoveredServicesMapUseCase: GetNsdDiscoveredServicesMapUseCase
+    @Inject
+    internal lateinit var updateStudentServiceStateUseCase: UpdateStudentServiceStateUseCase
+    @Inject
+    internal lateinit var addNsdDiscoveredServiceUseCase: AddNsdDiscoveredServiceUseCase
+    @Inject
+    internal lateinit var removeNsdDiscoveredServiceUseCase: RemoveNsdDiscoveredServiceUseCase
+    @Inject
+    internal lateinit var clearNsdDiscoveredServicesUseCase: ClearNsdDiscoveredServicesUseCase
+    @Inject
+    internal lateinit var startVisitUseCase: StartVisitUseCase
+    @[Inject StudentServiceCoroutineScope]
+    internal lateinit var coroutineScope: CoroutineScope
 
     private var state: StudentServiceState
         get() = getStudentServiceStateUseCase().value
@@ -64,9 +72,9 @@ internal class NsdStudentService : Service(),
         executedCommand = intent?.getCommandExtra()
 
         when (val command = executedCommand) {
-            null        -> Unit
+            null -> Unit
             is Discover -> state = Discovering
-            is Connect  -> state = Resolving(command.serviceName)
+            is Connect -> state = Resolving(command.serviceName)
         }
 
         return START_STICKY
@@ -85,10 +93,10 @@ internal class NsdStudentService : Service(),
         onNotificationChange(state)
 
         when (state) {
-            is Discovering                  -> onDiscover()
-            is Resolving                    -> onResolve(state.serviceName)
-            is Stopped, is StoppedByError   -> onStop()
-            else                            -> Unit
+            is Discovering -> onDiscover()
+            is Resolving -> onResolve(state.serviceName)
+            is Stopped, is StoppedByError -> onStop()
+            else -> Unit
         }
     }
 
@@ -222,9 +230,9 @@ internal class NsdStudentService : Service(),
 
     private fun cancelCurrentJob() {
         when (executedCommand) {
-            null            -> Unit
-            is Discover     -> nsdManager?.stopServiceDiscovery(/* listener = */ this)
-            is Connect      -> visitorJob?.cancel()
+            null -> Unit
+            is Discover -> nsdManager?.stopServiceDiscovery(/* listener = */ this)
+            is Connect -> visitorJob?.cancel()
         }
 
         executedCommand = null

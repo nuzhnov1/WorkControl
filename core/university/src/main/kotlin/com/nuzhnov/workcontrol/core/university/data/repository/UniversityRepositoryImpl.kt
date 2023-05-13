@@ -10,7 +10,8 @@ import com.nuzhnov.workcontrol.core.mapper.*
 import com.nuzhnov.workcontrol.core.model.*
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class UniversityRepositoryImpl @Inject constructor(
@@ -175,7 +176,9 @@ internal class UniversityRepositoryImpl @Inject constructor(
                 .map { studentDTO -> studentDTO.toStudentEntity(groupID) }
                 .toTypedArray()
 
-            universityLocalDataSource.saveStudentEntities(*studentEntityArray)
+            universityLocalDataSource
+                .saveStudentEntities(*studentEntityArray)
+                .getOrThrow()
         }
 
         response.toLoadResult { studentDTOList ->

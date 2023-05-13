@@ -1,8 +1,10 @@
 package com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.notification
 
-import com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.resources.*
+import com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.resources.teacherServiceTitle
+import com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.resources.toResourceString
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState
-import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState.*
+import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState.Running
+import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState.StoppedAcceptConnections
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.R
 import com.nuzhnov.workcontrol.core.visitservice.notification.extensions.getContentPendingIntent
 import com.nuzhnov.workcontrol.core.visitservice.notification.extensions.getNotificationBuilderTemplate

@@ -2,9 +2,10 @@ package com.nuzhnov.workcontrol.core.visitservice.studentservice.presentation.co
 
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.presentation.service.NsdStudentService
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.controller.StudentServiceController
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.UpdateStudentIdUseCase
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand.Connect
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand.Discover
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.ClearNsdDiscoveredServicesUseCase
-import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand.*
+import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.UpdateStudentIdUseCase
 import com.nuzhnov.workcontrol.core.model.Student
 import kotlin.reflect.KClass
 import javax.inject.Inject

@@ -16,8 +16,11 @@ import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.ApplicationCor
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
 import com.nuzhnov.workcontrol.common.util.throttleLatest
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class TeacherServiceRepositoryImpl @Inject constructor(
@@ -66,7 +69,7 @@ internal class TeacherServiceRepositoryImpl @Inject constructor(
 
             else -> participantsLocalDataSource.getParticipants(lessonID)
                 .onSuccess { participantEntityList ->
-                    val visitArray= participantEntityList
+                    val visitArray = participantEntityList
                         .map(ParticipantEntity::toVisit)
                         .toTypedArray()
 

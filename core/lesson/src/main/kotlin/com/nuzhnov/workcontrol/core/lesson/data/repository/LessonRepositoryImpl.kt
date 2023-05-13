@@ -14,7 +14,8 @@ import com.nuzhnov.workcontrol.core.model.Lesson
 import com.nuzhnov.workcontrol.core.model.Discipline
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class LessonRepositoryImpl @Inject constructor(

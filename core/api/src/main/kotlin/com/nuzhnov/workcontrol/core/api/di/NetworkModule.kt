@@ -2,15 +2,15 @@ package com.nuzhnov.workcontrol.core.api.di
 
 import com.nuzhnov.workcontrol.core.api.authenticator.ServiceAuthenticator
 import com.nuzhnov.workcontrol.core.api.constant.BACKEND_ENDPOINT
+import com.squareup.moshi.Moshi
 import javax.inject.Singleton
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import com.squareup.moshi.Moshi
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import okhttp3.OkHttpClient
 
 @[Module InstallIn(SingletonComponent::class)]
 internal object NetworkModule {
