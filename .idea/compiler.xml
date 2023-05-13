@@ -4,6 +4,7 @@
     <bytecodeTargetLevel target="1.5">
       <module name="WorkControl.core.api.test" target="1.8" />
       <module name="WorkControl.core.notification" target="1.8" />
+      <module name="WorkControl.core.resources" target="1.8" />
       <module name="WorkControl.core.room" target="1.8" />
       <module name="WorkControl.core.studentservice" target="1.8" />
       <module name="WorkControl.core.teacherservice" target="1.8" />
