@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.nuzhnov.workcontrol.core.statistics"
+    namespace = "com.nuzhnov.workcontrol.core.data.preferences"
     compileSdk = 33
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 14
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -21,7 +21,7 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
+                getDefaultProguardFile(name = "proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
@@ -48,14 +48,13 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:data:api"))
-    implementation(project(":core:data:database"))
-    implementation(project(":core:data:mapper"))
     implementation(project(":core:model"))
-    implementation(project(":core:util:coroutines"))
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("com.google.dagger:hilt-android:2.44")
+    implementation("com.squareup.moshi:moshi:1.14.0")
 
     kapt("com.google.dagger:hilt-android-compiler:2.44")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.14.0")
 }
 
 kapt {

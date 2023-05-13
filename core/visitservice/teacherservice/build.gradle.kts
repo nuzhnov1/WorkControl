@@ -50,9 +50,9 @@ android {
 dependencies {
     implementation(project(":core:visitservice:notification"))
     implementation(project(":core:visitservice:util"))
-    implementation(project(":core:database"))
+    implementation(project(":core:data:database"))
     implementation(project(":core:model"))
-    implementation(project(":core:mapper"))
+    implementation(project(":core:data:mapper"))
     implementation(project(":core:util:coroutines"))
     implementation(project(":common:util"))
     implementation(project(":common:visitcontrol"))

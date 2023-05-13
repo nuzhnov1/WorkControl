@@ -1,9 +1,9 @@
 package com.nuzhnov.workcontrol.core.lesson.data.datasource
 
-import com.nuzhnov.workcontrol.core.database.dao.StudentDAO
-import com.nuzhnov.workcontrol.core.database.entity.StudentEntity
-import com.nuzhnov.workcontrol.core.database.entity.model.StudentModel
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.database.dao.StudentDAO
+import com.nuzhnov.workcontrol.core.data.database.entity.StudentEntity
+import com.nuzhnov.workcontrol.core.data.database.entity.model.StudentModel
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher

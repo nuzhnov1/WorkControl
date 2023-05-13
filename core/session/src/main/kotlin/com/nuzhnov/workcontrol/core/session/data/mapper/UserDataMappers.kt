@@ -1,15 +1,15 @@
 package com.nuzhnov.workcontrol.core.session.data.mapper
 
 import com.nuzhnov.workcontrol.core.session.domen.model.UserData
-import com.nuzhnov.workcontrol.core.api.dto.university.DisciplineDTO
-import com.nuzhnov.workcontrol.core.api.dto.user.StudentModelDTO
-import com.nuzhnov.workcontrol.core.api.dto.user.TeacherModelDTO
-import com.nuzhnov.workcontrol.core.database.entity.DisciplineEntity
-import com.nuzhnov.workcontrol.core.database.entity.model.StudentModel
-import com.nuzhnov.workcontrol.core.database.entity.model.TeacherModel
-import com.nuzhnov.workcontrol.core.mapper.toDiscipline
-import com.nuzhnov.workcontrol.core.mapper.toStudent
-import com.nuzhnov.workcontrol.core.mapper.toTeacher
+import com.nuzhnov.workcontrol.core.data.api.dto.university.DisciplineDTO
+import com.nuzhnov.workcontrol.core.data.api.dto.user.StudentModelDTO
+import com.nuzhnov.workcontrol.core.data.api.dto.user.TeacherModelDTO
+import com.nuzhnov.workcontrol.core.data.database.entity.DisciplineEntity
+import com.nuzhnov.workcontrol.core.data.database.entity.model.StudentModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.TeacherModel
+import com.nuzhnov.workcontrol.core.data.mapper.toDiscipline
+import com.nuzhnov.workcontrol.core.data.mapper.toStudent
+import com.nuzhnov.workcontrol.core.data.mapper.toTeacher
 
 
 internal fun StudentModelDTO.toUserData(): UserData = UserData.StudentData(

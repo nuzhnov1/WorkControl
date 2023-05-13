@@ -10,7 +10,7 @@ import com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.mapper.toSe
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.repository.TeacherServiceRepository
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceState
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.model.TeacherServiceError
-import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
+import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.ApplicationCoroutineScope
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher

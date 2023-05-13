@@ -49,10 +49,10 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
-    implementation(project(":core:api"))
-    implementation(project(":core:database"))
-    implementation(project(":core:preferences"))
-    implementation(project(":core:mapper"))
+    implementation(project(":core:data:api"))
+    implementation(project(":core:data:database"))
+    implementation(project(":core:data:preferences"))
+    implementation(project(":core:data:mapper"))
     implementation(project(":core:util:coroutines"))
     implementation("com.google.dagger:hilt-android:2.44")
     implementation("com.soywiz.korlibs.klock:klock-jvm:2.2.0")

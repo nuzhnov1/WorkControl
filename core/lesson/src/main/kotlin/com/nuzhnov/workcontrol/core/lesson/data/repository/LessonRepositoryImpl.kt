@@ -5,10 +5,10 @@ import com.nuzhnov.workcontrol.core.lesson.data.datasource.LessonLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.ParticipantRemoteDataSource
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.ParticipantLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.domen.repository.LessonRepository
-import com.nuzhnov.workcontrol.core.api.dto.lesson.LessonDTO
-import com.nuzhnov.workcontrol.core.api.util.Response
-import com.nuzhnov.workcontrol.core.database.entity.model.LessonModel
-import com.nuzhnov.workcontrol.core.mapper.*
+import com.nuzhnov.workcontrol.core.data.api.dto.lesson.LessonDTO
+import com.nuzhnov.workcontrol.core.data.api.util.Response
+import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonModel
+import com.nuzhnov.workcontrol.core.data.mapper.*
 import com.nuzhnov.workcontrol.core.model.Lesson
 import com.nuzhnov.workcontrol.core.model.Discipline
 import com.nuzhnov.workcontrol.core.model.util.LoadResult

@@ -1,13 +1,11 @@
 plugins {
-    kotlin("kapt")
     kotlin("android")
 
     id("com.android.library")
-    id("com.google.dagger.hilt.android")
 }
 
 android {
-    namespace = "com.nuzhnov.workcontrol.core.statistics"
+    namespace = "com.nuzhnov.workcontrol.core.data.mapper"
     compileSdk = 33
 
     defaultConfig {
@@ -50,14 +48,6 @@ android {
 dependencies {
     implementation(project(":core:data:api"))
     implementation(project(":core:data:database"))
-    implementation(project(":core:data:mapper"))
     implementation(project(":core:model"))
-    implementation(project(":core:util:coroutines"))
-    implementation("com.google.dagger:hilt-android:2.44")
-
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
-}
-
-kapt {
-    correctErrorTypes = true
+    implementation("com.soywiz.korlibs.klock:klock-jvm:2.2.0")
 }

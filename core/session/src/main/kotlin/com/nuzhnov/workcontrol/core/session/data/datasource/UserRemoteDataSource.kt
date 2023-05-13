@@ -2,9 +2,9 @@ package com.nuzhnov.workcontrol.core.session.data.datasource
 
 import com.nuzhnov.workcontrol.core.session.data.mapper.toUserData
 import com.nuzhnov.workcontrol.core.session.domen.model.UserData
-import com.nuzhnov.workcontrol.core.api.service.UserService
-import com.nuzhnov.workcontrol.core.api.util.Response
-import com.nuzhnov.workcontrol.core.api.util.safeApiCall
+import com.nuzhnov.workcontrol.core.data.api.service.UserService
+import com.nuzhnov.workcontrol.core.data.api.util.Response
+import com.nuzhnov.workcontrol.core.data.api.util.safeApiCall
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher

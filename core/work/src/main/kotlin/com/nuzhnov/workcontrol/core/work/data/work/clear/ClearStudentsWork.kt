@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.core.work.data.work.clear
 
-import com.nuzhnov.workcontrol.core.database.dao.StudentDAO
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.database.dao.StudentDAO
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject

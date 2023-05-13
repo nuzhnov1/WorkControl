@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.core.university.data.datasource
 
-import com.nuzhnov.workcontrol.core.database.dao.*
-import com.nuzhnov.workcontrol.core.database.entity.*
+import com.nuzhnov.workcontrol.core.data.database.dao.*
+import com.nuzhnov.workcontrol.core.data.database.entity.*
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher

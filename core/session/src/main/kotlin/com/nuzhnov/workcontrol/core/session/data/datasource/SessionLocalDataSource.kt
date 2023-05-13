@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.core.session.data.datasource
 
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
-import com.nuzhnov.workcontrol.core.preferences.model.Session
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.preferences.model.Session
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher

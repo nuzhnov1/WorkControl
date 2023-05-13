@@ -1,14 +1,14 @@
 package com.nuzhnov.workcontrol.core.lesson.data.datasource
 
-import com.nuzhnov.workcontrol.core.database.dao.ParticipantDAO
-import com.nuzhnov.workcontrol.core.database.dao.StudentDAO
-import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.database.entity.model.ParticipantModel
-import com.nuzhnov.workcontrol.core.database.entity.model.ParticipantLessonModel
-import com.nuzhnov.workcontrol.core.database.entity.model.update.ParticipantUpdatableModel
-import com.nuzhnov.workcontrol.core.database.entity.StudentEntity
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
-import com.nuzhnov.workcontrol.core.mapper.toStudent
+import com.nuzhnov.workcontrol.core.data.database.dao.ParticipantDAO
+import com.nuzhnov.workcontrol.core.data.database.dao.StudentDAO
+import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
+import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantLessonModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.update.ParticipantUpdatableModel
+import com.nuzhnov.workcontrol.core.data.database.entity.StudentEntity
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.mapper.toStudent
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.model.Student
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute

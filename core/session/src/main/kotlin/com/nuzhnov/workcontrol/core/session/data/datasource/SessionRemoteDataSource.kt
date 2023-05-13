@@ -1,9 +1,9 @@
 package com.nuzhnov.workcontrol.core.session.data.datasource
 
-import com.nuzhnov.workcontrol.core.api.service.AuthorizationService
-import com.nuzhnov.workcontrol.core.api.dto.authorization.SessionDTO
-import com.nuzhnov.workcontrol.core.api.util.Response
-import com.nuzhnov.workcontrol.core.api.util.safeApiCall
+import com.nuzhnov.workcontrol.core.data.api.service.AuthorizationService
+import com.nuzhnov.workcontrol.core.data.api.dto.authorization.SessionDTO
+import com.nuzhnov.workcontrol.core.data.api.util.Response
+import com.nuzhnov.workcontrol.core.data.api.util.safeApiCall
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Inject

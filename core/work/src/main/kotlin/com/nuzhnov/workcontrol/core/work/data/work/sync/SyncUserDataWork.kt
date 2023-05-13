@@ -1,11 +1,11 @@
 package com.nuzhnov.workcontrol.core.work.data.work.sync
 
-import com.nuzhnov.workcontrol.core.api.service.UserService
-import com.nuzhnov.workcontrol.core.api.dto.university.DisciplineDTO
-import com.nuzhnov.workcontrol.core.database.dao.*
-import com.nuzhnov.workcontrol.core.database.entity.TeacherDisciplineCrossRefEntity
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
-import com.nuzhnov.workcontrol.core.mapper.*
+import com.nuzhnov.workcontrol.core.data.api.service.UserService
+import com.nuzhnov.workcontrol.core.data.api.dto.university.DisciplineDTO
+import com.nuzhnov.workcontrol.core.data.database.dao.*
+import com.nuzhnov.workcontrol.core.data.database.entity.TeacherDisciplineCrossRefEntity
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.mapper.*
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject

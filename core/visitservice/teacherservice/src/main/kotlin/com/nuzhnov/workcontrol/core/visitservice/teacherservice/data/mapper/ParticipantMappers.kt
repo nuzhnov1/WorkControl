@@ -1,11 +1,11 @@
 package com.nuzhnov.workcontrol.core.visitservice.teacherservice.data.mapper
 
-import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.database.entity.model.update.ParticipantActivityModel
-import com.nuzhnov.workcontrol.core.mapper.toDateTimeTz
-import com.nuzhnov.workcontrol.core.mapper.toTimeSpan
-import com.nuzhnov.workcontrol.core.mapper.toLong
-import com.nuzhnov.workcontrol.core.mapper.toDouble
+import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
+import com.nuzhnov.workcontrol.core.data.database.entity.model.update.ParticipantActivityModel
+import com.nuzhnov.workcontrol.core.data.mapper.toDateTimeTz
+import com.nuzhnov.workcontrol.core.data.mapper.toTimeSpan
+import com.nuzhnov.workcontrol.core.data.mapper.toLong
+import com.nuzhnov.workcontrol.core.data.mapper.toDouble
 import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
 
 

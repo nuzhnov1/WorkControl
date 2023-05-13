@@ -3,8 +3,8 @@ package com.nuzhnov.workcontrol.core.statistics.data.repository
 import com.nuzhnov.workcontrol.core.statistics.data.datasource.StatisticsRemoteDataSource
 import com.nuzhnov.workcontrol.core.statistics.data.datasource.StatisticsLocalDataSource
 import com.nuzhnov.workcontrol.core.statistics.domen.repository.StatisticsRepository
-import com.nuzhnov.workcontrol.core.mapper.toLoadResult
-import com.nuzhnov.workcontrol.core.mapper.toStatistics
+import com.nuzhnov.workcontrol.core.data.mapper.toLoadResult
+import com.nuzhnov.workcontrol.core.data.mapper.toStatistics
 import com.nuzhnov.workcontrol.core.model.Statistics
 import com.nuzhnov.workcontrol.core.model.Faculty
 import com.nuzhnov.workcontrol.core.model.Group

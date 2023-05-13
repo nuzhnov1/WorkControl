@@ -1,9 +1,9 @@
 package com.nuzhnov.workcontrol.core.statistics.data.datasource
 
-import com.nuzhnov.workcontrol.core.api.dto.statistics.StatisticsDTO
-import com.nuzhnov.workcontrol.core.api.service.StatisticsService
-import com.nuzhnov.workcontrol.core.api.util.Response
-import com.nuzhnov.workcontrol.core.api.util.safeApiCall
+import com.nuzhnov.workcontrol.core.data.api.dto.statistics.StatisticsDTO
+import com.nuzhnov.workcontrol.core.data.api.service.StatisticsService
+import com.nuzhnov.workcontrol.core.data.api.util.Response
+import com.nuzhnov.workcontrol.core.data.api.util.safeApiCall
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 

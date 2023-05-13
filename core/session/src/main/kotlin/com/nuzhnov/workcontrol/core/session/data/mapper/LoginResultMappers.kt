@@ -1,8 +1,8 @@
 package com.nuzhnov.workcontrol.core.session.data.mapper
 
 import com.nuzhnov.workcontrol.core.session.domen.model.LoginResult
-import com.nuzhnov.workcontrol.core.api.constant.LoginErrorMessages
-import com.nuzhnov.workcontrol.core.api.util.Response
+import com.nuzhnov.workcontrol.core.data.api.constant.LoginErrorMessages
+import com.nuzhnov.workcontrol.core.data.api.util.Response
 
 
 internal fun Response.Failure.toFailureLoginResult(): LoginResult.Failure = when (this) {

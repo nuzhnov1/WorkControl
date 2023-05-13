@@ -5,8 +5,8 @@ import com.nuzhnov.workcontrol.core.lesson.data.datasource.ParticipantLocalDataS
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.LessonLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.StudentLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.domen.repository.ParticipantRepository
-import com.nuzhnov.workcontrol.core.api.util.Response
-import com.nuzhnov.workcontrol.core.mapper.*
+import com.nuzhnov.workcontrol.core.data.api.util.Response
+import com.nuzhnov.workcontrol.core.data.mapper.*
 import com.nuzhnov.workcontrol.core.model.Participant
 import com.nuzhnov.workcontrol.core.model.Student
 import com.nuzhnov.workcontrol.core.model.Lesson

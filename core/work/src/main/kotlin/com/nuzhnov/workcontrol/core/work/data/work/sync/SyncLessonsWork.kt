@@ -1,12 +1,12 @@
 package com.nuzhnov.workcontrol.core.work.data.work.sync
 
-import com.nuzhnov.workcontrol.core.api.service.SyncService
-import com.nuzhnov.workcontrol.core.database.dao.LessonDAO
-import com.nuzhnov.workcontrol.core.database.dao.ParticipantDAO
-import com.nuzhnov.workcontrol.core.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
-import com.nuzhnov.workcontrol.core.mapper.toNewLessonDTO
-import com.nuzhnov.workcontrol.core.mapper.toUpdatedParticipantDTO
+import com.nuzhnov.workcontrol.core.data.api.service.SyncService
+import com.nuzhnov.workcontrol.core.data.database.dao.LessonDAO
+import com.nuzhnov.workcontrol.core.data.database.dao.ParticipantDAO
+import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.mapper.toNewLessonDTO
+import com.nuzhnov.workcontrol.core.data.mapper.toUpdatedParticipantDTO
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject

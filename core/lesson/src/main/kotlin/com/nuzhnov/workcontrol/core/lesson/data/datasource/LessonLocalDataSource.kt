@@ -1,13 +1,13 @@
 package com.nuzhnov.workcontrol.core.lesson.data.datasource
 
-import com.nuzhnov.workcontrol.core.database.dao.*
-import com.nuzhnov.workcontrol.core.database.entity.LessonEntity
-import com.nuzhnov.workcontrol.core.database.entity.model.LessonModel
-import com.nuzhnov.workcontrol.core.database.entity.LessonGroupCrossRefEntity
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
-import com.nuzhnov.workcontrol.core.mapper.toDateTimeTz
-import com.nuzhnov.workcontrol.core.mapper.toDouble
-import com.nuzhnov.workcontrol.core.mapper.toLong
+import com.nuzhnov.workcontrol.core.data.database.dao.*
+import com.nuzhnov.workcontrol.core.data.database.entity.LessonEntity
+import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonModel
+import com.nuzhnov.workcontrol.core.data.database.entity.LessonGroupCrossRefEntity
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.mapper.toDateTimeTz
+import com.nuzhnov.workcontrol.core.data.mapper.toDouble
+import com.nuzhnov.workcontrol.core.data.mapper.toLong
 import com.nuzhnov.workcontrol.core.model.Lesson
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute

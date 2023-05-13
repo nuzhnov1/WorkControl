@@ -3,10 +3,10 @@ package com.nuzhnov.workcontrol.core.university.data.repository
 import com.nuzhnov.workcontrol.core.university.data.datasource.UniversityRemoteDataSource
 import com.nuzhnov.workcontrol.core.university.data.datasource.UniversityLocalDataSource
 import com.nuzhnov.workcontrol.core.university.domen.repository.UniversityRepository
-import com.nuzhnov.workcontrol.core.api.dto.university.*
-import com.nuzhnov.workcontrol.core.api.util.Response
-import com.nuzhnov.workcontrol.core.database.entity.*
-import com.nuzhnov.workcontrol.core.mapper.*
+import com.nuzhnov.workcontrol.core.data.api.dto.university.*
+import com.nuzhnov.workcontrol.core.data.api.util.Response
+import com.nuzhnov.workcontrol.core.data.database.entity.*
+import com.nuzhnov.workcontrol.core.data.mapper.*
 import com.nuzhnov.workcontrol.core.model.*
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute

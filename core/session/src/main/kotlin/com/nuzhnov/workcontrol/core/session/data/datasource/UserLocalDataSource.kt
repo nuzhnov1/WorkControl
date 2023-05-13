@@ -2,10 +2,10 @@ package com.nuzhnov.workcontrol.core.session.data.datasource
 
 import com.nuzhnov.workcontrol.core.session.data.mapper.toUserData
 import com.nuzhnov.workcontrol.core.session.domen.model.UserData
-import com.nuzhnov.workcontrol.core.database.entity.TeacherDisciplineCrossRefEntity
-import com.nuzhnov.workcontrol.core.database.dao.*
-import com.nuzhnov.workcontrol.core.preferences.AppPreferences
-import com.nuzhnov.workcontrol.core.mapper.*
+import com.nuzhnov.workcontrol.core.data.database.entity.TeacherDisciplineCrossRefEntity
+import com.nuzhnov.workcontrol.core.data.database.dao.*
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.mapper.*
 import com.nuzhnov.workcontrol.core.model.Discipline
 import com.nuzhnov.workcontrol.core.model.Role
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute

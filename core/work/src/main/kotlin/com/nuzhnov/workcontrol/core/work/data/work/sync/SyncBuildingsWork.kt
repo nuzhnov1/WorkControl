@@ -1,9 +1,9 @@
 package com.nuzhnov.workcontrol.core.work.data.work.sync
 
-import com.nuzhnov.workcontrol.core.api.service.SyncService
-import com.nuzhnov.workcontrol.core.api.dto.university.BuildingDTO
-import com.nuzhnov.workcontrol.core.database.dao.BuildingDAO
-import com.nuzhnov.workcontrol.core.mapper.toBuildingEntity
+import com.nuzhnov.workcontrol.core.data.api.service.SyncService
+import com.nuzhnov.workcontrol.core.data.api.dto.university.BuildingDTO
+import com.nuzhnov.workcontrol.core.data.database.dao.BuildingDAO
+import com.nuzhnov.workcontrol.core.data.mapper.toBuildingEntity
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject
 
