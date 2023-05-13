@@ -85,6 +85,6 @@ internal fun Throwable.toLog() = when (localizedMessage) {
 }
 
 internal fun Boolean.toLog() = when (this) {
-    true    -> "yes"
-    false   -> "no"
+    true -> "yes"
+    false -> "no"
 }

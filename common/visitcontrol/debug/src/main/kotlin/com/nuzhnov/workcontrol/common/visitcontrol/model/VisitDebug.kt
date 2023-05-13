@@ -10,8 +10,8 @@ internal data class VisitDebug(
     val totalVisitDuration: TimeSpan
 ) : Comparable<VisitDebug> {
     override fun equals(other: Any?) = when (other) {
-        is VisitDebug   -> visitorID == other.visitorID
-        else            -> false
+        is VisitDebug -> visitorID == other.visitorID
+        else -> false
     }
 
     override fun hashCode() = visitorID.hashCode()

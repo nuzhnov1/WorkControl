@@ -6,7 +6,10 @@ import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerExceptio
 import com.nuzhnov.workcontrol.common.visitcontrol.control.ControlServerState.*
 import com.nuzhnov.workcontrol.common.visitcontrol.model.Visit
 import com.nuzhnov.workcontrol.common.visitcontrol.model.VisitorID
-import com.nuzhnov.workcontrol.common.visitcontrol.util.*
+import com.nuzhnov.workcontrol.common.visitcontrol.util.isEventsNotOccurred
+import com.nuzhnov.workcontrol.common.visitcontrol.util.safeClose
+import com.nuzhnov.workcontrol.common.visitcontrol.util.selectedKeys
+import com.nuzhnov.workcontrol.common.visitcontrol.util.serverChannel
 import com.nuzhnov.workcontrol.common.util.applyCatching
 import com.nuzhnov.workcontrol.common.util.applyUpdate
 import com.nuzhnov.workcontrol.common.util.transformFailedCause
@@ -143,9 +146,9 @@ internal class ControlServerImpl : ControlServer {
 
     private fun ControlServerState.toNextStateOnNormalCompletion(): ControlServerState =
         when (this) {
-            is Running                  -> Stopped(address, port)
+            is Running -> Stopped(address, port)
             is StoppedAcceptConnections -> StoppedByError(address, port, error, cause)
-            else                        -> this
+            else -> this
         }
 
     private fun ControlServerException.toControlServerState(): ControlServerState =
@@ -298,7 +301,7 @@ internal class ControlServerImpl : ControlServer {
             this[visitorID] = Visit(
                 visitorID = visitorID,
                 isActive = isActiveNow,
-                lastVisit = if (isActiveNow) { now } else { null },
+                lastVisit = if (isActiveNow) now else null ,
                 totalVisitDuration = TimeSpan.ZERO
             )
         } else {
@@ -310,7 +313,7 @@ internal class ControlServerImpl : ControlServer {
             this[visitorID] = Visit(
                 visitorID = visitorID,
                 isActive = isActiveNow,
-                lastVisit = if (isActiveNow) { now } else { previouslyVisitTime },
+                lastVisit = if (isActiveNow) now else previouslyVisitTime,
                 totalVisitDuration = if (isPreviouslyActive) { duration + delta } else { duration }
             )
         }
