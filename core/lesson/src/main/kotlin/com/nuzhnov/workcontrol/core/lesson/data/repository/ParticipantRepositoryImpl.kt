@@ -5,8 +5,6 @@ import com.nuzhnov.workcontrol.core.lesson.data.datasource.ParticipantLocalDataS
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.LessonLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.StudentLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.domen.repository.ParticipantRepository
-import com.nuzhnov.workcontrol.core.api.dto.lesson.ParticipantModelDTO
-import com.nuzhnov.workcontrol.core.api.dto.lesson.ParticipantLessonModelDTO
 import com.nuzhnov.workcontrol.core.api.util.Response
 import com.nuzhnov.workcontrol.core.mapper.*
 import com.nuzhnov.workcontrol.core.model.Participant
@@ -91,7 +89,7 @@ internal class ParticipantRepositoryImpl @Inject constructor(
         val response = participantRemoteDataSource
             .getParticipantsOfFinishedTeacherLesson(lessonID)
 
-        if (response is Response.Success<List<ParticipantModelDTO>>) {
+        if (response is Response.Success) {
             val participantModelDTOList = response.value
 
             val participantEntityArray = participantModelDTOList
@@ -129,7 +127,7 @@ internal class ParticipantRepositoryImpl @Inject constructor(
         val response = participantRemoteDataSource
             .getStudentParticipationOfFinishedTeacherLessons(studentID)
 
-        if (response is Response.Success<List<ParticipantLessonModelDTO>>) {
+        if (response is Response.Success) {
             val participantLessonModelDTOList = response.value
 
             val participantEntityArray = participantLessonModelDTOList
@@ -170,7 +168,7 @@ internal class ParticipantRepositoryImpl @Inject constructor(
             val studentID = student.id
             val response = participantRemoteDataSource.getStudentParticipationOfFinishedLessons()
 
-            if (response is Response.Success<List<ParticipantLessonModelDTO>>) {
+            if (response is Response.Success) {
                 val participantLessonModelDTOList = response.value
 
                 val participantEntityArray = participantLessonModelDTOList

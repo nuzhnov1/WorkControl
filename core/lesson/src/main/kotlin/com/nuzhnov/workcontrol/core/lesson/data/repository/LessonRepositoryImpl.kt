@@ -6,7 +6,6 @@ import com.nuzhnov.workcontrol.core.lesson.data.datasource.ParticipantRemoteData
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.ParticipantLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.domen.repository.LessonRepository
 import com.nuzhnov.workcontrol.core.api.dto.lesson.LessonDTO
-import com.nuzhnov.workcontrol.core.api.dto.university.StudentDTO
 import com.nuzhnov.workcontrol.core.api.util.Response
 import com.nuzhnov.workcontrol.core.database.entity.model.LessonModel
 import com.nuzhnov.workcontrol.core.mapper.*
@@ -52,7 +51,7 @@ internal class LessonRepositoryImpl @Inject constructor(
     override suspend fun loadFinishedLessons(): LoadResult<List<Lesson>> = safeExecute {
         val response = lessonRemoteDataSource.getFinishedLessons()
 
-        if (response is Response.Success<List<LessonDTO>>) {
+        if (response is Response.Success) {
             val finishedLessonDTOList = response.value
             val finishedLessonModelArray = finishedLessonDTOList
                 .map(LessonDTO::toLessonModel)
@@ -72,7 +71,7 @@ internal class LessonRepositoryImpl @Inject constructor(
         val response = lessonRemoteDataSource
             .getDisciplineFinishedLessons(disciplineID = discipline.id)
 
-        if (response is Response.Success<List<LessonDTO>>) {
+        if (response is Response.Success) {
             val finishedLessonDTOList = response.value
             val finishedLessonModelArray = finishedLessonDTOList
                 .map(LessonDTO::toLessonModel)
@@ -91,7 +90,7 @@ internal class LessonRepositoryImpl @Inject constructor(
         val groupIDList = lesson.associatedGroups.map { group -> group.id }
         val response = participantRemoteDataSource.getStudentsOfGroups(groupIDList)
 
-        if (response is Response.Success<Map<Long, StudentDTO>>) {
+        if (response is Response.Success) {
             val studentDTOMap = response.value
             val studentEntityList = studentDTOMap.map { (groupID, studentDTO) ->
                 studentDTO.toStudentEntity(groupID)
@@ -114,7 +113,7 @@ internal class LessonRepositoryImpl @Inject constructor(
         val groupIDList = lesson.associatedGroups.map { group -> group.id }
         val response = participantRemoteDataSource.getStudentsOfGroups(groupIDList)
 
-        if (response is Response.Success<Map<Long, StudentDTO>>) {
+        if (response is Response.Success) {
             val studentDTOMap = response.value
             val studentEntityList = studentDTOMap.map { (groupID, studentDTO) ->
                 studentDTO.toStudentEntity(groupID)

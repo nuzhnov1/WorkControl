@@ -7,7 +7,6 @@ import com.nuzhnov.workcontrol.core.session.data.mapper.unwrap
 import com.nuzhnov.workcontrol.core.session.domen.repository.SessionRepository
 import com.nuzhnov.workcontrol.core.session.domen.model.LoginResult
 import com.nuzhnov.workcontrol.core.session.domen.model.UserData
-import com.nuzhnov.workcontrol.core.api.dto.authorization.SessionDTO
 import com.nuzhnov.workcontrol.core.api.util.Response
 import com.nuzhnov.workcontrol.core.mapper.toLoadResult
 import com.nuzhnov.workcontrol.core.mapper.unwrap
@@ -30,7 +29,7 @@ internal class SessionRepositoryImpl @Inject constructor(
         isLoginSave: Boolean
     ): LoginResult = safeExecute {
         when (val authorizationResponse = sessionRemoteDataSource.login(login, password)) {
-            is Response.Success<SessionDTO> -> {
+            is Response.Success -> {
                 val session = authorizationResponse.value.toSession()
 
                 sessionLocalDataSource.saveSession(session).getOrThrow()
@@ -74,7 +73,7 @@ internal class SessionRepositoryImpl @Inject constructor(
         val sessionRole = session.role
         val getUserDataResponse = userRemoteDataSource.getUserData(sessionRole)
 
-        if (getUserDataResponse is Response.Success<UserData>) {
+        if (getUserDataResponse is Response.Success) {
             userLocalDataSource
                 .saveUserData(userData = getUserDataResponse.value)
                 .getOrThrow()

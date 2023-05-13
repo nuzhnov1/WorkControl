@@ -89,7 +89,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
     override suspend fun loadBuildings(): LoadResult<List<Building>> = safeExecute {
         val response = universityRemoteDataSource.getBuildingsDTO()
 
-        if (response is Response.Success<List<BuildingDTO>>) {
+        if (response is Response.Success) {
             val buildingDTOList = response.value
             val buildingEntityArray = buildingDTOList
                 .map(BuildingDTO::toBuildingEntity)
@@ -109,7 +109,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
         val buildingID = building.id
         val response = universityRemoteDataSource.getRoomsDTO(buildingID)
 
-        if (response is Response.Success<List<RoomDTO>>) {
+        if (response is Response.Success) {
             val roomDTOList = response.value
             val roomEntityArray = roomDTOList
                 .map { roomDTO -> roomDTO.toRoomEntity(buildingID) }
@@ -128,7 +128,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
     override suspend fun loadFaculties(): LoadResult<List<Faculty>> = safeExecute {
         val response = universityRemoteDataSource.getFacultiesDTO()
 
-        if (response is Response.Success<List<FacultyDTO>>) {
+        if (response is Response.Success) {
             val facultyDTOList = response.value
             val facultyEntityArray = facultyDTOList
                 .map(FacultyDTO::toFacultyEntity)
@@ -148,7 +148,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
         val facultyID = faculty.id
         val response = universityRemoteDataSource.getGroupsDTO(facultyID)
 
-        if (response is Response.Success<List<GroupDTO>>) {
+        if (response is Response.Success) {
             val groupDTOList = response.value
             val groupEntityArray = groupDTOList
                 .map { groupDTO -> groupDTO.toGroupEntity(facultyID) }
@@ -170,7 +170,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
         val groupID = group.id
         val response = universityRemoteDataSource.getStudentsDTO(groupID)
 
-        if (response is Response.Success<List<StudentDTO>>) {
+        if (response is Response.Success) {
             val studentDTOList = response.value
             val studentEntityArray = studentDTOList
                 .map { studentDTO -> studentDTO.toStudentEntity(groupID) }

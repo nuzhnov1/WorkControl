@@ -25,6 +25,7 @@
             <option value="$PROJECT_DIR$/core/preferences" />
             <option value="$PROJECT_DIR$/core/resources" />
             <option value="$PROJECT_DIR$/core/session" />
+            <option value="$PROJECT_DIR$/core/statistics" />
             <option value="$PROJECT_DIR$/core/university" />
             <option value="$PROJECT_DIR$/core/util" />
             <option value="$PROJECT_DIR$/core/util/coroutines" />
