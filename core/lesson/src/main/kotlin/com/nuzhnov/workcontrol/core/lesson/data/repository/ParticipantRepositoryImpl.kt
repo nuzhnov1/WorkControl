@@ -12,7 +12,10 @@ import com.nuzhnov.workcontrol.core.model.Student
 import com.nuzhnov.workcontrol.core.model.Lesson
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -20,7 +23,8 @@ internal class ParticipantRepositoryImpl @Inject constructor(
     private val participantRemoteDataSource: ParticipantRemoteDataSource,
     private val participantLocalDataSource: ParticipantLocalDataSource,
     private val lessonLocalDataSource: LessonLocalDataSource,
-    private val studentLocalDataSource: StudentLocalDataSource
+    private val studentLocalDataSource: StudentLocalDataSource,
+    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : ParticipantRepository {
 
     override fun getParticipantsOfLessonFlow(
@@ -49,7 +53,7 @@ internal class ParticipantRepositoryImpl @Inject constructor(
                     )
                 }
             }
-    }
+    }.flowOn(context = coroutineDispatcher)
 
     override fun getStudentParticipationOfTeacherLessonsFlow(
         student: Student
@@ -66,6 +70,7 @@ internal class ParticipantRepositoryImpl @Inject constructor(
                 )
             }
         }
+        .flowOn(context = coroutineDispatcher)
 
     override fun getStudentParticipationOfLessonsFlow(): Flow<LoadResult<List<Participant>>> =
         participantLocalDataSource
@@ -81,10 +86,11 @@ internal class ParticipantRepositoryImpl @Inject constructor(
                     )
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override suspend fun loadParticipantsOfFinishedLesson(
         lesson: Lesson
-    ): LoadResult<List<Participant>> = safeExecute {
+    ): LoadResult<List<Participant>> = safeExecute(context = coroutineDispatcher) {
         val lessonID = lesson.id
         val response = participantRemoteDataSource
             .getParticipantsOfFinishedTeacherLesson(lessonID)
@@ -122,7 +128,7 @@ internal class ParticipantRepositoryImpl @Inject constructor(
 
     override suspend fun loadStudentParticipationOfTeacherLessons(
         student: Student
-    ): LoadResult<List<Participant>> = safeExecute {
+    ): LoadResult<List<Participant>> = safeExecute(context = coroutineDispatcher) {
         val studentID = student.id
         val response = participantRemoteDataSource
             .getStudentParticipationOfFinishedTeacherLessons(studentID)
@@ -159,7 +165,7 @@ internal class ParticipantRepositoryImpl @Inject constructor(
     }.unwrap()
 
     override suspend fun loadStudentParticipationOfLessons(): LoadResult<List<Participant>> =
-        safeExecute {
+        safeExecute(context = coroutineDispatcher) {
             val student = studentLocalDataSource
                 .getCurrentStudentModel()
                 .getOrThrow()
@@ -200,7 +206,9 @@ internal class ParticipantRepositoryImpl @Inject constructor(
         }.unwrap()
 
     override suspend fun updateParticipant(participant: Participant): Result<Unit> =
-        participantLocalDataSource.updateParticipant(
-            participantUpdatableModel = participant.toParticipantUpdatableModel()
-        )
+        safeExecute(context = coroutineDispatcher) {
+            participantLocalDataSource.updateParticipant(
+                participantUpdatableModel = participant.toParticipantUpdatableModel()
+            )
+        }
 }

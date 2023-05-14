@@ -5,18 +5,24 @@ import com.nuzhnov.workcontrol.core.statistics.data.datasource.StatisticsLocalDa
 import com.nuzhnov.workcontrol.core.statistics.domen.repository.StatisticsRepository
 import com.nuzhnov.workcontrol.core.data.mapper.toLoadResult
 import com.nuzhnov.workcontrol.core.data.mapper.toStatistics
+import com.nuzhnov.workcontrol.core.data.mapper.unwrap
 import com.nuzhnov.workcontrol.core.model.Statistics
 import com.nuzhnov.workcontrol.core.model.Faculty
 import com.nuzhnov.workcontrol.core.model.Group
 import com.nuzhnov.workcontrol.core.model.Student
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
+import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class StatisticsRepositoryImpl @Inject constructor(
     private val statisticsRemoteDataSource: StatisticsRemoteDataSource,
-    private val statisticsLocalDataSource: StatisticsLocalDataSource
+    private val statisticsLocalDataSource: StatisticsLocalDataSource,
+    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : StatisticsRepository {
 
     override fun getUniversityStatisticsFlow(): Flow<LoadResult<Statistics>> =
@@ -29,6 +35,7 @@ internal class StatisticsRepositoryImpl @Inject constructor(
                     LoadResult.Success(data = statistics)
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override fun getFacultyStatisticsFlow(faculty: Faculty): Flow<LoadResult<Statistics>> =
         statisticsLocalDataSource
@@ -40,6 +47,7 @@ internal class StatisticsRepositoryImpl @Inject constructor(
                     LoadResult.Success(data = statistics)
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override fun getGroupStatisticsFlow(group: Group): Flow<LoadResult<Statistics>> =
         statisticsLocalDataSource
@@ -51,6 +59,7 @@ internal class StatisticsRepositoryImpl @Inject constructor(
                     LoadResult.Success(data = statistics)
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override fun getStudentStatisticsFlow(student: Student): Flow<LoadResult<Statistics>> =
         statisticsLocalDataSource
@@ -62,6 +71,7 @@ internal class StatisticsRepositoryImpl @Inject constructor(
                     LoadResult.Success(data = statistics)
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override fun getCurrentStudentStatisticsFlow(): Flow<LoadResult<Statistics>> =
         statisticsLocalDataSource
@@ -73,46 +83,68 @@ internal class StatisticsRepositoryImpl @Inject constructor(
                     LoadResult.Success(data = statistics)
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override suspend fun loadUniversityStatistics(): LoadResult<Statistics> =
-        statisticsRemoteDataSource
-            .getUniversityStatistics()
-            .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
-            .onSuccess { statistics ->
-                statisticsLocalDataSource.saveUniversityStatistics(statistics)
-            }
+        safeExecute(context = coroutineDispatcher) {
+            statisticsRemoteDataSource
+                .getUniversityStatistics()
+                .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
+                .onSuccess { statistics ->
+                    statisticsLocalDataSource.saveUniversityStatistics(statistics = statistics)
+                }
+        }.unwrap()
 
     override suspend fun loadFacultyStatistics(faculty: Faculty): LoadResult<Statistics> =
-        statisticsRemoteDataSource
-            .getFacultyStatistics(facultyID = faculty.id)
-            .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
-            .onSuccess { statistics ->
-                statisticsLocalDataSource.saveFacultyStatistics(facultyID = faculty.id, statistics)
-            }
+        safeExecute(context = coroutineDispatcher) {
+            statisticsRemoteDataSource
+                .getFacultyStatistics(facultyID = faculty.id)
+                .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
+                .onSuccess { statistics ->
+                    statisticsLocalDataSource.saveFacultyStatistics(
+                        facultyID = faculty.id,
+                        statistics = statistics
+                    )
+                }
+        }.unwrap()
 
     override suspend fun loadGroupStatistics(group: Group): LoadResult<Statistics> =
-        statisticsRemoteDataSource
-            .getGroupStatistics(groupID = group.id)
-            .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
-            .onSuccess { statistics ->
-                statisticsLocalDataSource.saveGroupStatistics(groupID = group.id, statistics)
-            }
+        safeExecute(context = coroutineDispatcher) {
+            statisticsRemoteDataSource
+                .getGroupStatistics(groupID = group.id)
+                .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
+                .onSuccess { statistics ->
+                    statisticsLocalDataSource.saveGroupStatistics(
+                        groupID = group.id,
+                        statistics = statistics
+                    )
+                }
+        }.unwrap()
 
     override suspend fun loadStudentStatistics(student: Student): LoadResult<Statistics> =
-        statisticsRemoteDataSource
-            .getStudentStatistics(studentID = student.id)
-            .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
-            .onSuccess { statistics ->
-                statisticsLocalDataSource.saveStudentStatistics(studentID = student.id, statistics)
-            }
+        safeExecute(context = coroutineDispatcher) {
+            statisticsRemoteDataSource
+                .getStudentStatistics(studentID = student.id)
+                .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
+                .onSuccess { statistics ->
+                    statisticsLocalDataSource.saveStudentStatistics(
+                        studentID = student.id,
+                        statistics = statistics
+                    )
+                }
+        }.unwrap()
 
     override suspend fun loadCurrentStudentStatistics(): LoadResult<Statistics> =
-        statisticsRemoteDataSource
-            .getCurrentStudentStatistics()
-            .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
-            .onSuccess { statistics ->
-                statisticsLocalDataSource.saveCurrentStudentStatistics(statistics)
-            }
+        safeExecute(context = coroutineDispatcher) {
+            statisticsRemoteDataSource
+                .getCurrentStudentStatistics()
+                .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
+                .onSuccess { statistics ->
+                    statisticsLocalDataSource.saveCurrentStudentStatistics(
+                        statistics = statistics
+                    )
+                }
+        }.unwrap()
 
     private inline fun <T> LoadResult<T>.onSuccess(
         block: (T) -> Unit

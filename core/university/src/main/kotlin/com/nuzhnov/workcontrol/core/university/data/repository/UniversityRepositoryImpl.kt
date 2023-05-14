@@ -10,13 +10,17 @@ import com.nuzhnov.workcontrol.core.data.mapper.*
 import com.nuzhnov.workcontrol.core.model.*
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
+import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class UniversityRepositoryImpl @Inject constructor(
     private val universityRemoteDataSource: UniversityRemoteDataSource,
-    private val universityLocalDataSource: UniversityLocalDataSource
+    private val universityLocalDataSource: UniversityLocalDataSource,
+    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : UniversityRepository {
 
     override fun getBuildingsFlow(): Flow<LoadResult<List<Building>>> =
@@ -31,6 +35,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
                     )
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override fun getBuildingRoomsFlow(building: Building): Flow<LoadResult<List<Room>>> =
         universityLocalDataSource
@@ -44,6 +49,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
                     )
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override fun getFacultiesFlow(): Flow<LoadResult<List<Faculty>>> =
         universityLocalDataSource
@@ -57,6 +63,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
                     )
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override fun getFacultyGroupsFlow(faculty: Faculty): Flow<LoadResult<List<Group>>> =
         universityLocalDataSource
@@ -70,6 +77,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
                     )
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
     override fun getStudentsOfGroupFlow(group: Group): Flow<LoadResult<List<Student>>> =
         universityLocalDataSource
@@ -85,104 +93,108 @@ internal class UniversityRepositoryImpl @Inject constructor(
                     )
                 }
             }
+            .flowOn(context = coroutineDispatcher)
 
-    override suspend fun loadBuildings(): LoadResult<List<Building>> = safeExecute {
-        val response = universityRemoteDataSource.getBuildingsDTO()
+    override suspend fun loadBuildings(): LoadResult<List<Building>> =
+        safeExecute(context = coroutineDispatcher) {
+            val response = universityRemoteDataSource.getBuildingsDTO()
 
-        if (response is Response.Success) {
-            val buildingDTOList = response.value
-            val buildingEntityArray = buildingDTOList
-                .map(BuildingDTO::toBuildingEntity)
-                .toTypedArray()
+            if (response is Response.Success) {
+                val buildingDTOList = response.value
+                val buildingEntityArray = buildingDTOList
+                    .map(BuildingDTO::toBuildingEntity)
+                    .toTypedArray()
 
-            universityLocalDataSource
-                .saveBuildingEntities(*buildingEntityArray)
-                .getOrThrow()
-        }
+                universityLocalDataSource
+                    .saveBuildingEntities(*buildingEntityArray)
+                    .getOrThrow()
+            }
 
-        response.toLoadResult { buildingDTOList -> buildingDTOList.map(BuildingDTO::toBuilding) }
-    }.unwrap()
+            response.toLoadResult { buildingDTOList ->
+                buildingDTOList.map(BuildingDTO::toBuilding)
+            }
+        }.unwrap()
 
-    override suspend fun loadBuildingsRooms(
-        building: Building
-    ): LoadResult<List<Room>> = safeExecute {
-        val buildingID = building.id
-        val response = universityRemoteDataSource.getRoomsDTO(buildingID)
+    override suspend fun loadBuildingsRooms(building: Building): LoadResult<List<Room>> =
+        safeExecute(context = coroutineDispatcher) {
+            val buildingID = building.id
+            val response = universityRemoteDataSource.getRoomsDTO(buildingID)
 
-        if (response is Response.Success) {
-            val roomDTOList = response.value
-            val roomEntityArray = roomDTOList
-                .map { roomDTO -> roomDTO.toRoomEntity(buildingID) }
-                .toTypedArray()
+            if (response is Response.Success) {
+                val roomDTOList = response.value
+                val roomEntityArray = roomDTOList
+                    .map { roomDTO -> roomDTO.toRoomEntity(buildingID) }
+                    .toTypedArray()
 
-            universityLocalDataSource
-                .saveRoomEntities(*roomEntityArray)
-                .getOrThrow()
-        }
+                universityLocalDataSource
+                    .saveRoomEntities(*roomEntityArray)
+                    .getOrThrow()
+            }
 
-        response.toLoadResult { roomDTOList ->
-            roomDTOList.map { roomDTO -> roomDTO.toRoom(building) }
-        }
-    }.unwrap()
+            response.toLoadResult { roomDTOList ->
+                roomDTOList.map { roomDTO -> roomDTO.toRoom(building) }
+            }
+        }.unwrap()
 
-    override suspend fun loadFaculties(): LoadResult<List<Faculty>> = safeExecute {
-        val response = universityRemoteDataSource.getFacultiesDTO()
+    override suspend fun loadFaculties(): LoadResult<List<Faculty>> =
+        safeExecute(context = coroutineDispatcher) {
+            val response = universityRemoteDataSource.getFacultiesDTO()
 
-        if (response is Response.Success) {
-            val facultyDTOList = response.value
-            val facultyEntityArray = facultyDTOList
-                .map(FacultyDTO::toFacultyEntity)
-                .toTypedArray()
+            if (response is Response.Success) {
+                val facultyDTOList = response.value
+                val facultyEntityArray = facultyDTOList
+                    .map(FacultyDTO::toFacultyEntity)
+                    .toTypedArray()
 
-            universityLocalDataSource
-                .saveFacultyEntities(*facultyEntityArray)
-                .getOrThrow()
-        }
+                universityLocalDataSource
+                    .saveFacultyEntities(*facultyEntityArray)
+                    .getOrThrow()
+            }
 
-        response.toLoadResult { facultyDTOList -> facultyDTOList.map(FacultyDTO::toFaculty) }
-    }.unwrap()
+            response.toLoadResult { facultyDTOList ->
+                facultyDTOList.map(FacultyDTO::toFaculty)
+            }
+        }.unwrap()
 
-    override suspend fun loadFacultyGroups(
-        faculty: Faculty
-    ): LoadResult<List<Group>> = safeExecute {
-        val facultyID = faculty.id
-        val response = universityRemoteDataSource.getGroupsDTO(facultyID)
+    override suspend fun loadFacultyGroups(faculty: Faculty): LoadResult<List<Group>> =
+        safeExecute(context = coroutineDispatcher) {
+            val facultyID = faculty.id
+            val response = universityRemoteDataSource.getGroupsDTO(facultyID)
 
-        if (response is Response.Success) {
-            val groupDTOList = response.value
-            val groupEntityArray = groupDTOList
-                .map { groupDTO -> groupDTO.toGroupEntity(facultyID) }
-                .toTypedArray()
+            if (response is Response.Success) {
+                val groupDTOList = response.value
+                val groupEntityArray = groupDTOList
+                    .map { groupDTO -> groupDTO.toGroupEntity(facultyID) }
+                    .toTypedArray()
 
-            universityLocalDataSource
-                .saveGroupEntities(*groupEntityArray)
-                .getOrThrow()
-        }
+                universityLocalDataSource
+                    .saveGroupEntities(*groupEntityArray)
+                    .getOrThrow()
+            }
 
-        response.toLoadResult { groupDTOList ->
-            groupDTOList.map { groupDTO -> groupDTO.toGroup(faculty) }
-        }
-    }.unwrap()
+            response.toLoadResult { groupDTOList ->
+                groupDTOList.map { groupDTO -> groupDTO.toGroup(faculty) }
+            }
+        }.unwrap()
 
-    override suspend fun loadStudentsOfGroup(
-        group: Group
-    ): LoadResult<List<Student>> = safeExecute {
-        val groupID = group.id
-        val response = universityRemoteDataSource.getStudentsDTO(groupID)
+    override suspend fun loadStudentsOfGroup(group: Group): LoadResult<List<Student>> =
+        safeExecute(context = coroutineDispatcher) {
+            val groupID = group.id
+            val response = universityRemoteDataSource.getStudentsDTO(groupID)
 
-        if (response is Response.Success) {
-            val studentDTOList = response.value
-            val studentEntityArray = studentDTOList
-                .map { studentDTO -> studentDTO.toStudentEntity(groupID) }
-                .toTypedArray()
+            if (response is Response.Success) {
+                val studentDTOList = response.value
+                val studentEntityArray = studentDTOList
+                    .map { studentDTO -> studentDTO.toStudentEntity(groupID) }
+                    .toTypedArray()
 
-            universityLocalDataSource
-                .saveStudentEntities(*studentEntityArray)
-                .getOrThrow()
-        }
+                universityLocalDataSource
+                    .saveStudentEntities(*studentEntityArray)
+                    .getOrThrow()
+            }
 
-        response.toLoadResult { studentDTOList ->
-            studentDTOList.map { studentDTO -> studentDTO.toStudent(group) }
-        }
-    }.unwrap()
+            response.toLoadResult { studentDTOList ->
+                studentDTOList.map { studentDTO -> studentDTO.toStudent(group) }
+            }
+        }.unwrap()
 }

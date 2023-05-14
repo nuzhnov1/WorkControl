@@ -44,7 +44,6 @@ internal class LessonLocalDataSource @Inject constructor(
                 throw IllegalStateException("permission denied")
             }
         }
-        .flowOn(context = coroutineDispatcher)
 
     fun getTeacherActiveLessonFlow(): Flow<LessonModel?> = appPreferences
         .getSessionFlow()
@@ -58,7 +57,6 @@ internal class LessonLocalDataSource @Inject constructor(
                 throw IllegalStateException("permission denied")
             }
         }
-        .flowOn(context = coroutineDispatcher)
 
     fun getTeacherFinishedLessonsFlow(): Flow<List<LessonModel>> = appPreferences
         .getSessionFlow()
@@ -72,7 +70,6 @@ internal class LessonLocalDataSource @Inject constructor(
                 throw IllegalStateException("permission denied")
             }
         }
-        .flowOn(context = coroutineDispatcher)
 
     fun getTeacherDisciplineCreatedLessonsFlow(
         disciplineID: Long
@@ -88,7 +85,6 @@ internal class LessonLocalDataSource @Inject constructor(
                 throw IllegalStateException("permission denied")
             }
         }
-        .flowOn(context = coroutineDispatcher)
 
     fun getTeacherDisciplineFinishedLessonsFlow(
         disciplineID: Long
@@ -102,11 +98,8 @@ internal class LessonLocalDataSource @Inject constructor(
                     .collect { lessonModelList -> emit(lessonModelList) }
             }
         }
-        .flowOn(context = coroutineDispatcher)
 
-    suspend fun saveLessonModels(
-        vararg lessonModel: LessonModel
-    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
+    suspend fun saveLessonModels(vararg lessonModel: LessonModel): Result<Unit> = safeExecute {
         val lessonEntityArray = lessonModel
             .map { lessonModel -> lessonModel.lessonEntity }
             .toTypedArray()
@@ -180,15 +173,11 @@ internal class LessonLocalDataSource @Inject constructor(
         addLesson(lessonModel).getOrThrow()
     }
 
-    suspend fun removeLesson(
-        lessonEntity: LessonEntity
-    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
+    suspend fun removeLesson(lessonEntity: LessonEntity): Result<Unit> = safeExecute {
         lessonDAO.delete(lessonEntity)
     }
 
-    suspend fun startLesson(
-        lessonID: Long
-    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
+    suspend fun startLesson(lessonID: Long): Result<Unit> = safeExecute {
         val session = appPreferences.getSession()
 
         if (session?.role != Role.TEACHER) {
@@ -213,9 +202,7 @@ internal class LessonLocalDataSource @Inject constructor(
         }
     }
 
-    suspend fun finishLesson(
-        lessonID: Long
-    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
+    suspend fun finishLesson(lessonID: Long): Result<Unit> = safeExecute {
         val session = appPreferences.getSession()
 
         if (session?.role != Role.TEACHER) {

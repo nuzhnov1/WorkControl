@@ -18,6 +18,8 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 internal class NsdStudentService : Service(),
@@ -54,9 +56,9 @@ internal class NsdStudentService : Service(),
 
     override fun onCreate() {
         state = NotInitialized
-        coroutineScope.launch {
-            getStudentServiceStateUseCase().collect { state -> onStateChange(state) }
-        }
+        getStudentServiceStateUseCase()
+            .onEach { state -> onStateChange(state) }
+            .launchIn(scope = coroutineScope)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -210,9 +212,7 @@ internal class NsdStudentService : Service(),
             val serverPort = serviceInfo.port
 
             visitorJob?.cancel()
-            visitorJob = coroutineScope.launch {
-                startVisitUseCase(serverAddress, serverPort)
-            }
+            visitorJob = coroutineScope.launch { startVisitUseCase(serverAddress, serverPort) }
         }
     }
 

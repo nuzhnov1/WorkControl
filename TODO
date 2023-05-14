@@ -1,2 +1,4 @@
 1: Make the visitcontrol library multiplatform (migrate from java.nio to ktor?)
 2: Migrate from the Moshi to the kotlinx.serialization
+3: Implement the interaction of NSD callbacks with the Flow API
+4: Move complex database queries to separate DAO classes

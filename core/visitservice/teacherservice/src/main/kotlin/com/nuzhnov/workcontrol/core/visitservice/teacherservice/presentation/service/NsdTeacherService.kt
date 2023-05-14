@@ -20,6 +20,8 @@ import android.content.Intent
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
@@ -51,9 +53,9 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
     override fun onCreate() {
         state = NotInitialized
-        coroutineScope.launch {
-            getTeacherServiceStateUseCase().collect { state -> onStateChange(state) }
-        }
+        getTeacherServiceStateUseCase()
+            .onEach { state -> onStateChange(state) }
+            .launchIn(scope = coroutineScope)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -133,9 +135,7 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
     private fun onStart() {
         controlJob?.cancel()
-        controlJob = coroutineScope.launch {
-            startControlUseCase()
-        }
+        controlJob = coroutineScope.launch { startControlUseCase() }
     }
 
     private fun onRegisterService(serverAddress: InetAddress, serverPort: Int) {

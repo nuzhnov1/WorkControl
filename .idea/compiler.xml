@@ -5,10 +5,6 @@
       <module name="WorkControl.core.api" target="1.8" />
       <module name="WorkControl.core.api.main" target="1.8" />
       <module name="WorkControl.core.api.test" target="1.8" />
-      <module name="WorkControl.core.data.api" target="1.8" />
-      <module name="WorkControl.core.data.database" target="1.8" />
-      <module name="WorkControl.core.data.mapper" target="1.8" />
-      <module name="WorkControl.core.data.preferences" target="1.8" />
       <module name="WorkControl.core.database" target="1.8" />
       <module name="WorkControl.core.mapper" target="1.8" />
       <module name="WorkControl.core.notification" target="1.8" />

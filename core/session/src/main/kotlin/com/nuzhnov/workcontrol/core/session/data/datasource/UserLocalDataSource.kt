@@ -47,26 +47,23 @@ internal class UserLocalDataSource @Inject constructor(
                 null -> emit(value = null)
             }
         }
-        .flowOn(context = coroutineDispatcher)
 
-    suspend fun saveUserData(userData: UserData): Result<Unit> =
-        safeExecute(context = coroutineDispatcher) {
-            when (userData) {
-                is UserData.TeacherData -> saveTeacherData(teacherData = userData)
-                is UserData.StudentData -> saveStudentData(studentData = userData)
-            }
+    suspend fun saveUserData(userData: UserData): Result<Unit> = safeExecute {
+        when (userData) {
+            is UserData.TeacherData -> saveTeacherData(teacherData = userData)
+            is UserData.StudentData -> saveStudentData(studentData = userData)
         }
+    }
 
-    suspend fun removeUserData(): Result<Unit> =
-        safeExecute(context = coroutineDispatcher) {
-            val session = appPreferences.getSession() ?: return@safeExecute
-            val sessionID = session.id
+    suspend fun removeUserData(): Result<Unit> = safeExecute {
+        val session = appPreferences.getSession() ?: return@safeExecute
+        val sessionID = session.id
 
-            when (session.role) {
-                Role.TEACHER -> removeTeacherData(teacherID = sessionID)
-                Role.STUDENT -> removeStudentData(studentID = sessionID)
-            }
+        when (session.role) {
+            Role.TEACHER -> removeTeacherData(teacherID = sessionID)
+            Role.STUDENT -> removeStudentData(studentID = sessionID)
         }
+    }
 
     private suspend fun saveTeacherData(teacherData: UserData.TeacherData) {
         val teacherEntity = teacherData.teacher.toTeacherEntity()

@@ -40,7 +40,6 @@ internal class ParticipantLocalDataSource @Inject constructor(
                 throw IllegalStateException("permission denied")
             }
         }
-        .flowOn(context = coroutineDispatcher)
 
     fun getStudentParticipationOfTeacherLessonsFlow(
         studentID: Long
@@ -56,7 +55,6 @@ internal class ParticipantLocalDataSource @Inject constructor(
                 throw IllegalStateException("permission denied")
             }
         }
-        .flowOn(context = coroutineDispatcher)
 
     fun getStudentParticipationOfLessonsFlow(): Flow<Pair<Student, List<ParticipantLessonModel>>> =
         appPreferences
@@ -77,18 +75,15 @@ internal class ParticipantLocalDataSource @Inject constructor(
                     throw IllegalStateException("permission denied")
                 }
             }
-            .flowOn(context = coroutineDispatcher)
 
     suspend fun saveParticipantEntities(
         vararg participantEntity: ParticipantEntity
-    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
-        participantDAO.insertOrUpdate(*participantEntity)
-    }
+    ): Result<Unit> = safeExecute { participantDAO.insertOrUpdate(*participantEntity) }
 
     suspend fun attachStudentsToLesson(
         lessonID: Long,
         studentEntityList: List<StudentEntity>
-    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
+    ): Result<Unit> = safeExecute {
         studentDAO.insertOrUpdate(*studentEntityList.toTypedArray())
 
         val attachedParticipantArray = studentEntityList
@@ -118,7 +113,5 @@ internal class ParticipantLocalDataSource @Inject constructor(
 
     suspend fun updateParticipant(
         participantUpdatableModel: ParticipantUpdatableModel
-    ): Result<Unit> = safeExecute(context = coroutineDispatcher) {
-        participantDAO.updateData(participantUpdatableModel)
-    }
+    ): Result<Unit> = safeExecute { participantDAO.updateData(participantUpdatableModel) }
 }

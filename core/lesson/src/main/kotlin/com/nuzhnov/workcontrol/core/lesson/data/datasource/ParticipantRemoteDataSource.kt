@@ -7,36 +7,31 @@ import com.nuzhnov.workcontrol.core.data.api.dto.lesson.ParticipantLessonModelDT
 import com.nuzhnov.workcontrol.core.data.api.dto.university.StudentDTO
 import com.nuzhnov.workcontrol.core.data.api.util.Response
 import com.nuzhnov.workcontrol.core.data.api.util.safeApiCall
-import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
-import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Inject
 
 internal class ParticipantRemoteDataSource @Inject constructor(
     private val lessonService: LessonService,
-    private val universityService: UniversityService,
-    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
+    private val universityService: UniversityService
 ) {
 
     suspend fun getParticipantsOfFinishedTeacherLesson(
         lessonID: Long
-    ): Response<List<ParticipantModelDTO>> = safeApiCall(context = coroutineDispatcher) {
+    ): Response<List<ParticipantModelDTO>> = safeApiCall {
         lessonService.getParticipantsOfFinishedTeacherLesson(lessonID)
     }
 
     suspend fun getStudentParticipationOfFinishedTeacherLessons(
         studentID: Long
-    ): Response<List<ParticipantLessonModelDTO>> = safeApiCall(context = coroutineDispatcher) {
+    ): Response<List<ParticipantLessonModelDTO>> = safeApiCall {
         lessonService.getStudentParticipationOfFinishedTeacherLessons(studentID)
     }
 
     suspend fun getStudentParticipationOfFinishedLessons(): Response<List<ParticipantLessonModelDTO>> =
-        safeApiCall(context = coroutineDispatcher) {
-            lessonService.getStudentParticipationOfFinishedLessons()
-        }
+        safeApiCall { lessonService.getStudentParticipationOfFinishedLessons() }
 
     suspend fun getStudentsOfGroups(
         groupIDList: List<Long>
-    ): Response<Map<Long, StudentDTO>> = safeApiCall(context = coroutineDispatcher) {
+    ): Response<Map<Long, StudentDTO>> = safeApiCall {
         universityService.getStudentsOfGroups(groupIDList)
     }
 }

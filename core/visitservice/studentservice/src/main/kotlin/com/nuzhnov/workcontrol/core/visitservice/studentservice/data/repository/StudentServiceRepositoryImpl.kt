@@ -11,6 +11,7 @@ import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.ApplicationCor
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -27,10 +28,9 @@ internal class StudentServiceRepositoryImpl @Inject constructor(
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : StudentServiceRepository {
 
-    override val discoveredServicesFlow = nsdDiscoveredServicesLocalDataSource
-        .nsdServicesFlow.map { nsdServicesMap ->
-            nsdServicesMap.values.map(NsdServiceInfo::toDiscoveredService)
-        }
+    override val discoveredServicesFlow = nsdDiscoveredServicesLocalDataSource.nsdServicesFlow
+        .map { nsdServicesMap -> nsdServicesMap.values.map(NsdServiceInfo::toDiscoveredService) }
+        .flowOn(context = coroutineDispatcher)
 
     override val serviceState = studentServiceLocalDataSource.serviceState
 
