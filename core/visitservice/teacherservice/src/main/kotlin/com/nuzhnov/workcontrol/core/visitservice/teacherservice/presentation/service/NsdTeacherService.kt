@@ -59,12 +59,8 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (state is NotInitialized) {
+        if (state is NotInitialized || state is Stopped || state is StoppedByError) {
             onInit(intent, startId)
-        }
-
-        if (state is Stopped || state is StoppedByError) {
-            state = ReadyToRun
         }
 
         return START_STICKY

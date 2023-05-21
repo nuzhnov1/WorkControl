@@ -62,21 +62,19 @@ internal class NsdStudentService : Service(),
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (state is NotInitialized) {
+        if (state is NotInitialized || state is Stopped || state is StoppedByError) {
             onInit(intent, startId)
-        }
 
-        if (state is InitFailed) {
-            return START_STICKY
-        }
+            if (state !is InitFailed) {
+                cancelCurrentJob()
+                executedCommand = intent?.getCommandExtra()
 
-        cancelCurrentJob()
-        executedCommand = intent?.getCommandExtra()
-
-        when (val command = executedCommand) {
-            null -> Unit
-            is Discover -> state = Discovering
-            is Connect -> state = Resolving(command.serviceName)
+                when (val command = executedCommand) {
+                    null -> Unit
+                    is Discover -> state = Discovering
+                    is Connect -> state = Resolving(command.serviceName)
+                }
+            }
         }
 
         return START_STICKY
