@@ -120,9 +120,7 @@ internal class LessonRepositoryImpl @Inject constructor(
                     .getOrThrow()
             }
         }.onFailure {
-            safeExecute(context = coroutineDispatcher) {
-                lessonLocalDataSource.removeLesson(lessonEntity = lesson.toLessonEntity())
-            }
+            removeLesson(lesson)
         }
 
     override suspend fun updateLesson(lesson: Lesson): Result<Unit> =
