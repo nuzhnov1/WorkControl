@@ -25,14 +25,13 @@ internal class VisitorImpl : Visitor {
     private val _state = MutableStateFlow<VisitorState>(value = NotRunningYet)
     override val state = _state.asStateFlow()
 
+    private var clientSelector: Selector? = null
+    private var clientSocketChannel: SocketChannel? = null
     private var clientJob: Job? = null
 
     private var serverAddress by Delegates.notNull<InetAddress>()
     private var serverPort by Delegates.notNull<Int>()
     private var visitorID by Delegates.notNull<VisitorID>()
-
-    private var clientSelector: Selector? = null
-    private var clientSocketChannel: SocketChannel? = null
 
     private val inputBufferSize = Int.SIZE_BYTES
     private val inputBuffer = ByteBuffer.allocate(inputBufferSize)
@@ -44,31 +43,14 @@ internal class VisitorImpl : Visitor {
         serverAddress: InetAddress,
         serverPort: Int,
         visitorID: VisitorID
-    ) = withContext(context = Dispatchers.IO) {
-        initProperties(serverAddress, serverPort, visitorID)
+    ): Unit = withContext(context = Dispatchers.IO) {
+        this@VisitorImpl.serverAddress = serverAddress
+        this@VisitorImpl.serverPort = serverPort
+        this@VisitorImpl.visitorID = visitorID
+
         clientJob?.cancelAndJoin()
+        clientJob = coroutineContext.job
 
-        val newClientJob = launchClientJob()
-
-        clientJob = newClientJob
-        newClientJob.join()
-    }
-
-    override fun stopVisit() {
-        clientJob?.cancel()
-    }
-
-    private fun initProperties(
-        serverAddress: InetAddress,
-        serverPort: Int,
-        visitorID: VisitorID
-    ) {
-        this.serverAddress = serverAddress
-        this.serverPort = serverPort
-        this.visitorID = visitorID
-    }
-
-    private fun CoroutineScope.launchClientJob(): Job = launch {
         val jobResult = initiateConnection().fold(
             onSuccess = {
                 startClientJob().fold(
@@ -84,92 +66,46 @@ internal class VisitorImpl : Visitor {
         completeClientJob()
     }
 
+    override fun stopVisit() {
+        clientJob?.cancel()
+    }
+
     private fun Result<Unit>.toVisitorState(): VisitorState = fold(
         onSuccess = { _state.value.toNextStateOnNormalCompletion() },
         onFailure = { cause ->
             when (cause) {
                 is CancellationException -> _state.value.toNextStateOnNormalCompletion()
                 is VisitorException -> cause.toVisitorState()
-
-                is IOException -> StoppedByError(
-                    serverAddress = serverAddress,
-                    serverPort = serverPort,
-                    visitorID = visitorID,
-                    error = IO_ERROR,
-                    cause = cause
-                )
-
-                is SecurityException -> StoppedByError(
-                    serverAddress = serverAddress,
-                    serverPort = serverPort,
-                    visitorID = visitorID,
-                    error = SECURITY_ERROR,
-                    cause = cause
-                )
-
-                else -> StoppedByError(
-                    serverAddress = serverAddress,
-                    serverPort = serverPort,
-                    visitorID = visitorID,
-                    error = UNKNOWN_ERROR,
-                    cause = cause
-                )
+                is IOException -> StoppedByError(error = IO_ERROR, cause = cause)
+                is SecurityException -> StoppedByError(error = SECURITY_ERROR, cause = cause)
+                else -> StoppedByError(error = UNKNOWN_ERROR, cause = cause)
             }
         }
     )
 
     private fun VisitorState.toNextStateOnNormalCompletion(): VisitorState =
         when (this) {
-            is Connecting -> Stopped(serverAddress, serverPort, visitorID)
-            is Running -> Stopped(serverAddress, serverPort, visitorID)
+            is Connecting, is Running -> Stopped
             else -> this
         }
 
     private fun VisitorException.toVisitorState(): VisitorState =
         when (this) {
-            is ConnectionFailedException -> StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = CONNECTION_FAILED,
-                cause = cause
-            )
-
-            is BreakConnectionException -> StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = BREAK_CONNECTION,
-                cause = cause
-            )
-
-            is BadConnectionException -> StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = BAD_CONNECTION,
-                cause = cause
-            )
-
-            is DisconnectedException -> StoppedByError(
-                serverAddress = serverAddress,
-                serverPort = serverPort,
-                visitorID = visitorID,
-                error = DISCONNECTED,
-                cause = cause
-            )
+            is ConnectionFailedException -> StoppedByError(error = CONNECTION_FAILED, cause = cause)
+            is BreakConnectionException -> StoppedByError(error = BREAK_CONNECTION, cause = cause)
+            is BadConnectionException -> StoppedByError(error = BAD_CONNECTION, cause = cause)
+            is DisconnectedException -> StoppedByError(error = DISCONNECTED, cause = cause)
         }
 
     private suspend fun initiateConnection(): Result<Unit> = applyCatching {
         clientSelector = Selector.open()
         clientSocketChannel = SocketChannel.open().apply {
-            val selector = clientSelector!!
             val socket = socket()
             val serverSocketAddress = InetSocketAddress(serverAddress, serverPort)
 
             configureBlocking(/* block = */ false)
             connect(serverSocketAddress)
-            register(selector, /* ops = */ OP_READ or OP_WRITE)
+            register(clientSelector!!, /* ops = */ OP_READ or OP_WRITE)
 
             serverAddress = socket.inetAddress
             serverPort = socket.port
@@ -225,6 +161,9 @@ internal class VisitorImpl : Visitor {
     private fun completeClientJob(): Result<Unit> = applyCatching {
         clientSelector?.safeClose()
         clientSocketChannel?.safeClose()
+
+        clientSelector = null
+        clientSocketChannel = null
     }
 
     private fun SocketChannel.receiveResponse() {

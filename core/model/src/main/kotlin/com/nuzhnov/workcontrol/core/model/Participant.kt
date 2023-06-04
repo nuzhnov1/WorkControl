@@ -5,6 +5,7 @@ import com.soywiz.klock.TimeSpan
 data class Participant(
     val student: Student,
     val lesson: Lesson,
+    val isActive: Boolean,
     val totalVisitDuration: TimeSpan = TimeSpan.ZERO,
     val isMarked: Boolean = false,
     val theoryAssessment: Byte? = null,

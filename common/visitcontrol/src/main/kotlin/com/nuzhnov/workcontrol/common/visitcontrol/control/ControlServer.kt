@@ -10,13 +10,14 @@ interface ControlServer {
     val visits: Flow<Set<Visit>>
     val state: StateFlow<ControlServerState>
 
+    var backlog: Int
+    var handlersCount: Int
+    var maxAcceptConnectionAttempts: Int
 
-    suspend fun start(
-        address: InetAddress? = null,
-        port: Int = DEFAULT_PORT,
-        backlog: Int = DEFAULT_BACKLOG,
-        maxAcceptConnectionAttempts: Int = DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS
-    )
+
+    suspend fun start()
+    suspend fun start(port: Int)
+    suspend fun start(address: InetAddress, port: Int)
 
     fun stop()
 
@@ -30,10 +31,6 @@ interface ControlServer {
 
 
     companion object {
-        const val DEFAULT_PORT = 0
-        const val DEFAULT_BACKLOG = 512
-        const val DEFAULT_MAX_ACCEPT_CONNECTION_ATTEMPTS = 16
-
         fun getDefaultControlServer(): ControlServer = ControlServerImpl()
     }
 }

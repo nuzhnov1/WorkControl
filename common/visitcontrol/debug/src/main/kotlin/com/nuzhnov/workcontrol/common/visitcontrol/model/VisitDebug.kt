@@ -6,7 +6,7 @@ import com.soywiz.klock.TimeSpan
 internal data class VisitDebug(
     val visitorID: VisitorID,
     val isActive: Boolean,
-    val lastVisitTime: DateTimeTz?,
+    val lastVisitTime: DateTimeTz,
     val totalVisitDuration: TimeSpan
 ) : Comparable<VisitDebug> {
     override fun equals(other: Any?) = when (other) {

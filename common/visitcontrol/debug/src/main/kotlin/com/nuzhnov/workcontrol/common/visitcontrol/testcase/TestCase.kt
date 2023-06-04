@@ -30,12 +30,7 @@ internal data class TestCase(
             "${visitorMaxAppearanceDelayTimeMillis / MILLIS_IN_SECOND};\n" +
         "Visitor minimum interruption count: $visitorMinInterruptionCount;\n" +
         "Visitor maximum interruption count: $visitorMaxInterruptionCount;\n" +
-        "Number of user disconnections: $disconnectionsNumber;"
-
-
-    companion object {
-        const val MILLIS_IN_SECOND = 1000
-    }
+        "Number of user disconnections: $disconnectionsNumber;\n"
 }
 
 
@@ -68,12 +63,12 @@ internal val testCaseType2 = TestCase(
 )
 
 internal val testCaseType3 = TestCase(
-    serverWorkTimeMillis = 10_000L,
+    serverWorkTimeMillis = 15_000L,
     visitorsCount = 100,
     serverAddress = LOCALHOST,
     serverPort = DEFAULT_SERVER_PORT,
-    minVisitTimeMillis = 1_000L,
-    maxVisitTimeMillis = 2_000L,
+    minVisitTimeMillis = 10_000L,
+    maxVisitTimeMillis = 11_000L,
     visitorMinAppearanceDelayTimeMillis = 0L,
     visitorMaxAppearanceDelayTimeMillis = 0L,
     visitorMinInterruptionCount = 0,
@@ -82,12 +77,12 @@ internal val testCaseType3 = TestCase(
 )
 
 internal val testCaseType4 = TestCase(
-    serverWorkTimeMillis = 10_000L,
+    serverWorkTimeMillis = 30_000L,
     visitorsCount = 100,
     serverAddress = LOCALHOST,
     serverPort = DEFAULT_SERVER_PORT,
-    minVisitTimeMillis = 9_000L,
-    maxVisitTimeMillis = 10_000L,
+    minVisitTimeMillis = 30_000L,
+    maxVisitTimeMillis = 30_000L,
     visitorMinAppearanceDelayTimeMillis = 0L,
     visitorMaxAppearanceDelayTimeMillis = 0L,
     visitorMinInterruptionCount = 0,

@@ -18,16 +18,9 @@ sealed interface VisitorState {
         val visitorID: VisitorID
     ) : VisitorState
 
-    data class Stopped(
-        val serverAddress: InetAddress,
-        val serverPort: Int,
-        val visitorID: VisitorID
-    ) : VisitorState
+    object Stopped : VisitorState
 
     data class StoppedByError(
-        val serverAddress: InetAddress,
-        val serverPort: Int,
-        val visitorID: VisitorID,
         val error: VisitorError,
         val cause: Throwable
     ) : VisitorState

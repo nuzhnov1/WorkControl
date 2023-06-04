@@ -14,9 +14,11 @@ internal fun log(message: String) {
 }
 
 internal fun Collection<VisitDebug>.log() {
+    println("-".repeat(n = 80))
     println("Visitors info:")
     println("Visitors count: ${size}.")
     forEach { visit -> println(visit.toLog()) }
+    println("-".repeat(n = 80))
 }
 
 internal fun VisitDebug.toLog() =
@@ -51,13 +53,11 @@ internal fun VisitorState.toLog() = when (this) {
         "'$serverAddress' and port '$serverPort'"
 
     is VisitorState.Stopped ->
-        "connection to the server with address '$serverAddress' and port '$serverPort' " +
-        "has been stopped"
+        "connection to the server has been stopped"
 
     is VisitorState.StoppedByError ->
-        "connection to the server with address '$serverAddress' and port '$serverPort' " +
-        "has been stopped by the error: ${error.toLog()}; Detailed message: ${cause.toLog()}; " +
-        "Exception: $cause"
+        "connection to the server has been stopped by the error: ${error.toLog()};" +
+        "Detailed message: ${cause.toLog()}; Exception: $cause"
 }
 
 internal fun ControlServerError.toLog() = when (this) {
