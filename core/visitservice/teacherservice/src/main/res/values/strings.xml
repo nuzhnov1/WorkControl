@@ -1,27 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Common: -->
-    <string name="teacher_service_title">Teacher service</string>
-    <string name="teacher_service_description">Attendance tracking service</string>
-
-    <!-- Statuses: -->
-    <string name="teacher_service_not_initialized_status">Not initialized</string>
-    <string name="teacher_service_init_failed_status">Initialization failed</string>
-    <string name="teacher_service_ready_to_run_status">Ready to run</string>
-    <string name="teacher_service_running_status">Running</string>
-    <string name="teacher_service_stopped_accept_connections_status">
-        Stopped accept connections, but still running
-    </string>
-    <string name="teacher_service_stopped_status">Stopped</string>
-    <string name="teacher_service_stopped_by_error_status">Stopped by error: %1$s</string>
-
-    <!-- Errors: -->
-    <string name="teacher_service_register_failed_error">service registration failed</string>
-    <string name="teacher_service_init_failed_error">service initialization failed</string>
-    <string name="teacher_service_max_accept_connections_attempts_reached_error">
-        the maximum number of connection acceptance attempts has been reached
-    </string>
-    <string name="teacher_service_IO_error">network error</string>
-    <string name="teacher_service_security_error">permission denied</string>
-    <string name="teacher_service_unknown_error">unknown error</string>
+    <string name="service_name">Lesson %1$d</string>
 </resources>
