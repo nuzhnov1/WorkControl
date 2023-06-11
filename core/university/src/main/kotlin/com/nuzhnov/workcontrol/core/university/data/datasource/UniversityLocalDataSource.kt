@@ -9,7 +9,7 @@ import javax.inject.Inject
 internal class UniversityLocalDataSource @Inject constructor(
     private val buildingDAO: BuildingDAO,
     private val roomDAO: RoomDAO,
-    private val facultyDAO: FacultyDAO,
+    private val departmentDAO: DepartmentDAO,
     private val groupDAO: GroupDAO,
     private val studentDAO: StudentDAO
 ) {
@@ -20,11 +20,11 @@ internal class UniversityLocalDataSource @Inject constructor(
     fun getRoomEntitiesFlow(buildingID: Long): Flow<List<RoomEntity>> =
         roomDAO.getEntitiesFlow(buildingID)
 
-    fun getFacultyEntitiesFlow(): Flow<List<FacultyEntity>> =
-        facultyDAO.getEntitiesFlow()
+    fun getDepartmentEntitiesFlow(): Flow<List<DepartmentEntity>> =
+        departmentDAO.getEntitiesFlow()
 
-    fun getGroupEntitiesFlow(facultyID: Long): Flow<List<GroupEntity>> =
-        groupDAO.getEntitiesFlow(facultyID)
+    fun getGroupEntitiesFlow(departmentID: Long): Flow<List<GroupEntity>> =
+        groupDAO.getEntitiesFlow(departmentID)
 
     fun getStudentEntitiesFlow(groupID: Long): Flow<List<StudentEntity>> =
         studentDAO.getEntitiesFlow(groupID)
@@ -35,8 +35,8 @@ internal class UniversityLocalDataSource @Inject constructor(
     suspend fun saveRoomEntities(vararg roomEntity: RoomEntity): Result<Unit> =
         safeExecute { roomDAO.insertOrUpdate(*roomEntity) }
 
-    suspend fun saveFacultyEntities(vararg facultyEntity: FacultyEntity): Result<Unit> =
-        safeExecute { facultyDAO.insertOrUpdate(*facultyEntity) }
+    suspend fun saveDepartmentEntities(vararg departmentEntity: DepartmentEntity): Result<Unit> =
+        safeExecute { departmentDAO.insertOrUpdate(*departmentEntity) }
 
     suspend fun saveGroupEntities(vararg groupEntity: GroupEntity): Result<Unit> =
         safeExecute { groupDAO.insertOrUpdate(*groupEntity) }

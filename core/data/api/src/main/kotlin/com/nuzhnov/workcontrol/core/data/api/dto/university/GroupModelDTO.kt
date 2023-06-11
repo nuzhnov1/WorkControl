@@ -12,7 +12,7 @@ import com.squareup.moshi.JsonClass
  *          course: 1
  *      },
  *
- *      faculty: {
+ *      department: {
  *          id: 1,
  *          name: "ACE"
  *      }
@@ -21,5 +21,5 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class GroupModelDTO(
     @Json(name = "group") val groupDTO: GroupDTO,
-    @Json(name = "faculty") val facultyDTO: FacultyDTO
+    @Json(name = "department") val departmentDTO: DepartmentDTO
 )

@@ -23,7 +23,7 @@ internal class LessonLocalDataSource @Inject constructor(
     private val disciplineDAO: DisciplineDAO,
     private val buildingDAO: BuildingDAO,
     private val roomDAO: RoomDAO,
-    private val facultyDAO: FacultyDAO,
+    private val departmentDAO: DepartmentDAO,
     private val groupDAO: GroupDAO,
     private val teacherDAO: TeacherDAO,
     private val lessonDAO: LessonDAO,
@@ -136,8 +136,8 @@ internal class LessonLocalDataSource @Inject constructor(
             .map { groupModel -> groupModel.groupEntity }
             .toTypedArray()
 
-        val facultyEntityArray = groupModelList
-            .map { groupModel -> groupModel.facultyEntity }
+        val departmentEntityArray = groupModelList
+            .map { groupModel -> groupModel.departmentEntity }
             .distinct()
             .toTypedArray()
 
@@ -160,7 +160,7 @@ internal class LessonLocalDataSource @Inject constructor(
         teacherDAO.insertOrUpdate(*teacherEntityArray)
         buildingDAO.insertOrUpdate(*buildingEntityArray)
         roomDAO.insertOrUpdate(*roomEntityArray)
-        facultyDAO.insertOrUpdate(*facultyEntityArray)
+        departmentDAO.insertOrUpdate(*departmentEntityArray)
         groupDAO.insertOrUpdate(*groupEntityArray)
         lessonDAO.insertOrUpdate(*lessonEntityArray)
         lessonGroupCrossRefDAO.insertOrUpdate(*lessonGroupCrossRefEntityArray)

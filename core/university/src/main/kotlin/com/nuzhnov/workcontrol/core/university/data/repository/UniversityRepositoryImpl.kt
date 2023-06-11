@@ -51,29 +51,31 @@ internal class UniversityRepositoryImpl @Inject constructor(
             }
             .flowOn(context = coroutineDispatcher)
 
-    override fun getFacultiesFlow(): Flow<LoadResult<List<Faculty>>> =
+    override fun getDepartmentsFlow(): Flow<LoadResult<List<Department>>> =
         universityLocalDataSource
-            .getFacultyEntitiesFlow()
-            .map { facultyEntityList ->
-                if (facultyEntityList.isEmpty()) {
-                    loadFaculties()
+            .getDepartmentEntitiesFlow()
+            .map { departmentEntityList ->
+                if (departmentEntityList.isEmpty()) {
+                    loadDepartments()
                 } else {
                     LoadResult.Success(
-                        data = facultyEntityList.map(FacultyEntity::toFaculty)
+                        data = departmentEntityList.map(DepartmentEntity::toDepartment)
                     )
                 }
             }
             .flowOn(context = coroutineDispatcher)
 
-    override fun getFacultyGroupsFlow(faculty: Faculty): Flow<LoadResult<List<Group>>> =
+    override fun getDepartmentGroupsFlow(department: Department): Flow<LoadResult<List<Group>>> =
         universityLocalDataSource
-            .getGroupEntitiesFlow(facultyID = faculty.id)
+            .getGroupEntitiesFlow(departmentID = department.id)
             .map { groupEntityList ->
                 if (groupEntityList.isEmpty()) {
-                    loadFacultyGroups(faculty)
+                    loadDepartmentGroups(department)
                 } else {
                     LoadResult.Success(
-                        data = groupEntityList.map { groupEntity -> groupEntity.toGroup(faculty) }
+                        data = groupEntityList.map { groupEntity ->
+                            groupEntity.toGroup(department)
+                        }
                     )
                 }
             }
@@ -136,35 +138,35 @@ internal class UniversityRepositoryImpl @Inject constructor(
             }
         }.unwrap()
 
-    override suspend fun loadFaculties(): LoadResult<List<Faculty>> =
+    override suspend fun loadDepartments(): LoadResult<List<Department>> =
         safeExecute(context = coroutineDispatcher) {
-            val response = universityRemoteDataSource.getFacultiesDTO()
+            val response = universityRemoteDataSource.getDepartmentsDTO()
 
             if (response is Response.Success) {
-                val facultyDTOList = response.value
-                val facultyEntityArray = facultyDTOList
-                    .map(FacultyDTO::toFacultyEntity)
+                val departmentDTOList = response.value
+                val departmentEntityArray = departmentDTOList
+                    .map(DepartmentDTO::toDepartmentEntity)
                     .toTypedArray()
 
                 universityLocalDataSource
-                    .saveFacultyEntities(*facultyEntityArray)
+                    .saveDepartmentEntities(*departmentEntityArray)
                     .getOrThrow()
             }
 
-            response.toLoadResult { facultyDTOList ->
-                facultyDTOList.map(FacultyDTO::toFaculty)
+            response.toLoadResult { departmentDTOList ->
+                departmentDTOList.map(DepartmentDTO::toDepartment)
             }
         }.unwrap()
 
-    override suspend fun loadFacultyGroups(faculty: Faculty): LoadResult<List<Group>> =
+    override suspend fun loadDepartmentGroups(department: Department): LoadResult<List<Group>> =
         safeExecute(context = coroutineDispatcher) {
-            val facultyID = faculty.id
-            val response = universityRemoteDataSource.getGroupsDTO(facultyID)
+            val departmentID = department.id
+            val response = universityRemoteDataSource.getGroupsDTO(departmentID)
 
             if (response is Response.Success) {
                 val groupDTOList = response.value
                 val groupEntityArray = groupDTOList
-                    .map { groupDTO -> groupDTO.toGroupEntity(facultyID) }
+                    .map { groupDTO -> groupDTO.toGroupEntity(departmentID) }
                     .toTypedArray()
 
                 universityLocalDataSource
@@ -173,7 +175,7 @@ internal class UniversityRepositoryImpl @Inject constructor(
             }
 
             response.toLoadResult { groupDTOList ->
-                groupDTOList.map { groupDTO -> groupDTO.toGroup(faculty) }
+                groupDTOList.map { groupDTO -> groupDTO.toGroup(department) }
             }
         }.unwrap()
 

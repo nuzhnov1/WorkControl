@@ -15,8 +15,8 @@ interface SyncService {
     @[POST("/rooms?list") PermittedTo(Role.TEACHER)]
     suspend fun getRooms(@Body roomIDList: List<Long>): List<RoomModelDTO>
 
-    @[POST("/faculties?list") PermittedTo(Role.TEACHER)]
-    suspend fun getFaculties(@Body facultyIDList: List<Long>): List<FacultyDTO>
+    @[POST("/departments?list") PermittedTo(Role.TEACHER)]
+    suspend fun getDepartments(@Body departmentIDList: List<Long>): List<DepartmentDTO>
 
     @[POST("/groups?list") PermittedTo(Role.TEACHER)]
     suspend fun getGroups(@Body groupIDList: List<Long>): List<GroupModelDTO>

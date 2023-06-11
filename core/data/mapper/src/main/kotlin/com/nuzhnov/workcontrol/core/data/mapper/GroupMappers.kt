@@ -1,68 +1,68 @@
 package com.nuzhnov.workcontrol.core.data.mapper
 
 import com.nuzhnov.workcontrol.core.model.Group
-import com.nuzhnov.workcontrol.core.model.Faculty
+import com.nuzhnov.workcontrol.core.model.Department
 import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupDTO
 import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupModelDTO
 import com.nuzhnov.workcontrol.core.data.database.entity.GroupEntity
 import com.nuzhnov.workcontrol.core.data.database.entity.model.GroupModel
 
 
-fun GroupDTO.toGroup(faculty: Faculty): Group = Group(
+fun GroupDTO.toGroup(department: Department): Group = Group(
     id = id,
     name = name,
     course = course,
-    faculty = faculty
+    department = department
 )
 
-fun GroupDTO.toGroupEntity(facultyID: Long): GroupEntity = GroupEntity(
+fun GroupDTO.toGroupEntity(departmentID: Long): GroupEntity = GroupEntity(
     id = id,
     name = name,
     course = course,
-    facultyID = facultyID
+    departmentID = departmentID
 )
 
 fun GroupModelDTO.toGroup(): Group = Group(
     id = groupDTO.id,
     name = groupDTO.name,
     course = groupDTO.course,
-    faculty = facultyDTO.toFaculty()
+    department = departmentDTO.toDepartment()
 )
 
 fun GroupModelDTO.toGroupModel(): GroupModel = GroupModel(
     groupEntity = this.toGroupEntity(),
-    facultyEntity = facultyDTO.toFacultyEntity()
+    departmentEntity = departmentDTO.toDepartmentEntity()
 )
 
 fun GroupModelDTO.toGroupEntity(): GroupEntity = GroupEntity(
     id = groupDTO.id,
     name = groupDTO.name,
     course = groupDTO.course,
-    facultyID = facultyDTO.id
+    departmentID = departmentDTO.id
 )
 
-fun GroupEntity.toGroup(faculty: Faculty): Group = Group(
+fun GroupEntity.toGroup(department: Department): Group = Group(
     id = id,
     name = name,
     course = course,
-    faculty = faculty
+    department = department
 )
 
 fun GroupModel.toGroup(): Group = Group(
     id = groupEntity.id,
     name = groupEntity.name,
     course = groupEntity.course,
-    faculty = facultyEntity.toFaculty()
+    department = departmentEntity.toDepartment()
 )
 
 fun Group.toGroupEntity(): GroupEntity = GroupEntity(
     id = id,
     name = name,
     course = course,
-    facultyID = faculty.id
+    departmentID = department.id
 )
 
 fun Group.toGroupModel(): GroupModel = GroupModel(
     groupEntity = this.toGroupEntity(),
-    facultyEntity = faculty.toFacultyEntity()
+    departmentEntity = department.toDepartmentEntity()
 )

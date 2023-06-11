@@ -26,8 +26,8 @@ internal object DatabaseModule {
         appDatabase.getDisciplineDAO()
 
     @[Provides Singleton]
-    fun provideFacultyDAO(appDatabase: AppDatabase): FacultyDAO =
-        appDatabase.getFacultyDAO()
+    fun provideDepartmentDAO(appDatabase: AppDatabase): DepartmentDAO =
+        appDatabase.getDepartmentDAO()
 
     @[Provides Singleton]
     fun provideGroupDAO(appDatabase: AppDatabase): GroupDAO =

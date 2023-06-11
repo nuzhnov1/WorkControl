@@ -20,7 +20,7 @@ import javax.inject.Inject
 internal class UserLocalDataSource @Inject constructor(
     private val appPreferences: AppPreferences,
     private val disciplineDAO: DisciplineDAO,
-    private val facultyDAO: FacultyDAO,
+    private val departmentDAO: DepartmentDAO,
     private val groupDAO: GroupDAO,
     private val studentDAO: StudentDAO,
     private val teacherDAO: TeacherDAO,
@@ -89,9 +89,9 @@ internal class UserLocalDataSource @Inject constructor(
     private suspend fun saveStudentData(studentData: UserData.StudentData) {
         val studentEntity = studentData.student.toStudentEntity()
         val groupEntity = studentData.student.group.toGroupEntity()
-        val facultyEntity = studentData.student.group.faculty.toFacultyEntity()
+        val departmentEntity = studentData.student.group.department.toDepartmentEntity()
 
-        facultyDAO.insertOrUpdate(facultyEntity)
+        departmentDAO.insertOrUpdate(departmentEntity)
         groupDAO.insertOrUpdate(groupEntity)
         studentDAO.insertOrUpdate(studentEntity)
     }
@@ -109,10 +109,10 @@ internal class UserLocalDataSource @Inject constructor(
         val studentModel = studentDAO.getStudent(id = studentID) ?: return
         val studentEntity = studentModel.studentEntity
         val groupEntity = studentModel.groupModel.groupEntity
-        val facultyEntity = studentModel.groupModel.facultyEntity
+        val departmentEntity = studentModel.groupModel.departmentEntity
 
         studentDAO.delete(studentEntity)
         groupDAO.delete(groupEntity)
-        facultyDAO.delete(facultyEntity)
+        departmentDAO.delete(departmentEntity)
     }
 }

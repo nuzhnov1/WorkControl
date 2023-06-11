@@ -11,7 +11,7 @@ interface StatisticsService {
     suspend fun getUniversityStatistics(): StatisticsDTO
 
     @[GET("/stat") PermittedTo(Role.TEACHER)]
-    suspend fun getFacultyStatistics(@Query("faculty_id") facultyID: Long): StatisticsDTO
+    suspend fun getDepartmentStatistics(@Query("department_id") departmentID: Long): StatisticsDTO
 
     @[GET("/stat") PermittedTo(Role.TEACHER)]
     suspend fun getGroupStatistics(@Query("group_id") groupID: Long): StatisticsDTO

@@ -9,9 +9,9 @@ internal interface UniversityRepository {
 
     fun getBuildingRoomsFlow(building: Building): Flow<LoadResult<List<Room>>>
 
-    fun getFacultiesFlow(): Flow<LoadResult<List<Faculty>>>
+    fun getDepartmentsFlow(): Flow<LoadResult<List<Department>>>
 
-    fun getFacultyGroupsFlow(faculty: Faculty): Flow<LoadResult<List<Group>>>
+    fun getDepartmentGroupsFlow(department: Department): Flow<LoadResult<List<Group>>>
 
     fun getStudentsOfGroupFlow(group: Group): Flow<LoadResult<List<Student>>>
 
@@ -19,9 +19,9 @@ internal interface UniversityRepository {
 
     suspend fun loadBuildingsRooms(building: Building): LoadResult<List<Room>>
 
-    suspend fun loadFaculties(): LoadResult<List<Faculty>>
+    suspend fun loadDepartments(): LoadResult<List<Department>>
 
-    suspend fun loadFacultyGroups(faculty: Faculty): LoadResult<List<Group>>
+    suspend fun loadDepartmentGroups(department: Department): LoadResult<List<Group>>
 
     suspend fun loadStudentsOfGroup(group: Group): LoadResult<List<Student>>
 }

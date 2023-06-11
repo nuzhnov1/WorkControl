@@ -12,11 +12,11 @@ interface UniversityService {
     @[GET("/rooms") PermittedTo(Role.TEACHER)]
     suspend fun getBuildingRooms(@Query("building_id") buildingID: Long): List<RoomDTO>
 
-    @[GET("/faculties") PermittedTo(Role.TEACHER)]
-    suspend fun getFaculties(): List<FacultyDTO>
+    @[GET("/departments") PermittedTo(Role.TEACHER)]
+    suspend fun getDepartments(): List<DepartmentDTO>
 
     @[GET("/groups") PermittedTo(Role.TEACHER)]
-    suspend fun getFacultyGroups(@Query("faculty_id") facultyID: Long): List<GroupDTO>
+    suspend fun getDepartmentGroups(@Query("department_id") departmentID: Long): List<GroupDTO>
 
     @[GET("/students") PermittedTo(Role.TEACHER)]
     suspend fun getStudentsOfGroup(@Query("group_id") groupID: Long): List<StudentDTO>

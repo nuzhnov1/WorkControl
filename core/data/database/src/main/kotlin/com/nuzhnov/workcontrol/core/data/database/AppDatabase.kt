@@ -10,7 +10,7 @@ import androidx.room.Database
         BuildingEntity::class,
         RoomEntity::class,
         DisciplineEntity::class,
-        FacultyEntity::class,
+        DepartmentEntity::class,
         GroupEntity::class,
         StudentEntity::class,
         TeacherEntity::class,
@@ -26,7 +26,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getBuildingDAO(): BuildingDAO
     abstract fun getRoomDAO(): RoomDAO
     abstract fun getDisciplineDAO(): DisciplineDAO
-    abstract fun getFacultyDAO(): FacultyDAO
+    abstract fun getDepartmentDAO(): DepartmentDAO
     abstract fun getGroupDAO(): GroupDAO
     abstract fun getStudentDAO(): StudentDAO
     abstract fun getTeacherDAO(): TeacherDAO

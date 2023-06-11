@@ -10,7 +10,7 @@ import com.squareup.moshi.JsonClass
  * }
  */
 @JsonClass(generateAdapter = true)
-data class FacultyDTO(
+data class DepartmentDTO(
     val id: Long,
     val name: String
 )

@@ -6,7 +6,7 @@ import javax.inject.Inject
 internal class ClearLocalDataWork @Inject constructor(
     private val clearBuildingsWork: ClearBuildingsWork,
     private val clearRoomsWork: ClearRoomsWork,
-    private val clearFacultiesWork: ClearFacultiesWork,
+    private val clearDepartmentsWork: ClearDepartmentsWork,
     private val clearGroupsWork: ClearGroupsWork,
     private val clearStudentsWork: ClearStudentsWork,
     private val clearTeachersWork: ClearTeachersWork,
@@ -19,7 +19,7 @@ internal class ClearLocalDataWork @Inject constructor(
             clearLessonsWork(),
             clearStudentsWork(),
             clearGroupsWork(),
-            clearFacultiesWork(),
+            clearDepartmentsWork(),
             clearRoomsWork(),
             clearBuildingsWork(),
             clearTeachersWork(),

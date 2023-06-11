@@ -7,7 +7,7 @@ import com.nuzhnov.workcontrol.core.data.mapper.toLoadResult
 import com.nuzhnov.workcontrol.core.data.mapper.toStatistics
 import com.nuzhnov.workcontrol.core.data.mapper.unwrap
 import com.nuzhnov.workcontrol.core.model.Statistics
-import com.nuzhnov.workcontrol.core.model.Faculty
+import com.nuzhnov.workcontrol.core.model.Department
 import com.nuzhnov.workcontrol.core.model.Group
 import com.nuzhnov.workcontrol.core.model.Student
 import com.nuzhnov.workcontrol.core.model.util.LoadResult
@@ -37,12 +37,12 @@ internal class StatisticsRepositoryImpl @Inject constructor(
             }
             .flowOn(context = coroutineDispatcher)
 
-    override fun getFacultyStatisticsFlow(faculty: Faculty): Flow<LoadResult<Statistics>> =
+    override fun getDepartmentStatisticsFlow(department: Department): Flow<LoadResult<Statistics>> =
         statisticsLocalDataSource
-            .getFacultyStatisticsFlow(facultyID = faculty.id)
+            .getDepartmentStatisticsFlow(departmentID = department.id)
             .map { statistics ->
                 if (statistics == null) {
-                    loadFacultyStatistics(faculty)
+                    loadDepartmentStatistics(department)
                 } else {
                     LoadResult.Success(data = statistics)
                 }
@@ -95,14 +95,14 @@ internal class StatisticsRepositoryImpl @Inject constructor(
                 }
         }.unwrap()
 
-    override suspend fun loadFacultyStatistics(faculty: Faculty): LoadResult<Statistics> =
+    override suspend fun loadDepartmentStatistics(department: Department): LoadResult<Statistics> =
         safeExecute(context = coroutineDispatcher) {
             statisticsRemoteDataSource
-                .getFacultyStatistics(facultyID = faculty.id)
+                .getDepartmentStatistics(departmentID = department.id)
                 .toLoadResult { statisticsDTO -> statisticsDTO.toStatistics() }
                 .onSuccess { statistics ->
-                    statisticsLocalDataSource.saveFacultyStatistics(
-                        facultyID = faculty.id,
+                    statisticsLocalDataSource.saveDepartmentStatistics(
+                        departmentID = department.id,
                         statistics = statistics
                     )
                 }

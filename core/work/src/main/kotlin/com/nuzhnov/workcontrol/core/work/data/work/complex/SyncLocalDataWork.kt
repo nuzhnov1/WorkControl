@@ -6,7 +6,7 @@ import javax.inject.Inject
 internal class SyncLocalDataWork @Inject constructor(
     private val syncBuildingsWork: SyncBuildingsWork,
     private val syncRoomsWork: SyncRoomsWork,
-    private val syncFacultiesWork: SyncFacultiesWork,
+    private val syncDepartmentsWork: SyncDepartmentsWork,
     private val syncGroupsWork: SyncGroupsWork,
     private val syncStudentsWork: SyncStudentsWork,
     private val syncLessonsWork: SyncLessonsWork
@@ -17,7 +17,7 @@ internal class SyncLocalDataWork @Inject constructor(
             syncLessonsWork(),
             syncStudentsWork(),
             syncGroupsWork(),
-            syncFacultiesWork(),
+            syncDepartmentsWork(),
             syncRoomsWork(),
             syncBuildingsWork()
         )

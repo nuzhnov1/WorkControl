@@ -10,8 +10,8 @@ internal class StatisticsRemoteDataSource(private val statisticsService: Statist
     suspend fun getUniversityStatistics(): Response<StatisticsDTO> =
         safeApiCall { statisticsService.getUniversityStatistics() }
 
-    suspend fun getFacultyStatistics(facultyID: Long): Response<StatisticsDTO> =
-        safeApiCall { statisticsService.getFacultyStatistics(facultyID) }
+    suspend fun getDepartmentStatistics(departmentID: Long): Response<StatisticsDTO> =
+        safeApiCall { statisticsService.getDepartmentStatistics(departmentID) }
 
     suspend fun getGroupStatistics(groupID: Long): Response<StatisticsDTO> =
         safeApiCall { statisticsService.getGroupStatistics(groupID) }

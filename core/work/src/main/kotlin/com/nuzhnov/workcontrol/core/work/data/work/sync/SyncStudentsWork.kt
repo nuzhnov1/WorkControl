@@ -1,13 +1,13 @@
 package com.nuzhnov.workcontrol.core.work.data.work.sync
 
 import com.nuzhnov.workcontrol.core.data.api.service.SyncService
-import com.nuzhnov.workcontrol.core.data.api.dto.university.FacultyDTO
+import com.nuzhnov.workcontrol.core.data.api.dto.university.DepartmentDTO
 import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupModelDTO
 import com.nuzhnov.workcontrol.core.data.api.dto.user.StudentModelDTO
-import com.nuzhnov.workcontrol.core.data.database.dao.FacultyDAO
+import com.nuzhnov.workcontrol.core.data.database.dao.DepartmentDAO
 import com.nuzhnov.workcontrol.core.data.database.dao.GroupDAO
 import com.nuzhnov.workcontrol.core.data.database.dao.StudentDAO
-import com.nuzhnov.workcontrol.core.data.mapper.toFacultyEntity
+import com.nuzhnov.workcontrol.core.data.mapper.toDepartmentEntity
 import com.nuzhnov.workcontrol.core.data.mapper.toGroupEntity
 import com.nuzhnov.workcontrol.core.data.mapper.toStudentEntity
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
@@ -17,7 +17,7 @@ internal class SyncStudentsWork @Inject constructor(
     private val syncService: SyncService,
     private val studentDAO: StudentDAO,
     private val groupDAO: GroupDAO,
-    private val facultyDAO: FacultyDAO
+    private val departmentDAO: DepartmentDAO
 ) {
 
     suspend operator fun invoke(): Result<Unit> = safeExecute {
@@ -35,11 +35,11 @@ internal class SyncStudentsWork @Inject constructor(
 
 
         groupModelDTOList
-            .map { studentModelDTO -> studentModelDTO.facultyDTO }
+            .map { studentModelDTO -> studentModelDTO.departmentDTO }
             .distinct()
-            .map(FacultyDTO::toFacultyEntity)
+            .map(DepartmentDTO::toDepartmentEntity)
             .toTypedArray()
-            .let { entities -> facultyDAO.insertOrUpdate(*entities) }
+            .let { entities -> departmentDAO.insertOrUpdate(*entities) }
 
         groupModelDTOList
             .map(GroupModelDTO::toGroupEntity)

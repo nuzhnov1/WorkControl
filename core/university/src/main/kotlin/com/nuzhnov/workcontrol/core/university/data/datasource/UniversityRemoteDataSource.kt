@@ -16,11 +16,11 @@ internal class UniversityRemoteDataSource @Inject constructor(
     suspend fun getRoomsDTO(buildingID: Long): Response<List<RoomDTO>> =
         safeApiCall { universityService.getBuildingRooms(buildingID) }
 
-    suspend fun getFacultiesDTO(): Response<List<FacultyDTO>> =
-        safeApiCall { universityService.getFaculties() }
+    suspend fun getDepartmentsDTO(): Response<List<DepartmentDTO>> =
+        safeApiCall { universityService.getDepartments() }
 
-    suspend fun getGroupsDTO(facultyID: Long): Response<List<GroupDTO>> =
-        safeApiCall { universityService.getFacultyGroups(facultyID) }
+    suspend fun getGroupsDTO(departmentID: Long): Response<List<GroupDTO>> =
+        safeApiCall { universityService.getDepartmentGroups(departmentID) }
 
     suspend fun getStudentsDTO(groupID: Long): Response<List<StudentDTO>> =
         safeApiCall { universityService.getStudentsOfGroup(groupID) }

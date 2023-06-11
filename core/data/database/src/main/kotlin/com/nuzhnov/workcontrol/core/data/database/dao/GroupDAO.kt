@@ -11,8 +11,8 @@ interface GroupDAO : BaseDAO<GroupEntity> {
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<GroupEntity>
 
-    @Query(FETCH_BY_FACULTY_ID_QUERY)
-    fun getEntitiesFlow(facultyID: Long): Flow<List<GroupEntity>>
+    @Query(FETCH_BY_DEPARTMENT_ID_QUERY)
+    fun getEntitiesFlow(departmentID: Long): Flow<List<GroupEntity>>
 
     suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
@@ -28,8 +28,8 @@ interface GroupDAO : BaseDAO<GroupEntity> {
     private companion object {
         const val FETCH_QUERY = "SELECT * FROM student_group"
 
-        const val FETCH_BY_FACULTY_ID_QUERY = """
-            SELECT * FROM student_group WHERE faculty_id = :facultyID
+        const val FETCH_BY_DEPARTMENT_ID_QUERY = """
+            SELECT * FROM student_group WHERE department_id = :departmentID
         """
     }
 }

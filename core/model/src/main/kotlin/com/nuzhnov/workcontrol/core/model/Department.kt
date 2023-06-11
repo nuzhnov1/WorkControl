@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.model
 
-data class Faculty(
+data class Department(
     val id: Long,
     val name: String
 )

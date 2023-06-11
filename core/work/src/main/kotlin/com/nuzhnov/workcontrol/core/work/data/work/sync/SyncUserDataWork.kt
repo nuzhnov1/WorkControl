@@ -15,7 +15,7 @@ internal class SyncUserDataWork @Inject constructor(
     private val appPreferences: AppPreferences,
     private val studentDAO: StudentDAO,
     private val groupDAO: GroupDAO,
-    private val facultyDAO: FacultyDAO,
+    private val departmentDAO: DepartmentDAO,
     private val teacherDAO: TeacherDAO,
     private val disciplineDAO: DisciplineDAO,
     private val teacherDisciplineCrossRefDAO: TeacherDisciplineCrossRefDAO
@@ -33,11 +33,11 @@ internal class SyncUserDataWork @Inject constructor(
     private suspend fun syncStudentData(): Unit = userService
         .getStudent()
         .let { studentModelDTO ->
-            val facultyEntity = studentModelDTO.groupModelDTO.facultyDTO.toFacultyEntity()
+            val departmentEntity = studentModelDTO.groupModelDTO.departmentDTO.toDepartmentEntity()
             val groupEntity = studentModelDTO.groupModelDTO.toGroupEntity()
             val studentEntity = studentModelDTO.toStudentEntity()
 
-            facultyDAO.insertOrUpdate(facultyEntity)
+            departmentDAO.insertOrUpdate(departmentEntity)
             groupDAO.insertOrUpdate(groupEntity)
             studentDAO.insertOrUpdate(studentEntity)
         }

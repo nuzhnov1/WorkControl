@@ -9,9 +9,9 @@ import androidx.room.ColumnInfo
     tableName = "student_group",
     foreignKeys = [
         ForeignKey(
-            entity = FacultyEntity::class,
+            entity = DepartmentEntity::class,
             parentColumns = ["id"],
-            childColumns = ["faculty_id"],
+            childColumns = ["department_id"],
             onDelete = ForeignKey.RESTRICT,
             onUpdate = ForeignKey.RESTRICT
         )
@@ -21,5 +21,5 @@ data class GroupEntity(
     @PrimaryKey(autoGenerate = false) val id: Long,
     val name: String,
     val course: Byte,
-    @ColumnInfo(name = "faculty_id", index = true) val facultyID: Long
+    @ColumnInfo(name = "department_id", index = true) val departmentID: Long
 )

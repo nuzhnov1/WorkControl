@@ -8,7 +8,7 @@ import javax.inject.Inject
 internal class StatisticsLocalDataSource @Inject constructor() {
 
     private val universityStatistics = MutableStateFlow<Statistics?>(value = null)
-    private val facultyStatisticsMap = mutableMapOf<Long, MutableStateFlow<Statistics?>>()
+    private val departmentStatisticsMap = mutableMapOf<Long, MutableStateFlow<Statistics?>>()
     private val groupStatisticsMap = mutableMapOf<Long, MutableStateFlow<Statistics?>>()
     private val studentStatisticsMap = mutableMapOf<Long, MutableStateFlow<Statistics?>>()
     private val currentStudentStatistics = MutableStateFlow<Statistics?>(value = null)
@@ -16,8 +16,8 @@ internal class StatisticsLocalDataSource @Inject constructor() {
 
     fun getUniversityStatisticsFlow(): Flow<Statistics?> = universityStatistics
 
-    fun getFacultyStatisticsFlow(facultyID: Long): Flow<Statistics?> =
-        facultyStatisticsMap.getOrPut(facultyID) { MutableStateFlow(value = null) }
+    fun getDepartmentStatisticsFlow(departmentID: Long): Flow<Statistics?> =
+        departmentStatisticsMap.getOrPut(departmentID) { MutableStateFlow(value = null) }
 
     fun getGroupStatisticsFlow(groupID: Long): Flow<Statistics?> =
         groupStatisticsMap.getOrPut(groupID) { MutableStateFlow(value = null) }
@@ -31,13 +31,13 @@ internal class StatisticsLocalDataSource @Inject constructor() {
         universityStatistics.value = statistics
     }
 
-    fun saveFacultyStatistics(facultyID: Long, statistics: Statistics) {
-        val facultyStatisticsFlow = facultyStatisticsMap[facultyID]
+    fun saveDepartmentStatistics(departmentID: Long, statistics: Statistics) {
+        val departmentStatisticsFlow = departmentStatisticsMap[departmentID]
 
-        if (facultyStatisticsFlow != null) {
-            facultyStatisticsFlow.value = statistics
+        if (departmentStatisticsFlow != null) {
+            departmentStatisticsFlow.value = statistics
         } else {
-            facultyStatisticsMap[facultyID] = MutableStateFlow(value = statistics)
+            departmentStatisticsMap[departmentID] = MutableStateFlow(value = statistics)
         }
     }
 
