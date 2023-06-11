@@ -32,12 +32,12 @@ internal class LessonLocalDataSource @Inject constructor(
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) {
 
-    fun getTeacherCreatedLessonsFlow(): Flow<List<LessonModel>> = appPreferences
+    fun getTeacherScheduledLessonsFlow(): Flow<List<LessonModel>> = appPreferences
         .getSessionFlow()
         .transform { session ->
             if (session?.role == Role.TEACHER) {
                 lessonDAO
-                    .getTeacherCreatedLessonsFlow(teacherID = session.id)
+                    .getTeacherScheduledLessonsFlow(teacherID = session.id)
                     .flowOn(context = coroutineDispatcher)
                     .collect { lessonModelList -> emit(lessonModelList) }
             } else {
@@ -71,14 +71,14 @@ internal class LessonLocalDataSource @Inject constructor(
             }
         }
 
-    fun getTeacherDisciplineCreatedLessonsFlow(
+    fun getTeacherDisciplineScheduledLessonsFlow(
         disciplineID: Long
     ): Flow<List<LessonModel>> = appPreferences
         .getSessionFlow()
         .transform { session ->
             if (session?.role == Role.TEACHER) {
                 lessonDAO
-                    .getTeacherCreatedDisciplineLessonsFlow(teacherID = session.id, disciplineID)
+                    .getTeacherScheduledDisciplineLessonsFlow(teacherID = session.id, disciplineID)
                     .flowOn(context = coroutineDispatcher)
                     .collect { lessonModelList -> emit(lessonModelList) }
             } else {

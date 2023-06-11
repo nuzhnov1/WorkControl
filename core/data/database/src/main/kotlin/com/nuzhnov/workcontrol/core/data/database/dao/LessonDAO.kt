@@ -11,8 +11,8 @@ interface LessonDAO : BaseDAO<LessonEntity> {
     @Query(FETCH_BY_ID_QUERY)
     suspend fun getEntity(lessonID: Long): LessonEntity?
 
-    @[Transaction Query(FETCH_CREATED_LESSONS_BY_TEACHER_ID_QUERY)]
-    fun getTeacherCreatedLessonsFlow(teacherID: Long): Flow<List<LessonModel>>
+    @[Transaction Query(FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_QUERY)]
+    fun getTeacherScheduledLessonsFlow(teacherID: Long): Flow<List<LessonModel>>
 
     @[Transaction Query(FETCH_ACTIVE_LESSON_BY_TEACHER_ID_QUERY)]
     suspend fun getTeacherActiveLesson(teacherID: Long): LessonModel?
@@ -23,8 +23,8 @@ interface LessonDAO : BaseDAO<LessonEntity> {
     @[Transaction Query(FETCH_FINISHED_LESSONS_BY_TEACHER_ID_QUERY)]
     fun getTeacherFinishedLessonFlow(teacherID: Long): Flow<List<LessonModel>>
 
-    @[Transaction Query(FETCH_CREATED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherCreatedDisciplineLessonsFlow(
+    @[Transaction Query(FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY)]
+    fun getTeacherScheduledDisciplineLessonsFlow(
         teacherID: Long,
         disciplineID: Long
     ): Flow<List<LessonModel>>
@@ -45,8 +45,8 @@ interface LessonDAO : BaseDAO<LessonEntity> {
     private companion object {
         const val FETCH_BY_ID_QUERY = "SELECT * FROM lesson WHERE id = :lessonID"
 
-        const val FETCH_CREATED_LESSONS_BY_TEACHER_ID_QUERY = """
-            SELECT * FROM lesson WHERE state = 'CREATED' AND teacher_id = :teacherID
+        const val FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_QUERY = """
+            SELECT * FROM lesson WHERE state = 'SCHEDULED' AND teacher_id = :teacherID
         """
 
         const val FETCH_ACTIVE_LESSON_BY_TEACHER_ID_QUERY = """
@@ -57,9 +57,9 @@ interface LessonDAO : BaseDAO<LessonEntity> {
             SELECT * FROM lesson WHERE state = 'FINISHED' AND teacher_id = :teacherID
         """
 
-        const val FETCH_CREATED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY = """
+        const val FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY = """
             SELECT * FROM lesson
-            WHERE state = 'CREATED' AND teacher_id = :teacherID AND discipline_id = :disciplineID
+            WHERE state = 'SCHEDULED' AND teacher_id = :teacherID AND discipline_id = :disciplineID
         """
 
         const val FETCH_FINISHED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY = """

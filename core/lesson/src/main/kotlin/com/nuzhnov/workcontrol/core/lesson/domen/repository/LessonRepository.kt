@@ -6,13 +6,13 @@ import com.nuzhnov.workcontrol.core.model.util.LoadResult
 import kotlinx.coroutines.flow.Flow
 
 internal interface LessonRepository {
-    fun getCreatedLessonsFlow(): Flow<List<Lesson>>
+    fun getScheduledLessonsFlow(): Flow<List<Lesson>>
 
     fun getActiveLessonFlow(): Flow<Lesson?>
 
     fun getFinishedLessonsFlow(): Flow<List<Lesson>>
 
-    fun getDisciplineCreatedLessonsFlow(discipline: Discipline): Flow<List<Lesson>>
+    fun getDisciplineScheduledLessonsFlow(discipline: Discipline): Flow<List<Lesson>>
 
     fun getDisciplineFinishedLessonsFlow(discipline: Discipline): Flow<List<Lesson>>
 

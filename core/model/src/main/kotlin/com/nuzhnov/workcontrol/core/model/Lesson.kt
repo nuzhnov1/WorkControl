@@ -43,7 +43,7 @@ data class Lesson(
     }
 
     enum class State {
-        CREATED,
+        SCHEDULED,
         ACTIVE,
         FINISHED
     }

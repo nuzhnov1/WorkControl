@@ -28,8 +28,8 @@ internal class LessonRepositoryImpl @Inject constructor(
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : LessonRepository {
 
-    override fun getCreatedLessonsFlow(): Flow<List<Lesson>> = lessonLocalDataSource
-        .getTeacherCreatedLessonsFlow()
+    override fun getScheduledLessonsFlow(): Flow<List<Lesson>> = lessonLocalDataSource
+        .getTeacherScheduledLessonsFlow()
         .map { lessonModelList -> lessonModelList.map(LessonModel::toLesson) }
         .flowOn(context = coroutineDispatcher)
 
@@ -43,10 +43,10 @@ internal class LessonRepositoryImpl @Inject constructor(
         .map { lessonModelList -> lessonModelList.map(LessonModel::toLesson) }
         .flowOn(context = coroutineDispatcher)
 
-    override fun getDisciplineCreatedLessonsFlow(
+    override fun getDisciplineScheduledLessonsFlow(
         discipline: Discipline
     ): Flow<List<Lesson>> = lessonLocalDataSource
-        .getTeacherDisciplineCreatedLessonsFlow(disciplineID = discipline.id)
+        .getTeacherDisciplineScheduledLessonsFlow(disciplineID = discipline.id)
         .map { lessonModelList -> lessonModelList.map(LessonModel::toLesson) }
         .flowOn(context = coroutineDispatcher)
 

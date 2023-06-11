@@ -30,7 +30,7 @@ internal class ParticipantRepositoryImpl @Inject constructor(
     override fun getParticipantsOfLessonFlow(
         lesson: Lesson
     ): Flow<LoadResult<List<Participant>>> = when (lesson.state) {
-        Lesson.State.CREATED, Lesson.State.ACTIVE -> participantLocalDataSource
+        Lesson.State.SCHEDULED, Lesson.State.ACTIVE -> participantLocalDataSource
             .getParticipantsOfTeacherLessonFlow(lessonID = lesson.id)
             .map { participantModelList ->
                 LoadResult.Success(
