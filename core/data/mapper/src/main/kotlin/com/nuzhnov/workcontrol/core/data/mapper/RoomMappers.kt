@@ -19,12 +19,6 @@ fun RoomModelDTO.toRoomModel() = RoomModel(
     buildingEntity = buildingDTO.toBuildingEntity()
 )
 
-fun RoomModelDTO.toRoomEntity() = RoomEntity(
-    id = roomDTO.id,
-    name = roomDTO.name,
-    buildingID = buildingDTO.id
-)
-
 fun RoomEntity.toRoom(building: Building) = Room(
     id = id,
     name = name,

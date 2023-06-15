@@ -9,10 +9,6 @@ data class StudentModel(
     @Embedded
     val studentEntity: StudentEntity,
 
-    @Relation(
-        entity = GroupEntity::class,
-        parentColumn = "group_id",
-        entityColumn = "id"
-    )
+    @Relation(entity = GroupEntity::class, parentColumn = "group_id", entityColumn = "id")
     val groupModel: GroupModel
 )

@@ -2,11 +2,11 @@ package com.nuzhnov.workcontrol.core.data.api.authenticator
 
 import com.nuzhnov.workcontrol.core.data.api.constant.Headers
 import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import javax.inject.Inject
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
-import javax.inject.Inject
 
 internal class ServiceAuthenticator @Inject constructor(
     private val appPreferences: AppPreferences

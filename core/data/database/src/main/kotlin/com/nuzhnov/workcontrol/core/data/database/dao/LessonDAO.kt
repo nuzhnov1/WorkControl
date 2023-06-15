@@ -2,7 +2,7 @@ package com.nuzhnov.workcontrol.core.data.database.dao
 
 import com.nuzhnov.workcontrol.core.data.database.entity.LessonEntity
 import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonModel
-import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonWithParticipantEntity
+import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonWithParticipantsModel
 import kotlinx.coroutines.flow.Flow
 import androidx.room.*
 
@@ -24,22 +24,16 @@ interface LessonDAO : BaseDAO<LessonEntity> {
     fun getTeacherFinishedLessonFlow(teacherID: Long): Flow<List<LessonModel>>
 
     @[Transaction Query(FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherDisciplineScheduledLessonsFlow(
-        teacherID: Long,
-        disciplineID: Long
-    ): Flow<List<LessonModel>>
+    fun getTeacherDisciplineScheduledLessonsFlow(teacherID: Long, disciplineID: Long): Flow<List<LessonModel>>
 
     @[Transaction Query(FETCH_FINISHED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherDisciplineFinishedLessonsFlow(
-        teacherID: Long,
-        disciplineID: Long
-    ): Flow<List<LessonModel>>
+    fun getTeacherDisciplineFinishedLessonsFlow(teacherID: Long, disciplineID: Long): Flow<List<LessonModel>>
 
     @Query(FETCH_FINISHED_LESSON_QUERY)
     suspend fun getFinishedLessonEntities(): List<LessonEntity>
 
     @[Transaction Query(FETCH_FINISHED_LESSON_QUERY)]
-    suspend fun getFinishedEntitiesWithParticipants(): List<LessonWithParticipantEntity>
+    suspend fun getFinishedEntitiesWithParticipants(): List<LessonWithParticipantsModel>
 
 
     private companion object {

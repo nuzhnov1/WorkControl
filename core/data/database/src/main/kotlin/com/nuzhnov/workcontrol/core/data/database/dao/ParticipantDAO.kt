@@ -11,21 +11,13 @@ import androidx.room.*
 @Dao
 interface ParticipantDAO : BaseDAO<ParticipantEntity> {
     @[Transaction Query(FETCH_BY_TEACHER_ID_AND_LESSON_ID_QUERY)]
-    fun getParticipantsOfTeacherLessonFlow(
-        teacherID: Long,
-        lessonID: Long
-    ): Flow<List<ParticipantModel>>
+    fun getParticipantsOfTeacherLessonFlow(teacherID: Long, lessonID: Long): Flow<List<ParticipantModel>>
 
     @[Transaction Query(FETCH_BY_TEACHER_ID_AND_STUDENT_ID_QUERY)]
-    fun getStudentParticipationOfTeacherLessonsFlow(
-        teacherID: Long,
-        studentID: Long
-    ): Flow<List<ParticipantLessonModel>>
+    fun getStudentParticipationOfTeacherLessonsFlow(teacherID: Long, studentID: Long): Flow<List<ParticipantLessonModel>>
 
     @[Transaction Query(FETCH_BY_STUDENT_ID_QUERY)]
-    fun getStudentParticipationOfLessonsFlow(
-        studentID: Long
-    ): Flow<List<ParticipantLessonModel>>
+    fun getStudentParticipationOfLessonsFlow(studentID: Long): Flow<List<ParticipantLessonModel>>
 
     @Query(FETCH_BY_LESSON_ID_QUERY)
     suspend fun getEntities(lessonID: Long): List<ParticipantEntity>

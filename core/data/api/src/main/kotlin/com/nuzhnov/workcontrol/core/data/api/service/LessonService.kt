@@ -4,7 +4,9 @@ import com.nuzhnov.workcontrol.core.data.api.dto.lesson.*
 import com.nuzhnov.workcontrol.core.data.api.annotation.PermittedTo
 import com.nuzhnov.workcontrol.core.models.Role
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
+import retrofit2.http.Body
 
 interface LessonService {
     // Примечание: извлекаются занятия текущего преподавателя по его токену
@@ -16,6 +18,11 @@ interface LessonService {
     suspend fun getDisciplineFinishedLessons(
         @Query("discipline_id") disciplineID: Long
     ): List<LessonDTO>
+
+    // Примечание: на сервере должна осуществляться проверка на то, что занятие было создано
+    // данным преподавателем с его дисциплиной
+    @[POST("/lessons?new") PermittedTo(Role.TEACHER)]
+    suspend fun postNewLessons(@Body newLessonDTOList: List<NewLessonDTO>)
 
     // Примечание: преподавателю разрешено извлекать участников только своих занятий.
     // На сервере должна осуществляться проверка принадлежности запрашиваемого занятия к
@@ -35,4 +42,9 @@ interface LessonService {
     // Примечание: id студента извлекается на основе токена в заголовке пакета
     @[GET("/participants") PermittedTo(Role.STUDENT)]
     suspend fun getStudentParticipationOfFinishedLessons(): List<ParticipantLessonModelDTO>
+
+    // Примечание: на сервере должна осуществляться проверка на то, что участники могут обновляться
+    // только для занятий данного преподавателя
+    @[POST("/participants?update") PermittedTo(Role.TEACHER)]
+    suspend fun postUpdatedParticipants(@Body updatedParticipantDTOList: List<UpdatedParticipantDTO>)
 }

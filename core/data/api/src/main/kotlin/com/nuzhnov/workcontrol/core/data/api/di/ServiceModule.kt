@@ -29,8 +29,4 @@ internal object ServiceModule {
     @[Provides Singleton]
     fun provideStatisticsService(retrofit: Retrofit): StatisticsService =
         retrofit.create(StatisticsService::class.java)
-
-    @[Provides Singleton]
-    fun provideSyncService(retrofit: Retrofit): SyncService =
-        retrofit.create(SyncService::class.java)
 }
