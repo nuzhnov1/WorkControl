@@ -192,9 +192,9 @@ internal class NsdTeacherService : Service(), NsdManager.RegistrationListener {
 
     internal companion object {
         const val CONTENT_ACTIVITY_CLASS_NAME_EXTRA = "com.nuzhnov.workcontrol.core.visitservice" +
-                ".teacherservice.presentation.service.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
+                ".teacherservice.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
 
         const val NOTIFICATION_CHANNEL_ID_EXTRA = "com.nuzhnov.workcontrol.core.visitservice" +
-                ".teacherservice.presentation.service.NOTIFICATION_CHANNEL_ID_EXTRA"
+                ".teacherservice.NOTIFICATION_CHANNEL_ID_EXTRA"
     }
 }

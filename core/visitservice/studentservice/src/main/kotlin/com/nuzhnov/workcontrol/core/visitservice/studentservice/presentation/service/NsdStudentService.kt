@@ -250,13 +250,12 @@ internal class NsdStudentService : Service(),
 
 
     internal companion object {
-        const val COMMAND_EXTRA = "com.nuzhnov.workcontrol.core.visitservice" +
-                ".studentservice.presentation.service.COMMAND_EXTRA"
+        const val COMMAND_EXTRA = "com.nuzhnov.workcontrol.core.visitservice.studentservice.COMMAND_EXTRA"
 
         const val CONTENT_ACTIVITY_CLASS_NAME_EXTRA = "com.nuzhnov.workcontrol.core.visitservice" +
-                ".studentservice.presentation.service.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
+                ".studentservice.CONTENT_ACTIVITY_CLASS_NAME_EXTRA"
 
         const val NOTIFICATION_CHANNEL_ID_EXTRA = "com.nuzhnov.workcontrol.core.visitservice" +
-                ".studentservice.presentation.service.NOTIFICATION_CHANNEL_ID_EXTRA"
+                ".studentservice.NOTIFICATION_CHANNEL_ID_EXTRA"
     }
 }

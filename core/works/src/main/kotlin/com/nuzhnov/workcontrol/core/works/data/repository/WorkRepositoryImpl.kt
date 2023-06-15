@@ -53,8 +53,8 @@ internal class WorkRepositoryImpl @Inject constructor(
 
 
     private companion object {
-        const val SYNC_LOCAL_DATA_WORK_NAME = "com.nuzhnov.workcontrol.core.works.data.repository.SYNC_LOCAL_DATA_WORK_NAME"
-        const val CLEAR_LOCAL_DATA_WORK_NAME = "com.nuzhnov.workcontrol.core.works.data.repository.CLEAR_LOCAL_DATA_WORK_NAME"
+        const val SYNC_LOCAL_DATA_WORK_NAME = "com.nuzhnov.workcontrol.core.works.SYNC_LOCAL_DATA_WORK_NAME"
+        const val CLEAR_LOCAL_DATA_WORK_NAME = "com.nuzhnov.workcontrol.core.works.CLEAR_LOCAL_DATA_WORK_NAME"
 
         const val SYNC_LOCAL_DATA_WORK_TIME_INTERVAL_HOURS = 24L
         const val CLEAR_LOCAL_DATA_WORK_TIME_INTERVAL_DAYS = 7L
