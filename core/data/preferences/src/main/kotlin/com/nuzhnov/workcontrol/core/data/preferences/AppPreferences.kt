@@ -19,7 +19,9 @@ class AppPreferences @Inject internal constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PREFERENCES_FILENAME)
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+        name = PREFERENCES_FILENAME
+    )
 
 
     suspend fun getSession() = context.dataStore.data
@@ -41,7 +43,8 @@ class AppPreferences @Inject internal constructor(
         }
     }
 
-    fun getLoginFlow() = context.dataStore.data.map { preferences -> preferences[sessionPreferencesKey] }
+    fun getLoginFlow() = context.dataStore.data
+        .map { preferences -> preferences[sessionPreferencesKey] }
 
     suspend fun setLogin(value: String) {
         context.dataStore.edit { preferences ->
@@ -58,10 +61,8 @@ class AppPreferences @Inject internal constructor(
 
     private companion object {
         const val PREFERENCES_FILENAME = "preferences.json"
-        const val SESSION_KEY = "SESSION_KEY"
-        const val LOGIN_KEY = "LOGIN_KEY"
 
-        val sessionPreferencesKey = stringPreferencesKey(SESSION_KEY)
-        val loginPreferencesKey = stringPreferencesKey(LOGIN_KEY)
+        val sessionPreferencesKey = stringPreferencesKey(name = "SESSION_KEY")
+        val loginPreferencesKey = stringPreferencesKey(name = "LOGIN_KEY")
     }
 }
