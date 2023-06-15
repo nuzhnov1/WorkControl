@@ -5,7 +5,7 @@ import com.nuzhnov.workcontrol.core.data.database.entity.BuildingEntity
 import androidx.room.Embedded
 import androidx.room.Relation
 
-data class RoomModel(
+data class RoomEntityModel(
     @Embedded
     val roomEntity: RoomEntity,
 

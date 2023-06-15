@@ -5,7 +5,7 @@ import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
 import androidx.room.Embedded
 import androidx.room.Relation
 
-data class LessonWithParticipantsModel(
+data class LessonWithParticipantsEntityModel(
     @Embedded
     val lessonEntity: LessonEntity,
 

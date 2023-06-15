@@ -6,7 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.ColumnInfo
 
 @Entity(
-    tableName = "group_statistics",
+    tableName = "student_group_statistics",
     foreignKeys = [
         ForeignKey(
             entity = GroupEntity::class,

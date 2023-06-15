@@ -2,14 +2,13 @@ package com.nuzhnov.workcontrol.core.data.database.dao
 
 import com.nuzhnov.workcontrol.core.data.database.entity.UniversityStatisticsEntity
 import kotlinx.coroutines.flow.Flow
+import androidx.room.Dao
 import androidx.room.Query
 
-interface UniversityStatisticsDAO : BaseDAO<UniversityStatisticsEntity> {
-    @Query(FETCH_QUERY)
-    fun getEntityFlow(): Flow<UniversityStatisticsEntity?>
+@Dao
+abstract class UniversityStatisticsDAO :
+    EntityDAO<UniversityStatisticsEntity>(entityName = "university_statistics") {
 
-
-    private companion object {
-        const val FETCH_QUERY = "SELECT * FROM department_statistics WHERE id = 0"
-    }
+    @Query("SELECT * FROM university_statistics WHERE id = 0")
+    abstract fun getEntityFlow(): Flow<UniversityStatisticsEntity?>
 }

@@ -1,66 +1,56 @@
 package com.nuzhnov.workcontrol.core.data.database.dao
 
 import com.nuzhnov.workcontrol.core.data.database.entity.LessonEntity
-import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonModel
-import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonWithParticipantsModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonEntityModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonWithParticipantsEntityModel
 import kotlinx.coroutines.flow.Flow
 import androidx.room.*
 
 @Dao
-interface LessonDAO : BaseDAO<LessonEntity> {
-    @Query(FETCH_BY_ID_QUERY)
-    suspend fun getEntity(lessonID: Long): LessonEntity?
+abstract class LessonDAO : EntityDAO<LessonEntity>(entityName = "lesson") {
+    @Query("SELECT * FROM lesson WHERE id = :lessonID")
+    abstract suspend fun getEntity(lessonID: Long): LessonEntity?
 
-    @[Transaction Query(FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_QUERY)]
-    fun getTeacherScheduledLessonsFlow(teacherID: Long): Flow<List<LessonModel>>
+    @Transaction
+    @Query("SELECT * FROM lesson WHERE state = 'SCHEDULED' AND teacher_id = :teacherID")
+    abstract fun getTeacherScheduledLessonsFlow(teacherID: Long): Flow<List<LessonEntityModel>>
 
-    @[Transaction Query(FETCH_ACTIVE_LESSON_BY_TEACHER_ID_QUERY)]
-    suspend fun getTeacherActiveLesson(teacherID: Long): LessonModel?
+    @Transaction
+    @Query("SELECT * FROM lesson WHERE state = 'ACTIVE' AND teacher_id = :teacherID")
+    abstract suspend fun getTeacherActiveLesson(teacherID: Long): LessonEntityModel?
 
-    @[Transaction Query(FETCH_ACTIVE_LESSON_BY_TEACHER_ID_QUERY)]
-    fun getTeacherActiveLessonFlow(teacherID: Long): Flow<LessonModel?>
+    @Transaction
+    @Query("SELECT * FROM lesson WHERE state = 'ACTIVE' AND teacher_id = :teacherID")
+    abstract fun getTeacherActiveLessonFlow(teacherID: Long): Flow<LessonEntityModel?>
 
-    @[Transaction Query(FETCH_FINISHED_LESSONS_BY_TEACHER_ID_QUERY)]
-    fun getTeacherFinishedLessonFlow(teacherID: Long): Flow<List<LessonModel>>
+    @Transaction
+    @Query("SELECT * FROM lesson WHERE state = 'FINISHED' AND teacher_id = :teacherID")
+    abstract fun getTeacherFinishedLessonFlow(teacherID: Long): Flow<List<LessonEntityModel>>
 
-    @[Transaction Query(FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherDisciplineScheduledLessonsFlow(teacherID: Long, disciplineID: Long): Flow<List<LessonModel>>
+    @Transaction
+    @Query("""
+        SELECT * FROM lesson
+        WHERE state = 'SCHEDULED' AND teacher_id = :teacherID AND discipline_id = :disciplineID
+    """)
+    abstract fun getTeacherDisciplineScheduledLessonsFlow(
+        teacherID: Long,
+        disciplineID: Long
+    ): Flow<List<LessonEntityModel>>
 
-    @[Transaction Query(FETCH_FINISHED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherDisciplineFinishedLessonsFlow(teacherID: Long, disciplineID: Long): Flow<List<LessonModel>>
+    @Transaction
+    @Query("""
+        SELECT * FROM lesson
+        WHERE state = 'FINISHED' AND teacher_id = :teacherID AND discipline_id = :disciplineID
+    """)
+    abstract fun getTeacherDisciplineFinishedLessonsFlow(
+        teacherID: Long,
+        disciplineID: Long
+    ): Flow<List<LessonEntityModel>>
 
-    @Query(FETCH_FINISHED_LESSON_QUERY)
-    suspend fun getFinishedLessonEntities(): List<LessonEntity>
+    @Query("SELECT * FROM lesson WHERE state = 'FINISHED'")
+    abstract suspend fun getFinishedLessonEntities(): List<LessonEntity>
 
-    @[Transaction Query(FETCH_FINISHED_LESSON_QUERY)]
-    suspend fun getFinishedEntitiesWithParticipants(): List<LessonWithParticipantsModel>
-
-
-    private companion object {
-        const val FETCH_BY_ID_QUERY = "SELECT * FROM lesson WHERE id = :lessonID"
-
-        const val FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_QUERY = """
-            SELECT * FROM lesson WHERE state = 'SCHEDULED' AND teacher_id = :teacherID
-        """
-
-        const val FETCH_ACTIVE_LESSON_BY_TEACHER_ID_QUERY = """
-            SELECT * FROM lesson WHERE state = 'ACTIVE' AND teacher_id = :teacherID
-        """
-
-        const val FETCH_FINISHED_LESSONS_BY_TEACHER_ID_QUERY = """
-            SELECT * FROM lesson WHERE state = 'FINISHED' AND teacher_id = :teacherID
-        """
-
-        const val FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY = """
-            SELECT * FROM lesson
-            WHERE state = 'SCHEDULED' AND teacher_id = :teacherID AND discipline_id = :disciplineID
-        """
-
-        const val FETCH_FINISHED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY = """
-            SELECT * FROM lesson
-            WHERE state = 'FINISHED' AND teacher_id = :teacherID AND discipline_id = :disciplineID
-        """
-
-        const val FETCH_FINISHED_LESSON_QUERY = "SELECT * FROM lesson WHERE state = 'FINISHED'"
-    }
+    @Transaction
+    @Query("SELECT * FROM lesson WHERE state = 'FINISHED'")
+    abstract suspend fun getFinishedEntitiesWithParticipants(): List<LessonWithParticipantsEntityModel>
 }

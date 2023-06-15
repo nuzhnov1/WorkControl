@@ -5,7 +5,7 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import androidx.room.Junction
 
-data class LessonModel(
+data class LessonEntityModel(
     @Embedded
     val lessonEntity: LessonEntity,
 
@@ -19,7 +19,7 @@ data class LessonModel(
             entityColumn = "group_id"
         )
     )
-    val groupModelList: List<GroupModel>,
+    val groupEntityModelList: List<GroupEntityModel>,
 
     @Relation(parentColumn = "teacher_id", entityColumn = "id")
     val teacherEntity: TeacherEntity,
@@ -28,5 +28,5 @@ data class LessonModel(
     val disciplineEntity: DisciplineEntity,
 
     @Relation(entity = RoomEntity::class, parentColumn = "room_id", entityColumn = "id")
-    val roomModel: RoomModel
+    val roomEntityModel: RoomEntityModel
 )

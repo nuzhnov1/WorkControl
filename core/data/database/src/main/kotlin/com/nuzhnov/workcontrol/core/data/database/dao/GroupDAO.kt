@@ -2,34 +2,11 @@ package com.nuzhnov.workcontrol.core.data.database.dao
 
 import com.nuzhnov.workcontrol.core.data.database.entity.GroupEntity
 import kotlinx.coroutines.flow.Flow
-import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Query
 
 @Dao
-interface GroupDAO : BaseDAO<GroupEntity> {
-    @Query(FETCH_QUERY)
-    suspend fun getEntities(): List<GroupEntity>
-
-    @Query(FETCH_BY_DEPARTMENT_ID_QUERY)
-    fun getEntitiesFlow(departmentID: Long): Flow<List<GroupEntity>>
-
-    suspend fun clear(vararg exceptionID: Long) = getEntities()
-        .filterNot { entity -> entity.id in exceptionID }
-        .forEach { entity ->
-            runCatching { delete(entity) }.onFailure { cause ->
-                if (cause !is SQLiteConstraintException) {
-                    throw cause
-                }
-            }
-        }
-
-
-    private companion object {
-        const val FETCH_QUERY = "SELECT * FROM student_group"
-
-        const val FETCH_BY_DEPARTMENT_ID_QUERY = """
-            SELECT * FROM student_group WHERE department_id = :departmentID
-        """
-    }
+abstract class GroupDAO : EntityDAO<GroupEntity>(entityName = "student_group") {
+    @Query("SELECT * FROM student_group WHERE department_id = :departmentID")
+    abstract fun getEntitiesFlow(departmentID: Long): Flow<List<GroupEntity>>
 }

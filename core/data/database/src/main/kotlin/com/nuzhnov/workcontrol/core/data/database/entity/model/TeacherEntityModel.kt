@@ -7,7 +7,7 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import androidx.room.Junction
 
-data class TeacherModel(
+data class TeacherEntityModel(
     @Embedded
     val teacherEntity: TeacherEntity,
 

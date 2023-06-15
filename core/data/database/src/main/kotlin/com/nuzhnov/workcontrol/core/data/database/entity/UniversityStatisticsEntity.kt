@@ -2,7 +2,9 @@ package com.nuzhnov.workcontrol.core.data.database.entity
 
 import androidx.room.PrimaryKey
 import androidx.room.ColumnInfo
+import androidx.room.Entity
 
+@Entity(tableName = "university_statistics")
 data class UniversityStatisticsEntity(
     @PrimaryKey(autoGenerate = false) val id: Long,
     @ColumnInfo(name = "marks_percent") val markPercent: Double?,

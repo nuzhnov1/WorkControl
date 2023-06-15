@@ -17,7 +17,11 @@ import androidx.room.Database
         TeacherDisciplineCrossRefEntity::class,
         LessonEntity::class,
         LessonGroupCrossRefEntity::class,
-        ParticipantEntity::class
+        ParticipantEntity::class,
+        UniversityStatisticsEntity::class,
+        DepartmentStatisticsEntity::class,
+        GroupStatisticsEntity::class,
+        StudentStatisticsEntity::class
     ],
     exportSchema = false,
     version = 1

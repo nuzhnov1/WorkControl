@@ -4,4 +4,5 @@ import com.nuzhnov.workcontrol.core.data.database.entity.LessonGroupCrossRefEnti
 import androidx.room.Dao
 
 @Dao
-interface LessonGroupCrossRefDAO : BaseDAO<LessonGroupCrossRefEntity>
+abstract class LessonGroupCrossRefDAO :
+    EntityDAO<LessonGroupCrossRefEntity>(entityName = "lesson_student_group_cross_ref")

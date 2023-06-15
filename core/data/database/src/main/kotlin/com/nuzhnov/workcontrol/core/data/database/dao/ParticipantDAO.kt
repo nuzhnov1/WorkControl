@@ -1,60 +1,56 @@
 package com.nuzhnov.workcontrol.core.data.database.dao
 
 import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantModel
-import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantLessonModel
-import com.nuzhnov.workcontrol.core.data.database.entity.model.update.ParticipantUpdatableModel
-import com.nuzhnov.workcontrol.core.data.database.entity.model.update.ParticipantActivityModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantEntityModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantWithLessonEntityModel
+import com.nuzhnov.workcontrol.core.data.database.entity.partial.ParticipantPartialEntity
+import com.nuzhnov.workcontrol.core.data.database.entity.partial.ParticipantActivityPartialEntity
 import kotlinx.coroutines.flow.Flow
 import androidx.room.*
 
 @Dao
-interface ParticipantDAO : BaseDAO<ParticipantEntity> {
-    @[Transaction Query(FETCH_BY_TEACHER_ID_AND_LESSON_ID_QUERY)]
-    fun getParticipantsOfTeacherLessonFlow(teacherID: Long, lessonID: Long): Flow<List<ParticipantModel>>
+abstract class ParticipantDAO : EntityDAO<ParticipantEntity>(entityName = "participant") {
+    @Transaction
+    @Query("""
+        SELECT participant.* FROM participant
+            INNER JOIN lesson ON participant.lesson_id = lesson.id
+        WHERE participant.lesson_id = :lessonID AND lesson.teacher_id = :teacherID
+    """)
+    abstract fun getParticipantsOfTeacherLessonFlow(
+        teacherID: Long,
+        lessonID: Long
+    ): Flow<List<ParticipantEntityModel>>
 
-    @[Transaction Query(FETCH_BY_TEACHER_ID_AND_STUDENT_ID_QUERY)]
-    fun getStudentParticipationOfTeacherLessonsFlow(teacherID: Long, studentID: Long): Flow<List<ParticipantLessonModel>>
+    @Transaction
+    @Query("""
+        SELECT participant.* FROM participant
+            INNER JOIN lesson ON participant.lesson_id = lesson.id
+        WHERE participant.student_id = :studentID AND lesson.teacher_id = :teacherID
+    """)
+    abstract fun getStudentParticipationOfTeacherLessonsFlow(
+        teacherID: Long,
+        studentID: Long
+    ): Flow<List<ParticipantWithLessonEntityModel>>
 
-    @[Transaction Query(FETCH_BY_STUDENT_ID_QUERY)]
-    fun getStudentParticipationOfLessonsFlow(studentID: Long): Flow<List<ParticipantLessonModel>>
+    @Transaction
+    @Query("SELECT * FROM participant WHERE student_id = :studentID")
+    abstract fun getStudentParticipationOfLessonsFlow(
+        studentID: Long
+    ): Flow<List<ParticipantWithLessonEntityModel>>
 
-    @Query(FETCH_BY_LESSON_ID_QUERY)
-    suspend fun getEntities(lessonID: Long): List<ParticipantEntity>
+    @Query("SELECT * FROM participant WHERE lesson_id = :lessonID")
+    abstract suspend fun getEntitiesByLessonID(lessonID: Long): List<ParticipantEntity>
 
-    @Query(FETCH_BY_LESSON_ID_LIST_QUERY)
-    suspend fun getEntities(lessonIDList: List<Long>): List<ParticipantEntity>
+    @Query("SELECT * FROM participant WHERE lesson_id IN (:lessonIDList)")
+    abstract suspend fun getEntitiesByLessonIDList(lessonIDList: List<Long>): List<ParticipantEntity>
 
     @Update(entity = ParticipantEntity::class)
-    suspend fun updateData(vararg participantUpdatableModel: ParticipantUpdatableModel)
+    abstract suspend fun updateData(
+        vararg participantPartialEntity: ParticipantPartialEntity
+    )
 
     @Update(entity = ParticipantEntity::class)
-    suspend fun updateActivity(vararg participantActivityModel: ParticipantActivityModel)
-
-
-    private companion object {
-        const val FETCH_BY_TEACHER_ID_AND_LESSON_ID_QUERY = """
-            SELECT participant.* FROM participant
-                INNER JOIN lesson ON participant.lesson_id = lesson.id
-            WHERE participant.lesson_id = :lessonID AND lesson.teacher_id = :teacherID
-        """
-
-        const val FETCH_BY_TEACHER_ID_AND_STUDENT_ID_QUERY = """
-            SELECT participant.* FROM participant
-                INNER JOIN lesson ON participant.lesson_id = lesson.id
-            WHERE participant.student_id = :studentID AND lesson.teacher_id = :teacherID
-        """
-
-        const val FETCH_BY_STUDENT_ID_QUERY = """
-            SELECT * FROM participant WHERE student_id = :studentID
-        """
-
-        const val FETCH_BY_LESSON_ID_QUERY = """
-            SELECT * FROM participant WHERE lesson_id = :lessonID
-        """
-
-        const val FETCH_BY_LESSON_ID_LIST_QUERY = """
-            SELECT * FROM participant WHERE lesson_id IN (:lessonIDList)
-        """
-    }
+    abstract suspend fun updateActivity(
+        vararg participantActivityPartialEntity: ParticipantActivityPartialEntity
+    )
 }

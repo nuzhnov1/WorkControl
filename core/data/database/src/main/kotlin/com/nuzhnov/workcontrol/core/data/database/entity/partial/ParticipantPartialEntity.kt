@@ -1,8 +1,8 @@
-package com.nuzhnov.workcontrol.core.data.database.entity.model.update
+package com.nuzhnov.workcontrol.core.data.database.entity.partial
 
 import androidx.room.ColumnInfo
 
-data class ParticipantUpdatableModel(
+data class ParticipantPartialEntity(
     @ColumnInfo(name = "student_id") val studentID: Long,
     @ColumnInfo(name = "lesson_id") val lessonID: Long,
     @ColumnInfo(name = "is_marked") val isMarked: Boolean,

@@ -5,7 +5,7 @@ import com.nuzhnov.workcontrol.core.data.database.entity.DepartmentEntity
 import androidx.room.Embedded
 import androidx.room.Relation
 
-data class GroupModel(
+data class GroupEntityModel(
     @Embedded
     val groupEntity: GroupEntity,
 
