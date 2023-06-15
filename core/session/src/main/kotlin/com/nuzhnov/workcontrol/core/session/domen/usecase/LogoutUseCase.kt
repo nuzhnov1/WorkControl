@@ -7,5 +7,5 @@ class LogoutUseCase @Inject internal constructor(
     private val sessionRepository: SessionRepository
 ) {
 
-    suspend operator fun invoke(): Result<Unit> = sessionRepository.logout()
+    suspend operator fun invoke() = sessionRepository.logout()
 }

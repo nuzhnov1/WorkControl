@@ -48,6 +48,6 @@ android {
 dependencies {
     implementation(project(":core:data:api"))
     implementation(project(":core:data:database"))
-    implementation(project(":core:model"))
+    implementation(project(":core:models"))
     implementation("com.soywiz.korlibs.klock:klock-jvm:2.2.0")
 }

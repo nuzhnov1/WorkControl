@@ -25,12 +25,12 @@ internal class ClientHandler(private val controlServer: ControlServerImpl) {
     private val outputBufferSize = Int.SIZE_BYTES
     private val outputBuffer = ByteBuffer.allocate(outputBufferSize)
 
-    internal val connectionsCount: Int get() = synchronized(lock = clientConnections) {
+    internal val connectionsCount get() = synchronized(lock = clientConnections) {
         clientConnections.size
     }
 
 
-    internal suspend fun start(): Unit = coroutineScope {
+    internal suspend fun start() = coroutineScope {
         handlerJob?.cancelAndJoin()
         handlerJob = coroutineContext.job
 
@@ -42,12 +42,14 @@ internal class ClientHandler(private val controlServer: ControlServerImpl) {
         handlerJob?.cancel()
     }
 
-    internal fun attachClient(channel: SocketChannel): Result<Unit> = applyCatching {
+    internal fun attachClient(channel: SocketChannel) = applyCatching {
+        val clientSelector = requireNotNull(clientSelector)
+
         channel.configureBlocking(/* block = */ false)
-        channel.register(clientSelector!!, /* ops = */ OP_READ or OP_WRITE)
+        channel.register(clientSelector, /* ops = */ OP_READ or OP_WRITE)
     }
 
-    internal fun disconnectVisitor(id: VisitorID): Unit = synchronized(lock = clientConnections) {
+    internal fun disconnectVisitor(id: VisitorID) = synchronized(lock = clientConnections) {
         clientConnections
             .filter { (_, visitorID) -> visitorID == id }
             .keys
@@ -59,8 +61,8 @@ internal class ClientHandler(private val controlServer: ControlServerImpl) {
         controlServer.updateVisitorActivity(visitorID = id, isActiveNow = false)
     }
 
-    private suspend fun doHandlerJob(): Result<Unit> = applyCatching {
-        val selector = Selector.open().apply { clientSelector = this }
+    private suspend fun doHandlerJob() = applyCatching {
+        val selector = requireNotNull(Selector.open()).apply { clientSelector = this }
 
         while (true) {
             if (selector.isEventsNotOccurred) {
@@ -72,7 +74,7 @@ internal class ClientHandler(private val controlServer: ControlServerImpl) {
             val iterator = selectedKeys.iterator()
 
             while (iterator.hasNext()) {
-                val key = iterator.next().also { iterator.remove() }
+                val key = requireNotNull(iterator.next()).also { iterator.remove() }
 
                 if (key.isValid && key.isReadable) {
                     val channel = key.clientChannel ?: continue
@@ -91,20 +93,20 @@ internal class ClientHandler(private val controlServer: ControlServerImpl) {
         closeAllConnections()
     }
 
-    private fun SocketChannel.closeConnection(): Unit = synchronized(lock = clientConnections) {
+    private fun SocketChannel.closeConnection() = synchronized(lock = clientConnections) {
         safeClose()
         clientConnections.remove(key = this)?.let { visitorID ->
             controlServer.updateVisitorActivity(visitorID, isActiveNow = false)
         }
     }
 
-    private fun closeAllConnections(): Unit = synchronized(lock = clientConnections) {
+    private fun closeAllConnections() = synchronized(lock = clientConnections) {
         clientConnections.keys.forEach { channel -> channel.safeClose() }
         clientConnections.clear()
         controlServer.makeAllVisitorsInactive()
     }
 
-    private fun SocketChannel.receiveVisitorID(): Result<Unit> = applyCatching {
+    private fun SocketChannel.receiveVisitorID() = applyCatching {
         val oldID = synchronized(lock = clientConnections) { clientConnections[this] }
         val readBytesCount = readVisitorID()
 

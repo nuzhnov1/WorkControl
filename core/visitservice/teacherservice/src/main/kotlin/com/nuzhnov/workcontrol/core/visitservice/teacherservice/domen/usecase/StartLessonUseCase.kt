@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.usecase
 
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.controller.TeacherServiceController
-import com.nuzhnov.workcontrol.core.model.Lesson
+import com.nuzhnov.workcontrol.core.models.Lesson
 import kotlin.reflect.KClass
 import javax.inject.Inject
 

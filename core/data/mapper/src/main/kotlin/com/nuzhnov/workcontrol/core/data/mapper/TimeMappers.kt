@@ -5,10 +5,10 @@ import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.TimeSpan
 
 
-fun DateTimeTz.toLong(): Long = local.unixMillisLong
+fun DateTimeTz.toLong() = local.unixMillisLong
 
-fun Long.toDateTimeTz(): DateTimeTz = DateTime(unix = this).local
+fun Long.toDateTimeTz() = DateTime(unix = this).local
 
-fun TimeSpan.toDouble(): Double = milliseconds
+fun TimeSpan.toDouble() = milliseconds
 
-fun Double.toTimeSpan(): TimeSpan = TimeSpan(milliseconds = this)
+fun Double.toTimeSpan() = TimeSpan(milliseconds = this)

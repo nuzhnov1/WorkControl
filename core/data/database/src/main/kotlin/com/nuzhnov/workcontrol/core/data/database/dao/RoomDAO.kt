@@ -14,7 +14,7 @@ interface RoomDAO : BaseDAO<RoomEntity> {
     @Query(FETCH_BY_BUILDING_ID_QUERY)
     fun getEntitiesFlow(buildingID: Long): Flow<List<RoomEntity>>
 
-    suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
+    suspend fun clear(vararg exceptionID: Long) = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
         .forEach { entity ->
             runCatching { delete(entity) }.onFailure { cause ->

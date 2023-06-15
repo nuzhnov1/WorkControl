@@ -43,37 +43,28 @@ internal class ControlServerImpl : ControlServer {
     private var address: InetAddress? = null
     private var port: Int = 0
 
-    override var backlog: Int = 512
+    override var backlog = 512
         set(value) {
-            if (value < 0) {
-                throw IllegalArgumentException("backlog < 0")
-            } else {
-                field = value
-            }
+            require(value >= 0) { "backlog < 0" }
+            field = value
         }
 
-    override var handlersCount: Int = 4
+    override var handlersCount = 4
         set(value) {
-            if (value < 1) {
-                throw IllegalArgumentException("handlersCount < 0")
-            } else {
-                field = value
-            }
+            require(value >= 1) { "handlersCount < 0" }
+            field = value
         }
 
-    override var maxAcceptConnectionAttempts: Int = 8
+    override var maxAcceptConnectionAttempts = 8
         set(value) {
-            if (value < 0) {
-                throw IllegalArgumentException("maxAcceptConnectionAttempts < 0")
-            } else {
-                field = value
-            }
+            require(value >= 0) { "maxAcceptConnectionAttempts < 0" }
+            field = value
         }
 
-    private var acceptConnectionAttempts: Int = 0
+    private var acceptConnectionAttempts = 0
 
 
-    private val isStoppedAcceptConnections: Boolean get() = _state.value is StoppedAcceptConnections
+    private val isStoppedAcceptConnections get() = _state.value is StoppedAcceptConnections
 
 
 
@@ -129,7 +120,7 @@ internal class ControlServerImpl : ControlServer {
         _visits.applyUpdate { clear() }
     }
 
-    private fun Result<Unit>.toControlServerState(): ControlServerState = fold(
+    private fun Result<Unit>.toControlServerState() = fold(
         onSuccess = { _state.value.toNextStateOnNormalCompletion() },
         onFailure = { cause ->
             when (cause) {
@@ -142,39 +133,42 @@ internal class ControlServerImpl : ControlServer {
         }
     )
 
-    private fun ControlServerState.toNextStateOnNormalCompletion(): ControlServerState =
-        when (this) {
-            is Running -> Stopped
-            is StoppedAcceptConnections -> StoppedByError(error, cause)
-            else -> this
-        }
+    private fun ControlServerState.toNextStateOnNormalCompletion() = when (this) {
+        is Running -> Stopped
+        is StoppedAcceptConnections -> StoppedByError(error, cause)
+        else -> this
+    }
 
-    private fun ControlServerException.toControlServerState(): ControlServerState =
-        when (this) {
-            is InitException -> StoppedByError(
-                error = INIT_ERROR,
-                cause = cause
-            )
+    private fun ControlServerException.toControlServerState() = when (this) {
+        is InitException -> StoppedByError(
+            error = INIT_ERROR,
+            cause = cause
+        )
 
-            is MaxAcceptConnectionAttemptsReachedException -> StoppedByError(
-                error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
-                cause = cause
-            )
-        }
+        is MaxAcceptConnectionAttemptsReachedException -> StoppedByError(
+            error = MAX_ACCEPT_CONNECTION_ATTEMPTS_REACHED,
+            cause = cause
+        )
+    }
 
-    private fun initServer(): Result<Unit> = applyCatching {
-        serverSelector = Selector.open()
+    private fun initServer() = applyCatching {
+        serverSelector = requireNotNull(Selector.open())
         serverChannel = ServerSocketChannel.open().apply {
             val socket = socket()
             val serverSocketAddress = InetSocketAddress(address, port)
+            val serverSelector = requireNotNull(serverSelector)
 
             configureBlocking(/* block = */ false)
             socket.bind(serverSocketAddress, backlog)
-            register(serverSelector!!, OP_ACCEPT)
+            register(serverSelector, OP_ACCEPT)
 
-            address = socket.inetAddress
-            port = socket.localPort
-            updateState(state = Running(address!!, port))
+            val address = socket.inetAddress
+            val port = socket.localPort
+
+            this@ControlServerImpl.address = address
+            this@ControlServerImpl.port = port
+
+            updateState(state = Running(address, port))
         }
 
         clientHandlers = buildList(handlersCount) {
@@ -187,13 +181,14 @@ internal class ControlServerImpl : ControlServer {
         }
     }
 
-    private suspend fun doServerJob(): Result<Unit> = applyCatching {
+    private suspend fun doServerJob() = applyCatching {
         coroutineScope {
-            val serverSelector = serverSelector!!
-            val serverChannel = serverChannel!!
+            val serverSelector = requireNotNull(serverSelector)
+            val serverChannel = requireNotNull(serverChannel)
+            val handlers = requireNotNull(clientHandlers)
 
             acceptConnectionAttempts = 0
-            clientHandlers!!.forEach { handler -> launch { handler.start() } }
+            handlers.forEach { handler -> launch { handler.start() } }
 
             while (!isStoppedAcceptConnections) {
                 if (serverSelector.isEventsNotOccurred) {
@@ -205,11 +200,11 @@ internal class ControlServerImpl : ControlServer {
                 val iterator = selectedKeys.iterator()
 
                 while (iterator.hasNext()) {
-                    val key = iterator.next().also { iterator.remove() }
+                    val key = requireNotNull(iterator.next()).also { iterator.remove() }
 
                     if (!isStoppedAcceptConnections && key.isValid && key.isAcceptable) {
                         serverChannel.acceptClient()
-                            .onSuccess { channel -> onSuccessAcceptClient(channel) }
+                            .onSuccess { channel -> onSuccessAcceptClient(handlers, channel) }
                             .onFailure { cause -> onFailureAcceptClient(cause) }
                     }
 
@@ -219,7 +214,7 @@ internal class ControlServerImpl : ControlServer {
         }
     }
 
-    private fun completeServerJob(): Result<Unit> = applyCatching {
+    private fun completeServerJob() = applyCatching {
         serverSelector?.safeClose()
         serverChannel?.safeClose()
         clientHandlers?.forEach { handler -> handler.stop() }
@@ -229,11 +224,14 @@ internal class ControlServerImpl : ControlServer {
         clientHandlers = null
     }
 
-    private fun ServerSocketChannel.acceptClient(): Result<SocketChannel> = runCatching { accept() }
+    private fun ServerSocketChannel.acceptClient() = runCatching { accept() }
 
-    private fun onSuccessAcceptClient(clientChannel: SocketChannel) {
+    private fun onSuccessAcceptClient(
+        handlers: List<ClientHandler>,
+        clientChannel: SocketChannel
+    ) {
         acceptConnectionAttempts = 0
-        clientHandlers!!
+        handlers
             .minBy { handler -> handler.connectionsCount }
             .attachClient(clientChannel)
             .onFailure { clientChannel.safeClose() }
@@ -307,5 +305,5 @@ internal class ControlServerImpl : ControlServer {
         }
     }
 
-    private fun Visit.isActivityChanged(isActiveNow: Boolean): Boolean = isActive != isActiveNow
+    private fun Visit.isActivityChanged(isActiveNow: Boolean) = isActive != isActiveNow
 }

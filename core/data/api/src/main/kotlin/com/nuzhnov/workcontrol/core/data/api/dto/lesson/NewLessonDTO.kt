@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.data.api.dto.lesson
 
-import com.nuzhnov.workcontrol.core.model.Lesson
+import com.nuzhnov.workcontrol.core.models.Lesson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 

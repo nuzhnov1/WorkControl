@@ -7,12 +7,17 @@ import com.nuzhnov.workcontrol.core.data.api.dto.university.*
 import com.nuzhnov.workcontrol.core.data.api.util.Response
 import com.nuzhnov.workcontrol.core.data.database.entity.*
 import com.nuzhnov.workcontrol.core.data.mapper.*
-import com.nuzhnov.workcontrol.core.model.*
-import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.preferences.model.Session
+import com.nuzhnov.workcontrol.core.models.*
+import com.nuzhnov.workcontrol.core.models.util.LoadResult
+import com.nuzhnov.workcontrol.core.util.roles.requireTeacherRole
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -20,183 +25,108 @@ import javax.inject.Inject
 internal class UniversityRepositoryImpl @Inject constructor(
     private val universityRemoteDataSource: UniversityRemoteDataSource,
     private val universityLocalDataSource: UniversityLocalDataSource,
+    private val appPreferences: AppPreferences,
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : UniversityRepository {
 
-    override fun getBuildingsFlow(): Flow<LoadResult<List<Building>>> =
-        universityLocalDataSource
-            .getBuildingEntitiesFlow()
-            .map { buildingEntityList ->
-                if (buildingEntityList.isEmpty()) {
-                    loadBuildings()
-                } else {
-                    LoadResult.Success(
-                        data = buildingEntityList.map(BuildingEntity::toBuilding)
-                    )
-                }
-            }
-            .flowOn(context = coroutineDispatcher)
+    override fun getBuildingsFlow() = flow {
+        val flow = appPreferences
+            .requireTeacherRole(universityLocalDataSource.getBuildingEntitiesFlow())
+            .map { entityList -> entityList.map(BuildingEntity::toBuilding) }
 
-    override fun getBuildingRoomsFlow(building: Building): Flow<LoadResult<List<Room>>> =
-        universityLocalDataSource
-            .getRoomEntitiesFlow(buildingID = building.id)
-            .map { roomEntityList ->
-                if (roomEntityList.isEmpty()) {
-                    loadBuildingsRooms(building)
-                } else {
-                    LoadResult.Success(
-                        data = roomEntityList.map { roomEntity -> roomEntity.toRoom(building) }
-                    )
-                }
-            }
-            .flowOn(context = coroutineDispatcher)
+        emitAll(flow)
+    }.flowOn(context = coroutineDispatcher)
 
-    override fun getDepartmentsFlow(): Flow<LoadResult<List<Department>>> =
-        universityLocalDataSource
-            .getDepartmentEntitiesFlow()
-            .map { departmentEntityList ->
-                if (departmentEntityList.isEmpty()) {
-                    loadDepartments()
-                } else {
-                    LoadResult.Success(
-                        data = departmentEntityList.map(DepartmentEntity::toDepartment)
-                    )
-                }
-            }
-            .flowOn(context = coroutineDispatcher)
+    override fun getBuildingRoomsFlow(building: Building) = flow {
+        val flow = appPreferences
+            .requireTeacherRole(universityLocalDataSource.getRoomsFlow(building.id))
+            .map { entityList -> entityList.map { entity -> entity.toRoom(building) } }
 
-    override fun getDepartmentGroupsFlow(department: Department): Flow<LoadResult<List<Group>>> =
-        universityLocalDataSource
-            .getGroupEntitiesFlow(departmentID = department.id)
-            .map { groupEntityList ->
-                if (groupEntityList.isEmpty()) {
-                    loadDepartmentGroups(department)
-                } else {
-                    LoadResult.Success(
-                        data = groupEntityList.map { groupEntity ->
-                            groupEntity.toGroup(department)
-                        }
-                    )
-                }
-            }
-            .flowOn(context = coroutineDispatcher)
+        emitAll(flow)
+    }.flowOn(context = coroutineDispatcher)
 
-    override fun getStudentsOfGroupFlow(group: Group): Flow<LoadResult<List<Student>>> =
-        universityLocalDataSource
-            .getStudentEntitiesFlow(groupID = group.id)
-            .map { studentEntityList ->
-                if (studentEntityList.isEmpty()) {
-                    loadStudentsOfGroup(group)
-                } else {
-                    LoadResult.Success(
-                        data = studentEntityList.map { studentEntity ->
-                            studentEntity.toStudent(group)
-                        }
-                    )
-                }
-            }
-            .flowOn(context = coroutineDispatcher)
+    override fun getDepartmentsFlow() = flow {
+        val flow = appPreferences
+            .requireTeacherRole(universityLocalDataSource.getDepartmentEntitiesFlow())
+            .map { entityList -> entityList.map(DepartmentEntity::toDepartment) }
 
-    override suspend fun loadBuildings(): LoadResult<List<Building>> =
-        safeExecute(context = coroutineDispatcher) {
-            val response = universityRemoteDataSource.getBuildingsDTO()
+        emitAll(flow)
+    }.flowOn(context = coroutineDispatcher)
 
-            if (response is Response.Success) {
-                val buildingDTOList = response.value
-                val buildingEntityArray = buildingDTOList
-                    .map(BuildingDTO::toBuildingEntity)
-                    .toTypedArray()
+    override fun getDepartmentGroupsFlow(department: Department) = flow {
+        val flow = appPreferences
+            .requireTeacherRole(universityLocalDataSource.getGroupEntitiesFlow(department.id))
+            .map { entityList -> entityList.map { entity -> entity.toGroup(department) } }
 
-                universityLocalDataSource
-                    .saveBuildingEntities(*buildingEntityArray)
-                    .getOrThrow()
-            }
+        emitAll(flow)
+    }.flowOn(context = coroutineDispatcher)
 
-            response.toLoadResult { buildingDTOList ->
-                buildingDTOList.map(BuildingDTO::toBuilding)
-            }
-        }.unwrap()
+    override fun getStudentsOfGroupFlow(group: Group) = flow {
+        val flow = appPreferences
+            .requireTeacherRole(universityLocalDataSource.getStudentEntitiesFlow(group.id))
+            .map { entityList -> entityList.map { entity -> entity.toStudent(group) } }
 
-    override suspend fun loadBuildingsRooms(building: Building): LoadResult<List<Room>> =
-        safeExecute(context = coroutineDispatcher) {
-            val buildingID = building.id
-            val response = universityRemoteDataSource.getRoomsDTO(buildingID)
+        emitAll(flow)
+    }.flowOn(context = coroutineDispatcher)
 
-            if (response is Response.Success) {
-                val roomDTOList = response.value
-                val roomEntityArray = roomDTOList
-                    .map { roomDTO -> roomDTO.toRoomEntity(buildingID) }
-                    .toTypedArray()
+    override suspend fun refreshBuildings() = refresh {
+        val response = universityRemoteDataSource.getBuildingsDTO()
 
-                universityLocalDataSource
-                    .saveRoomEntities(*roomEntityArray)
-                    .getOrThrow()
-            }
+        if (response is Response.Success) {
+            val entityArray = response.value.map(BuildingDTO::toBuildingEntity).toTypedArray()
+            universityLocalDataSource.saveBuildingEntities(*entityArray)
+        }
 
-            response.toLoadResult { roomDTOList ->
-                roomDTOList.map { roomDTO -> roomDTO.toRoom(building) }
-            }
-        }.unwrap()
+        response.toLoadResult()
+    }
 
-    override suspend fun loadDepartments(): LoadResult<List<Department>> =
-        safeExecute(context = coroutineDispatcher) {
-            val response = universityRemoteDataSource.getDepartmentsDTO()
+    override suspend fun refreshBuildingsRooms(building: Building) = refresh {
+        val response = universityRemoteDataSource.getRoomsDTO(building.id)
 
-            if (response is Response.Success) {
-                val departmentDTOList = response.value
-                val departmentEntityArray = departmentDTOList
-                    .map(DepartmentDTO::toDepartmentEntity)
-                    .toTypedArray()
+        if (response is Response.Success) {
+            val roomEntities = response.value.map { dto -> dto.toRoomEntity(building.id) }.toTypedArray()
+            universityLocalDataSource.saveRoomEntities(*roomEntities)
+        }
 
-                universityLocalDataSource
-                    .saveDepartmentEntities(*departmentEntityArray)
-                    .getOrThrow()
-            }
+        response.toLoadResult()
+    }
 
-            response.toLoadResult { departmentDTOList ->
-                departmentDTOList.map(DepartmentDTO::toDepartment)
-            }
-        }.unwrap()
+    override suspend fun refreshDepartments() = refresh {
+        val response = universityRemoteDataSource.getDepartmentsDTO()
 
-    override suspend fun loadDepartmentGroups(department: Department): LoadResult<List<Group>> =
-        safeExecute(context = coroutineDispatcher) {
-            val departmentID = department.id
-            val response = universityRemoteDataSource.getGroupsDTO(departmentID)
+        if (response is Response.Success) {
+            val departmentEntities = response.value.map(DepartmentDTO::toDepartmentEntity).toTypedArray()
+            universityLocalDataSource.saveDepartmentEntities(*departmentEntities)
+        }
 
-            if (response is Response.Success) {
-                val groupDTOList = response.value
-                val groupEntityArray = groupDTOList
-                    .map { groupDTO -> groupDTO.toGroupEntity(departmentID) }
-                    .toTypedArray()
+        response.toLoadResult()
+    }
 
-                universityLocalDataSource
-                    .saveGroupEntities(*groupEntityArray)
-                    .getOrThrow()
-            }
+    override suspend fun refreshDepartmentGroups(department: Department) = refresh {
+        val response = universityRemoteDataSource.getGroupsDTO(department.id)
 
-            response.toLoadResult { groupDTOList ->
-                groupDTOList.map { groupDTO -> groupDTO.toGroup(department) }
-            }
-        }.unwrap()
+        if (response is Response.Success) {
+            val groupEntities = response.value.map { dto -> dto.toGroupEntity(department.id) }.toTypedArray()
+            universityLocalDataSource.saveGroupEntities(*groupEntities)
+        }
 
-    override suspend fun loadStudentsOfGroup(group: Group): LoadResult<List<Student>> =
-        safeExecute(context = coroutineDispatcher) {
-            val groupID = group.id
-            val response = universityRemoteDataSource.getStudentsDTO(groupID)
+        response.toLoadResult()
+    }
 
-            if (response is Response.Success) {
-                val studentDTOList = response.value
-                val studentEntityArray = studentDTOList
-                    .map { studentDTO -> studentDTO.toStudentEntity(groupID) }
-                    .toTypedArray()
+    override suspend fun refreshStudentsOfGroup(group: Group) = refresh {
+        val response = universityRemoteDataSource.getStudentsDTO(group.id)
 
-                universityLocalDataSource
-                    .saveStudentEntities(*studentEntityArray)
-                    .getOrThrow()
-            }
+        if (response is Response.Success) {
+            val studentEntities = response.value.map { dto -> dto.toStudentEntity(group.id) }.toTypedArray()
+            universityLocalDataSource.saveStudentEntities(*studentEntities)
+        }
 
-            response.toLoadResult { studentDTOList ->
-                studentDTOList.map { studentDTO -> studentDTO.toStudent(group) }
-            }
-        }.unwrap()
+        response.toLoadResult()
+    }
+
+    private suspend fun refresh(block: suspend (Session) -> LoadResult) =
+        withContext(context = coroutineDispatcher) {
+            val session = appPreferences.requireTeacherRole()
+            safeExecute { block(session) }.unwrap()
+        }
 }

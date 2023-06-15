@@ -12,20 +12,16 @@ import com.nuzhnov.workcontrol.core.data.mapper.toStudent
 import com.nuzhnov.workcontrol.core.data.mapper.toTeacher
 
 
-internal fun StudentModelDTO.toUserData(): UserData = UserData.StudentData(
-    student = this.toStudent()
-)
+internal fun StudentModelDTO.toUserData() = UserData.StudentData(student = this.toStudent())
 
-internal fun TeacherModelDTO.toUserData(): UserData = UserData.TeacherData(
+internal fun TeacherModelDTO.toUserData() = UserData.TeacherData(
     teacher = teacherDTO.toTeacher(),
     disciplineList = disciplineDTOList.map(DisciplineDTO::toDiscipline)
 )
 
-internal fun StudentModel.toUserData(): UserData = UserData.StudentData(
-    student = this.toStudent()
-)
+internal fun StudentModel.toUserData() = UserData.StudentData(student = this.toStudent())
 
-internal fun TeacherModel.toUserData(): UserData = UserData.TeacherData(
+internal fun TeacherModel.toUserData() = UserData.TeacherData(
     teacher = teacherEntity.toTeacher(),
     disciplineList = disciplineEntityList.map(DisciplineEntity::toDiscipline)
 )

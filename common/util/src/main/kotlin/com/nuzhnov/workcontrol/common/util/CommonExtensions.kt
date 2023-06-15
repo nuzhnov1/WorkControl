@@ -18,7 +18,7 @@ inline fun <K, V> MutableStateFlow<Map<K, V>>.applyUpdate(
     block: MutableMap<K, V>.() -> Unit
 ) = update { value -> value.toMutableMap().apply(block) }
 
-fun <T> Flow<T>.throttleLatest(delayMillis: Long) = this
+fun <T> Flow<T>.throttleLatest(delayMillis: Long): Flow<T> = this
     .conflate()
     .transform {
         emit(it)

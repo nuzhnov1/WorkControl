@@ -34,6 +34,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getLessonDAO(): LessonDAO
     abstract fun getLessonGroupCrossRefDAO(): LessonGroupCrossRefDAO
     abstract fun getParticipantDAO(): ParticipantDAO
+    abstract fun getUniversityStatisticsDAO(): UniversityStatisticsDAO
+    abstract fun getDepartmentStatisticsDAO(): DepartmentStatisticsDAO
+    abstract fun getGroupStatisticsDAO(): GroupStatisticsDAO
+    abstract fun getStudentStatisticsDAO(): StudentStatisticsDAO
 
 
     internal companion object {

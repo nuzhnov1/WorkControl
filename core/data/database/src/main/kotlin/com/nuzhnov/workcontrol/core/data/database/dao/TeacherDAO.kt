@@ -19,7 +19,7 @@ interface TeacherDAO : BaseDAO<TeacherEntity> {
     @Query(FETCH_QUERY)
     suspend fun getEntities(): List<TeacherEntity>
 
-    suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
+    suspend fun clear(vararg exceptionID: Long) = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
         .forEach { entity ->
             runCatching { delete(entity) }.onFailure { cause ->

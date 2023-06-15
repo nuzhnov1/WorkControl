@@ -6,15 +6,10 @@ import com.nuzhnov.workcontrol.core.data.database.entity.TeacherDisciplineCrossR
 import com.nuzhnov.workcontrol.core.data.database.dao.*
 import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
 import com.nuzhnov.workcontrol.core.data.mapper.*
-import com.nuzhnov.workcontrol.core.model.Discipline
-import com.nuzhnov.workcontrol.core.model.Role
-import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
-import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
+import com.nuzhnov.workcontrol.core.models.Discipline
+import com.nuzhnov.workcontrol.core.models.Role
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 
 internal class UserLocalDataSource @Inject constructor(
@@ -24,66 +19,61 @@ internal class UserLocalDataSource @Inject constructor(
     private val groupDAO: GroupDAO,
     private val studentDAO: StudentDAO,
     private val teacherDAO: TeacherDAO,
-    private val teacherDisciplineCrossRefDAO: TeacherDisciplineCrossRefDAO,
-    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
+    private val teacherDisciplineCrossRefDAO: TeacherDisciplineCrossRefDAO
 ) {
 
-    fun getUserDataFlow(): Flow<UserData?> = appPreferences
-        .getSessionFlow()
-        .transform { session ->
-            when (session?.role) {
-                Role.TEACHER -> teacherDAO
-                    .getTeacherFlow(id = session.id)
-                    .map { teacherModel -> teacherModel?.toUserData() }
-                    .flowOn(context = coroutineDispatcher)
-                    .collect { userData -> emit(userData) }
+    fun getUserDataFlow() = flow {
+        val session = appPreferences.getSession()
 
-                Role.STUDENT -> studentDAO
-                    .getStudentFlow(id = session.id)
-                    .map { studentModel -> studentModel?.toUserData() }
-                    .flowOn(context = coroutineDispatcher)
-                    .collect { userData -> emit(userData) }
+        when (session?.role) {
+            Role.TEACHER -> teacherDAO
+                .getTeacherFlow(id = session.id)
+                .map { model -> model?.toUserData() }
+                .collect { data -> emit(data) }
 
-                null -> emit(value = null)
-            }
+            Role.STUDENT -> studentDAO
+                .getStudentFlow(id = session.id)
+                .map { model -> model?.toUserData() }
+                .collect { data -> emit(data) }
+
+            else -> flow { emit(value = null) }
         }
+    }
 
-    suspend fun saveUserData(userData: UserData): Result<Unit> = safeExecute {
+    suspend fun saveUserData(userData: UserData) {
         when (userData) {
             is UserData.TeacherData -> saveTeacherData(teacherData = userData)
             is UserData.StudentData -> saveStudentData(studentData = userData)
         }
     }
 
-    suspend fun removeUserData(): Result<Unit> = safeExecute {
-        val session = appPreferences.getSession() ?: return@safeExecute
-        val sessionID = session.id
+    suspend fun removeUserData() {
+        val session = appPreferences.getSession() ?: return
 
         when (session.role) {
-            Role.TEACHER -> removeTeacherData(teacherID = sessionID)
-            Role.STUDENT -> removeStudentData(studentID = sessionID)
+            Role.TEACHER -> removeTeacherData(teacherID = session.id)
+            Role.STUDENT -> removeStudentData(studentID = session.id)
         }
     }
 
     private suspend fun saveTeacherData(teacherData: UserData.TeacherData) {
         val teacherEntity = teacherData.teacher.toTeacherEntity()
 
-        val disciplineEntityArray = teacherData.disciplineList
+        val disciplineEntities = teacherData.disciplineList
             .map(Discipline::toDisciplineEntity)
             .toTypedArray()
 
-        val teacherDisciplineCrossRefEntityArray = disciplineEntityArray
-            .map { disciplineEntity ->
-                TeacherDisciplineCrossRefEntity(
-                    teacherID = teacherEntity.id,
-                    disciplineID = disciplineEntity.id
-                )
-            }
-            .toTypedArray()
+        val teacherDisciplineCrossRefEntities = disciplineEntities.map { disciplineEntity ->
+            TeacherDisciplineCrossRefEntity(
+                teacherID = teacherEntity.id,
+                disciplineID = disciplineEntity.id
+            )
+        }.toTypedArray()
+
 
         teacherDAO.insertOrUpdate(teacherEntity)
-        disciplineDAO.insertOrUpdate(*disciplineEntityArray)
-        teacherDisciplineCrossRefDAO.insertOrUpdate(*teacherDisciplineCrossRefEntityArray)
+        disciplineDAO.insertOrUpdate(*disciplineEntities)
+        teacherDisciplineCrossRefDAO.insertOrUpdate(*teacherDisciplineCrossRefEntities)
     }
 
     private suspend fun saveStudentData(studentData: UserData.StudentData) {
@@ -99,10 +89,10 @@ internal class UserLocalDataSource @Inject constructor(
     private suspend fun removeTeacherData(teacherID: Long) {
         val teacherModel = teacherDAO.getTeacher(id = teacherID) ?: return
         val teacherEntity = teacherModel.teacherEntity
-        val disciplineEntityArray = teacherModel.disciplineEntityList.toTypedArray()
+        val disciplineEntities = teacherModel.disciplineEntityList.toTypedArray()
 
         teacherDAO.delete(teacherEntity)
-        disciplineDAO.delete(*disciplineEntityArray)
+        disciplineDAO.delete(*disciplineEntities)
     }
 
     private suspend fun removeStudentData(studentID: Long) {

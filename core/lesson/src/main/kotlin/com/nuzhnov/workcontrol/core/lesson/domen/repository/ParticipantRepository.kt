@@ -1,23 +1,24 @@
 package com.nuzhnov.workcontrol.core.lesson.domen.repository
 
-import com.nuzhnov.workcontrol.core.model.Participant
-import com.nuzhnov.workcontrol.core.model.Student
-import com.nuzhnov.workcontrol.core.model.Lesson
-import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import com.nuzhnov.workcontrol.core.models.Participant
+import com.nuzhnov.workcontrol.core.models.Lesson
+import com.nuzhnov.workcontrol.core.models.Student
+import com.nuzhnov.workcontrol.core.models.util.LoadResult
+import com.nuzhnov.workcontrol.core.models.util.OperationResult
 import kotlinx.coroutines.flow.Flow
 
 internal interface ParticipantRepository {
-    fun getParticipantsOfLessonFlow(lesson: Lesson): Flow<LoadResult<List<Participant>>>
+    fun getParticipantsOfLessonFlow(lesson: Lesson): Flow<List<Participant>>
 
-    fun getStudentParticipationOfTeacherLessonsFlow(student: Student): Flow<LoadResult<List<Participant>>>
+    fun getStudentParticipationOfTeacherLessonsFlow(student: Student): Flow<List<Participant>>
 
-    fun getStudentParticipationOfLessonsFlow(): Flow<LoadResult<List<Participant>>>
+    fun getStudentParticipationOfLessonsFlow(): Flow<List<Participant>>
 
-    suspend fun loadParticipantsOfFinishedLesson(lesson: Lesson): LoadResult<List<Participant>>
+    suspend fun refreshParticipantsOfFinishedLesson(lesson: Lesson): LoadResult
 
-    suspend fun loadStudentParticipationOfTeacherLessons(student: Student): LoadResult<List<Participant>>
+    suspend fun refreshStudentParticipationOfTeacherLessons(student: Student): LoadResult
 
-    suspend fun loadStudentParticipationOfLessons(): LoadResult<List<Participant>>
+    suspend fun refreshStudentParticipationOfLessons(): LoadResult
 
-    suspend fun updateParticipant(participant: Participant): Result<Unit>
+    suspend fun updateParticipant(participant: Participant): OperationResult
 }

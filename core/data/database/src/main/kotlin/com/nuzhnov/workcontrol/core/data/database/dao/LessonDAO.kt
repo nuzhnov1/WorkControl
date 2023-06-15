@@ -24,13 +24,13 @@ interface LessonDAO : BaseDAO<LessonEntity> {
     fun getTeacherFinishedLessonFlow(teacherID: Long): Flow<List<LessonModel>>
 
     @[Transaction Query(FETCH_SCHEDULED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherScheduledDisciplineLessonsFlow(
+    fun getTeacherDisciplineScheduledLessonsFlow(
         teacherID: Long,
         disciplineID: Long
     ): Flow<List<LessonModel>>
 
     @[Transaction Query(FETCH_FINISHED_LESSONS_BY_TEACHER_ID_AND_DISCIPLINE_ID_QUERY)]
-    fun getTeacherFinishedDisciplineLessonsFlow(
+    fun getTeacherDisciplineFinishedLessonsFlow(
         teacherID: Long,
         disciplineID: Long
     ): Flow<List<LessonModel>>

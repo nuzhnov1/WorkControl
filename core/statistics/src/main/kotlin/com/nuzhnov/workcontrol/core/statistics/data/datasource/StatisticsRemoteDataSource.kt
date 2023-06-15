@@ -1,11 +1,14 @@
 package com.nuzhnov.workcontrol.core.statistics.data.datasource
 
-import com.nuzhnov.workcontrol.core.data.api.dto.statistics.StatisticsDTO
 import com.nuzhnov.workcontrol.core.data.api.service.StatisticsService
+import com.nuzhnov.workcontrol.core.data.api.dto.statistics.StatisticsDTO
 import com.nuzhnov.workcontrol.core.data.api.util.Response
 import com.nuzhnov.workcontrol.core.data.api.util.safeApiCall
+import javax.inject.Inject
 
-internal class StatisticsRemoteDataSource(private val statisticsService: StatisticsService) {
+internal class StatisticsRemoteDataSource @Inject constructor(
+    private val statisticsService: StatisticsService
+) {
 
     suspend fun getUniversityStatistics(): Response<StatisticsDTO> =
         safeApiCall { statisticsService.getUniversityStatistics() }

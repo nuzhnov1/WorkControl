@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:model"))
+    implementation(project(":core:models"))
     implementation(project(":core:data:preferences"))
     implementation(project(":core:util:coroutines"))
     implementation("com.google.dagger:hilt-android:2.44")

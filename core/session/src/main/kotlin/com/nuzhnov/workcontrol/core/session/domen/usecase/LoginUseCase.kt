@@ -1,7 +1,6 @@
 package com.nuzhnov.workcontrol.core.session.domen.usecase
 
 import com.nuzhnov.workcontrol.core.session.domen.repository.SessionRepository
-import com.nuzhnov.workcontrol.core.session.domen.model.LoginResult
 import javax.inject.Inject
 
 class LoginUseCase @Inject internal constructor(
@@ -12,5 +11,5 @@ class LoginUseCase @Inject internal constructor(
         login: String,
         password: String,
         isLoginSave: Boolean
-    ): LoginResult = sessionRepository.login(login, password, isLoginSave)
+    ) = sessionRepository.login(login, password, isLoginSave)
 }

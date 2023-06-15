@@ -5,16 +5,25 @@ import com.nuzhnov.workcontrol.core.lesson.data.datasource.ParticipantLocalDataS
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.LessonLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.data.datasource.StudentLocalDataSource
 import com.nuzhnov.workcontrol.core.lesson.domen.repository.ParticipantRepository
+import com.nuzhnov.workcontrol.core.lesson.domen.exception.LessonException
 import com.nuzhnov.workcontrol.core.data.api.util.Response
 import com.nuzhnov.workcontrol.core.data.mapper.*
-import com.nuzhnov.workcontrol.core.model.Participant
-import com.nuzhnov.workcontrol.core.model.Student
-import com.nuzhnov.workcontrol.core.model.Lesson
-import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
+import com.nuzhnov.workcontrol.core.data.preferences.model.Session
+import com.nuzhnov.workcontrol.core.models.Participant
+import com.nuzhnov.workcontrol.core.models.Student
+import com.nuzhnov.workcontrol.core.models.Lesson
+import com.nuzhnov.workcontrol.core.models.Role
+import com.nuzhnov.workcontrol.core.models.util.LoadResult
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
+import com.nuzhnov.workcontrol.core.util.roles.requireRole
+import com.nuzhnov.workcontrol.core.util.roles.requireTeacherRole
+import com.nuzhnov.workcontrol.core.util.roles.requireStudentRole
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -24,191 +33,148 @@ internal class ParticipantRepositoryImpl @Inject constructor(
     private val participantLocalDataSource: ParticipantLocalDataSource,
     private val lessonLocalDataSource: LessonLocalDataSource,
     private val studentLocalDataSource: StudentLocalDataSource,
+    private val appPreferences: AppPreferences,
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : ParticipantRepository {
 
-    override fun getParticipantsOfLessonFlow(
-        lesson: Lesson
-    ): Flow<LoadResult<List<Participant>>> = when (lesson.state) {
-        Lesson.State.SCHEDULED, Lesson.State.ACTIVE -> participantLocalDataSource
-            .getParticipantsOfTeacherLessonFlow(lessonID = lesson.id)
-            .map { participantModelList ->
-                LoadResult.Success(
-                    data = participantModelList.map { participantModel ->
-                        participantModel.toParticipant(lesson)
-                    }
-                )
-            }
+    override fun getParticipantsOfLessonFlow(lesson: Lesson) = flow {
+        val flow = appPreferences.requireTeacherRole { session ->
+            participantLocalDataSource.getParticipantsOfTeacherLessonFlow(
+                teacherID = session.id,
+                lessonID = lesson.id
+            )
+        }.map { modelList -> modelList.map { model -> model.toParticipant(lesson) } }
 
-        Lesson.State.FINISHED -> participantLocalDataSource
-            .getParticipantsOfTeacherLessonFlow(lessonID = lesson.id)
-            .map { participantModelList ->
-                if (participantModelList.isEmpty()) {
-                    loadParticipantsOfFinishedLesson(lesson)
-                } else {
-                    LoadResult.Success(
-                        data = participantModelList.map { participantModel ->
-                            participantModel.toParticipant(lesson)
-                        }
-                    )
-                }
-            }
+        emitAll(flow)
     }.flowOn(context = coroutineDispatcher)
 
-    override fun getStudentParticipationOfTeacherLessonsFlow(
-        student: Student
-    ): Flow<LoadResult<List<Participant>>> = participantLocalDataSource
-        .getStudentParticipationOfTeacherLessonsFlow(studentID = student.id)
-        .map { participantLessonModelList ->
-            if (participantLessonModelList.isEmpty()) {
-                loadStudentParticipationOfTeacherLessons(student)
-            } else {
-                LoadResult.Success(
-                    data = participantLessonModelList.map { participantLessonModel ->
-                        participantLessonModel.toParticipant(student)
-                    }
-                )
-            }
-        }
-        .flowOn(context = coroutineDispatcher)
+    override fun getStudentParticipationOfTeacherLessonsFlow(student: Student) = flow {
+        val flow = appPreferences.requireTeacherRole { session ->
+            participantLocalDataSource.getStudentParticipationOfTeacherLessonsFlow(
+                teacherID = session.id,
+                studentID = student.id
+            )
+        }.map { modelList -> modelList.map { model -> model.toParticipant(student) } }
 
-    override fun getStudentParticipationOfLessonsFlow(): Flow<LoadResult<List<Participant>>> =
-        participantLocalDataSource
-            .getStudentParticipationOfLessonsFlow()
-            .map { (student, participantLessonModelList) ->
-                if (participantLessonModelList.isEmpty()) {
-                    loadStudentParticipationOfLessons()
-                } else {
-                    LoadResult.Success(
-                        data = participantLessonModelList.map { participantLessonModel ->
-                            participantLessonModel.toParticipant(student)
-                        }
-                    )
-                }
-            }
-            .flowOn(context = coroutineDispatcher)
+        emitAll(flow)
+    }.flowOn(context = coroutineDispatcher)
 
-    override suspend fun loadParticipantsOfFinishedLesson(
-        lesson: Lesson
-    ): LoadResult<List<Participant>> = safeExecute(context = coroutineDispatcher) {
-        val lessonID = lesson.id
-        val response = participantRemoteDataSource
-            .getParticipantsOfFinishedTeacherLesson(lessonID)
-
-        if (response is Response.Success) {
-            val participantModelDTOList = response.value
-
-            val participantEntityArray = participantModelDTOList
-                .map { participantModelDTO ->
-                    participantModelDTO.toParticipantEntity(lessonID)
-                }
-                .toTypedArray()
-
-            val studentEntityArray = participantModelDTOList
-                .map { participantModelDTO ->
-                    participantModelDTO.studentModelDTO.toStudentEntity()
-                }
-                .toTypedArray()
-
-            studentLocalDataSource
-                .saveStudentEntities(*studentEntityArray)
-                .getOrThrow()
-
-            participantLocalDataSource
-                .saveParticipantEntities(*participantEntityArray)
-                .getOrThrow()
-        }
-
-        response.toLoadResult { participantModelDTOList ->
-            participantModelDTOList.map { participantModelDTO ->
-                participantModelDTO.toParticipant(lesson)
-            }
-        }
-    }.unwrap()
-
-    override suspend fun loadStudentParticipationOfTeacherLessons(
-        student: Student
-    ): LoadResult<List<Participant>> = safeExecute(context = coroutineDispatcher) {
-        val studentID = student.id
-        val response = participantRemoteDataSource
-            .getStudentParticipationOfFinishedTeacherLessons(studentID)
-
-        if (response is Response.Success) {
-            val participantLessonModelDTOList = response.value
-
-            val participantEntityArray = participantLessonModelDTOList
-                .map { participantLessonModelDTO ->
-                    participantLessonModelDTO.toParticipantEntity(studentID)
-                }
-                .toTypedArray()
-
-            val lessonModelArray = participantLessonModelDTOList
-                .map { participantLessonModelDTO ->
-                    participantLessonModelDTO.lessonDTO.toLessonModel()
-                }
-                .toTypedArray()
-
-            lessonLocalDataSource
-                .saveLessonModels(*lessonModelArray)
-                .getOrThrow()
-
-            participantLocalDataSource
-                .saveParticipantEntities(*participantEntityArray)
-                .getOrThrow()
-        }
-
-        response.toLoadResult { participantLessonModelDTOList ->
-            participantLessonModelDTOList.map { participantLessonModelDTO ->
-                participantLessonModelDTO.toParticipant(student)
-            }
-        }
-    }.unwrap()
-
-    override suspend fun loadStudentParticipationOfLessons(): LoadResult<List<Participant>> =
-        safeExecute(context = coroutineDispatcher) {
+    override fun getStudentParticipationOfLessonsFlow() = flow {
+        val flow = appPreferences.requireStudentRole { session ->
             val student = studentLocalDataSource
-                .getCurrentStudentModel()
-                .getOrThrow()
-                .toStudent()
+                .getCurrentStudentModel(studentID = session.id)
+                ?.toStudent()
+                ?: throw LessonException("student not found")
 
+            participantLocalDataSource
+                .getStudentParticipationOfLessonsFlow(studentID = session.id)
+                .map { modelList -> modelList.map { model -> model.toParticipant(student) } }
+        }
+
+        emitAll(flow)
+    }.flowOn(context = coroutineDispatcher)
+
+    override suspend fun refreshParticipantsOfFinishedLesson(lesson: Lesson) =
+        refresh(role = Role.TEACHER) {
+            val lessonID = lesson.id
+            val response = participantRemoteDataSource.getParticipantsOfFinishedTeacherLesson(lessonID)
+
+            if (response is Response.Success) {
+                val modelDTOList = response.value
+
+                val participantEntities = modelDTOList
+                    .map { modelDTO -> modelDTO.toParticipantEntity(lessonID) }
+                    .toTypedArray()
+
+                val studentEntities = modelDTOList
+                    .map { modelDTO -> modelDTO.studentModelDTO.toStudentEntity() }
+                    .toTypedArray()
+
+                studentLocalDataSource.saveStudentEntities(*studentEntities)
+                participantLocalDataSource.saveParticipantEntities(*participantEntities)
+            }
+
+            response.toLoadResult()
+        }
+
+    override suspend fun refreshStudentParticipationOfTeacherLessons(student: Student) =
+        refresh(role = Role.TEACHER) {
             val studentID = student.id
+            val response = participantRemoteDataSource.getStudentParticipationOfFinishedTeacherLessons(studentID)
+
+            if (response is Response.Success) {
+                val modelDTOList = response.value
+
+                val participantEntities = modelDTOList
+                    .map { modelDTO -> modelDTO.toParticipantEntity(studentID) }
+                    .toTypedArray()
+
+                val lessonModels = modelDTOList
+                    .map { modelDTO -> modelDTO.lessonDTO.toLessonModel() }
+                    .toTypedArray()
+
+                lessonLocalDataSource.saveLessonModels(*lessonModels)
+                participantLocalDataSource.saveParticipantEntities(*participantEntities)
+            }
+
+            response.toLoadResult()
+        }
+
+    override suspend fun refreshStudentParticipationOfLessons() =
+        refresh(role = Role.STUDENT) { session ->
+            val student = studentLocalDataSource
+                .getCurrentStudentModel(studentID = session.id)
+                ?.toStudent()
+                ?: throw LessonException("student not found")
+
             val response = participantRemoteDataSource.getStudentParticipationOfFinishedLessons()
 
             if (response is Response.Success) {
-                val participantLessonModelDTOList = response.value
+                val modelDTOList = response.value
 
-                val participantEntityArray = participantLessonModelDTOList
-                    .map { participantLessonModelDTO ->
-                        participantLessonModelDTO.toParticipantEntity(studentID)
-                    }
+                val participantEntities = modelDTOList
+                    .map { modelDTO -> modelDTO.toParticipantEntity(student.id) }
                     .toTypedArray()
 
-                val lessonModelArray = participantLessonModelDTOList
-                    .map { participantLessonModelDTO ->
-                        participantLessonModelDTO.lessonDTO.toLessonModel()
-                    }
+                val lessonModels = modelDTOList
+                    .map { modelDTO -> modelDTO.lessonDTO.toLessonModel() }
                     .toTypedArray()
 
-                lessonLocalDataSource
-                    .saveLessonModels(*lessonModelArray)
-                    .getOrThrow()
-
-                participantLocalDataSource
-                    .saveParticipantEntities(*participantEntityArray)
-                    .getOrThrow()
+                lessonLocalDataSource.saveLessonModels(*lessonModels)
+                participantLocalDataSource.saveParticipantEntities(*participantEntities)
             }
 
-            response.toLoadResult { participantLessonModelDTOList ->
-                participantLessonModelDTOList.map { participantLessonModelDTO ->
-                    participantLessonModelDTO.toParticipant(student)
-                }
-            }
-        }.unwrap()
+            response.toLoadResult()
+        }
 
-    override suspend fun updateParticipant(participant: Participant): Result<Unit> =
-        safeExecute(context = coroutineDispatcher) {
+    override suspend fun updateParticipant(participant: Participant) =
+        executeOperation(role = Role.TEACHER) {
             participantLocalDataSource.updateParticipant(
                 participantUpdatableModel = participant.toParticipantUpdatableModel()
             )
+        }
+
+    private suspend fun refresh(role: Role, block: suspend (Session) -> LoadResult) =
+        withContext(context = coroutineDispatcher) {
+            val session = appPreferences.requireRole(role)
+
+            safeExecute { block(session) }
+                .onFailure { cause ->
+                    if (cause is LessonException) {
+                        throw cause
+                    }
+                }.unwrap()
+        }
+
+    private suspend fun executeOperation(role: Role, block: suspend (Session) -> Unit) =
+        withContext(context = coroutineDispatcher) {
+            val session = appPreferences.requireRole(role)
+
+            safeExecute { block(session) }
+                .onFailure { cause ->
+                    if (cause is LessonException) {
+                        throw cause
+                    }
+                }.toOperationResult()
         }
 }

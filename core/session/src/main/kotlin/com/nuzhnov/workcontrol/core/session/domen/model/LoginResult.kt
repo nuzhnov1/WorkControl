@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.core.session.domen.model
 
 sealed interface LoginResult {
-    data class Success(val userData: UserData) : LoginResult
+    object Success : LoginResult
 
     sealed class Failure(val cause: Throwable) : LoginResult {
         class WrongLogin(cause: Throwable) : Failure(cause)

@@ -34,7 +34,7 @@ fun main() {
     )
 }
 
-private fun ControlServer.test(vararg testCase: TestCase): Unit =
+private fun ControlServer.test(vararg testCase: TestCase) =
     testCase.forEachIndexed { index, testData ->
         val visitorTestDataList = testData.generateVisitorTestData()
 

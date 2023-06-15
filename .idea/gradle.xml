@@ -23,18 +23,19 @@
             <option value="$PROJECT_DIR$/core/data/mapper" />
             <option value="$PROJECT_DIR$/core/data/preferences" />
             <option value="$PROJECT_DIR$/core/lesson" />
-            <option value="$PROJECT_DIR$/core/model" />
+            <option value="$PROJECT_DIR$/core/models" />
             <option value="$PROJECT_DIR$/core/session" />
             <option value="$PROJECT_DIR$/core/statistics" />
             <option value="$PROJECT_DIR$/core/university" />
             <option value="$PROJECT_DIR$/core/util" />
             <option value="$PROJECT_DIR$/core/util/coroutines" />
+            <option value="$PROJECT_DIR$/core/util/roles" />
             <option value="$PROJECT_DIR$/core/visitservice" />
             <option value="$PROJECT_DIR$/core/visitservice/notification" />
             <option value="$PROJECT_DIR$/core/visitservice/studentservice" />
             <option value="$PROJECT_DIR$/core/visitservice/teacherservice" />
             <option value="$PROJECT_DIR$/core/visitservice/util" />
-            <option value="$PROJECT_DIR$/core/work" />
+            <option value="$PROJECT_DIR$/core/works" />
           </set>
         </option>
       </GradleProjectSettings>

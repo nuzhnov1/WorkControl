@@ -1,21 +1,14 @@
 package com.nuzhnov.workcontrol.core.lesson.data.datasource
 
+import com.nuzhnov.workcontrol.core.lesson.domen.exception.LessonException
 import com.nuzhnov.workcontrol.core.data.database.dao.*
 import com.nuzhnov.workcontrol.core.data.database.entity.LessonEntity
 import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonModel
 import com.nuzhnov.workcontrol.core.data.database.entity.LessonGroupCrossRefEntity
-import com.nuzhnov.workcontrol.core.data.preferences.AppPreferences
 import com.nuzhnov.workcontrol.core.data.mapper.toDateTimeTz
 import com.nuzhnov.workcontrol.core.data.mapper.toDouble
 import com.nuzhnov.workcontrol.core.data.mapper.toLong
-import com.nuzhnov.workcontrol.core.model.Lesson
-import com.nuzhnov.workcontrol.core.model.Role
-import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
-import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.transform
+import com.nuzhnov.workcontrol.core.models.Lesson
 import javax.inject.Inject
 import com.soywiz.klock.DateTimeTz
 
@@ -27,134 +20,64 @@ internal class LessonLocalDataSource @Inject constructor(
     private val groupDAO: GroupDAO,
     private val teacherDAO: TeacherDAO,
     private val lessonDAO: LessonDAO,
-    private val lessonGroupCrossRefDAO: LessonGroupCrossRefDAO,
-    private val appPreferences: AppPreferences,
-    @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
+    private val lessonGroupCrossRefDAO: LessonGroupCrossRefDAO
 ) {
 
-    fun getTeacherScheduledLessonsFlow(): Flow<List<LessonModel>> = appPreferences
-        .getSessionFlow()
-        .transform { session ->
-            if (session?.role == Role.TEACHER) {
-                lessonDAO
-                    .getTeacherScheduledLessonsFlow(teacherID = session.id)
-                    .flowOn(context = coroutineDispatcher)
-                    .collect { lessonModelList -> emit(lessonModelList) }
-            } else {
-                throw IllegalStateException("permission denied")
-            }
-        }
+    fun getTeacherScheduledLessonsFlow(teacherID: Long) =
+        lessonDAO.getTeacherScheduledLessonsFlow(teacherID)
 
-    fun getTeacherActiveLessonFlow(): Flow<LessonModel?> = appPreferences
-        .getSessionFlow()
-        .transform { session ->
-            if (session?.role == Role.TEACHER) {
-                lessonDAO
-                    .getTeacherActiveLessonFlow(teacherID = session.id)
-                    .flowOn(context = coroutineDispatcher)
-                    .collect { lessonModel -> emit(lessonModel) }
-            } else {
-                throw IllegalStateException("permission denied")
-            }
-        }
+    fun getTeacherActiveLessonFlow(teacherID: Long) =
+        lessonDAO.getTeacherActiveLessonFlow(teacherID)
 
-    fun getTeacherFinishedLessonsFlow(): Flow<List<LessonModel>> = appPreferences
-        .getSessionFlow()
-        .transform { session ->
-            if (session?.role == Role.TEACHER) {
-                lessonDAO
-                    .getTeacherFinishedLessonFlow(teacherID = session.id)
-                    .flowOn(context = coroutineDispatcher)
-                    .collect { lessonModelList -> emit(lessonModelList) }
-            } else {
-                throw IllegalStateException("permission denied")
-            }
-        }
+    fun getTeacherFinishedLessonsFlow(teacherID: Long) =
+        lessonDAO.getTeacherFinishedLessonFlow(teacherID)
 
-    fun getTeacherDisciplineScheduledLessonsFlow(
-        disciplineID: Long
-    ): Flow<List<LessonModel>> = appPreferences
-        .getSessionFlow()
-        .transform { session ->
-            if (session?.role == Role.TEACHER) {
-                lessonDAO
-                    .getTeacherScheduledDisciplineLessonsFlow(teacherID = session.id, disciplineID)
-                    .flowOn(context = coroutineDispatcher)
-                    .collect { lessonModelList -> emit(lessonModelList) }
-            } else {
-                throw IllegalStateException("permission denied")
-            }
-        }
+    fun getTeacherDisciplineScheduledLessonsFlow(teacherID: Long, disciplineID: Long) =
+        lessonDAO.getTeacherDisciplineScheduledLessonsFlow(teacherID, disciplineID)
 
-    fun getTeacherDisciplineFinishedLessonsFlow(
-        disciplineID: Long
-    ): Flow<List<LessonModel>> = appPreferences
-        .getSessionFlow()
-        .transform { session ->
-            if (session?.role == Role.TEACHER) {
-                lessonDAO
-                    .getTeacherFinishedDisciplineLessonsFlow(teacherID = session.id, disciplineID)
-                    .flowOn(context = coroutineDispatcher)
-                    .collect { lessonModelList -> emit(lessonModelList) }
-            }
-        }
+    fun getTeacherDisciplineFinishedLessonsFlow(teacherID: Long, disciplineID: Long) =
+        lessonDAO.getTeacherDisciplineFinishedLessonsFlow(teacherID, disciplineID)
 
-    suspend fun saveLessonModels(vararg lessonModel: LessonModel): Result<Unit> = safeExecute {
+    suspend fun saveLessonModels(vararg lessonModel: LessonModel) {
         val lessonEntityArray = lessonModel
-            .map { lessonModel -> lessonModel.lessonEntity }
+            .map { model -> model.lessonEntity }
             .toTypedArray()
 
         val disciplineEntityArray = lessonModel
-            .map { lessonModel -> lessonModel.disciplineEntity }
+            .map { model -> model.disciplineEntity }
             .distinct()
             .toTypedArray()
 
         val teacherEntityArray = lessonModel
-            .map { lessonModel -> lessonModel.teacherEntity }
+            .map { model -> model.teacherEntity }
             .distinct()
             .toTypedArray()
 
-        val roomModelList = lessonModel
-            .map { lessonModel -> lessonModel.roomModel }
-            .distinct()
-
-        val roomEntityArray = roomModelList
-            .map { roomModel -> roomModel.roomEntity }
-            .toTypedArray()
+        val roomModelList = lessonModel.map { model -> model.roomModel }.distinct()
+        val roomEntityArray = roomModelList.map { model -> model.roomEntity }.toTypedArray()
 
         val buildingEntityArray = roomModelList
-            .map { roomModel -> roomModel.buildingEntity }
+            .map { model -> model.buildingEntity }
             .distinct()
             .toTypedArray()
 
-        val groupModelList = lessonModel
-            .map { lessonModel -> lessonModel.groupModelList }
-            .flatten()
-            .distinct()
-
-        val groupEntityArray = groupModelList
-            .map { groupModel -> groupModel.groupEntity }
-            .toTypedArray()
+        val groupModelList = lessonModel.map { model -> model.groupModelList }.flatten().distinct()
+        val groupEntityArray = groupModelList.map { model -> model.groupEntity }.toTypedArray()
 
         val departmentEntityArray = groupModelList
-            .map { groupModel -> groupModel.departmentEntity }
+            .map { model -> model.departmentEntity }
             .distinct()
             .toTypedArray()
 
-        val lessonGroupCrossRefEntityArray = lessonModel
-            .map { lessonModel ->
-                lessonModel
-                    .groupModelList
-                    .map { groupModel -> groupModel.groupEntity.id }
-                    .map { groupID ->
-                        LessonGroupCrossRefEntity(
-                            lessonID = lessonModel.lessonEntity.id,
-                            groupID = groupID
-                        )
-                    }
+        val lessonGroupCrossRefEntityArray = lessonModel.map { model ->
+            model.groupModelList.map { groupModel ->
+                LessonGroupCrossRefEntity(
+                    lessonID = model.lessonEntity.id,
+                    groupID = groupModel.groupEntity.id
+                )
             }
-            .flatten()
-            .toTypedArray()
+        }.flatten().toTypedArray()
+
 
         disciplineDAO.insertOrUpdate(*disciplineEntityArray)
         teacherDAO.insertOrUpdate(*teacherEntityArray)
@@ -166,31 +89,26 @@ internal class LessonLocalDataSource @Inject constructor(
         lessonGroupCrossRefDAO.insertOrUpdate(*lessonGroupCrossRefEntityArray)
     }
 
-    suspend fun addLesson(lessonModel: LessonModel): Result<Unit> = saveLessonModels(lessonModel)
-
-    suspend fun updateLesson(lessonModel: LessonModel): Result<Unit> = safeExecute {
-        removeLesson(lessonModel.lessonEntity).getOrThrow()
-        addLesson(lessonModel).getOrThrow()
+    suspend fun addLesson(lessonModel: LessonModel) {
+        saveLessonModels(lessonModel)
     }
 
-    suspend fun removeLesson(lessonEntity: LessonEntity): Result<Unit> = safeExecute {
+    suspend fun updateLesson(lessonModel: LessonModel) {
+        removeLesson(lessonModel.lessonEntity)
+        addLesson(lessonModel)
+    }
+
+    suspend fun removeLesson(lessonEntity: LessonEntity) {
         lessonDAO.delete(lessonEntity)
     }
 
-    suspend fun startLesson(lessonID: Long): Result<Unit> = safeExecute {
-        val session = appPreferences.getSession()
-
-        if (session?.role != Role.TEACHER) {
-            throw IllegalStateException("permission denied")
-        }
-
-        val activeLesson = lessonDAO.getTeacherActiveLesson(teacherID = session.id)
+    suspend fun startLesson(lessonID: Long, teacherID: Long) {
+        val activeLesson = lessonDAO.getTeacherActiveLesson(teacherID)
 
         if (activeLesson != null) {
-            throw IllegalStateException("one of the lessons has already active")
+            throw LessonException("there is already an active lesson")
         } else {
-            val lessonEntity = lessonDAO.getEntity(lessonID)
-                ?: throw IllegalStateException("lesson not found")
+            val lessonEntity = lessonDAO.getEntity(lessonID) ?: throw LessonException("lesson not found")
 
             val startedLesson = lessonEntity.copy(
                 startTime = DateTimeTz.nowLocal().toLong(),
@@ -202,20 +120,10 @@ internal class LessonLocalDataSource @Inject constructor(
         }
     }
 
-    suspend fun finishLesson(lessonID: Long): Result<Unit> = safeExecute {
-        val session = appPreferences.getSession()
-
-        if (session?.role != Role.TEACHER) {
-            throw IllegalStateException("permission denied")
-        }
-
-        val lessonEntity = lessonDAO.getEntity(lessonID)
-            ?: throw IllegalStateException("the lesson is not found")
-
+    suspend fun finishLesson(lessonID: Long) {
+        val lessonEntity = lessonDAO.getEntity(lessonID) ?: throw LessonException("lesson not found")
         val nowTime = DateTimeTz.nowLocal()
-        val startTime = lessonEntity.startTime
-            ?.toDateTimeTz()
-            ?: throw IllegalStateException("the lesson start time is not specified")
+        val startTime = lessonEntity.startTime?.toDateTimeTz() ?: throw LessonException("start time is not specified")
 
         val finishedLesson = lessonEntity.copy(
             actualDuration = (nowTime - startTime).toDouble(),

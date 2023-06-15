@@ -14,7 +14,7 @@ interface DepartmentDAO : BaseDAO<DepartmentEntity> {
     @Query(FETCH_QUERY)
     fun getEntitiesFlow(): Flow<List<DepartmentEntity>>
 
-    suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
+    suspend fun clear(vararg exceptionID: Long) = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
         .forEach { entity ->
             runCatching { delete(entity) }.onFailure { cause ->

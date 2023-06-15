@@ -6,7 +6,7 @@ import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.Stud
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.model.StudentServiceCommand.Discover
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.ClearNsdDiscoveredServicesUseCase
 import com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.usecase.internal.UpdateStudentIdUseCase
-import com.nuzhnov.workcontrol.core.model.Student
+import com.nuzhnov.workcontrol.core.models.Student
 import kotlin.reflect.KClass
 import javax.inject.Inject
 import android.content.Context

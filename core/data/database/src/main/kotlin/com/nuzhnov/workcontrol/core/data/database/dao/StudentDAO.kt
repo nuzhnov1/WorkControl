@@ -22,7 +22,7 @@ interface StudentDAO : BaseDAO<StudentEntity> {
     @Query(FETCH_BY_GROUP_ID_QUERY)
     fun getEntitiesFlow(groupID: Long): Flow<List<StudentEntity>>
 
-    suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
+    suspend fun clear(vararg exceptionID: Long) = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
         .forEach { entity ->
             runCatching { delete(entity) }.onFailure { cause ->

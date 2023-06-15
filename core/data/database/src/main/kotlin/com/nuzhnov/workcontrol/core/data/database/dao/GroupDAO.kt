@@ -14,7 +14,7 @@ interface GroupDAO : BaseDAO<GroupEntity> {
     @Query(FETCH_BY_DEPARTMENT_ID_QUERY)
     fun getEntitiesFlow(departmentID: Long): Flow<List<GroupEntity>>
 
-    suspend fun clear(vararg exceptionID: Long): Unit = getEntities()
+    suspend fun clear(vararg exceptionID: Long) = getEntities()
         .filterNot { entity -> entity.id in exceptionID }
         .forEach { entity ->
             runCatching { delete(entity) }.onFailure { cause ->

@@ -58,6 +58,22 @@ internal object DatabaseModule {
         appDatabase.getParticipantDAO()
 
     @[Provides Singleton]
+    fun provideUniversityStatisticsDAO(appDatabase: AppDatabase): UniversityStatisticsDAO =
+        appDatabase.getUniversityStatisticsDAO()
+
+    @[Provides Singleton]
+    fun provideDepartmentStatisticsDAO(appDatabase: AppDatabase): DepartmentStatisticsDAO =
+        appDatabase.getDepartmentStatisticsDAO()
+
+    @[Provides Singleton]
+    fun provideGroupStatisticsDAO(appDatabase: AppDatabase): GroupStatisticsDAO =
+        appDatabase.getGroupStatisticsDAO()
+
+    @[Provides Singleton]
+    fun provideStudentStatisticsDAO(appDatabase: AppDatabase): StudentStatisticsDAO =
+        appDatabase.getStudentStatisticsDAO()
+
+    @[Provides Singleton]
     fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase = Room
         .databaseBuilder(
             context = appContext,

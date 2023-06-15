@@ -1,8 +1,9 @@
 package com.nuzhnov.workcontrol.core.lesson.domen.repository
 
-import com.nuzhnov.workcontrol.core.model.Discipline
-import com.nuzhnov.workcontrol.core.model.Lesson
-import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import com.nuzhnov.workcontrol.core.models.Lesson
+import com.nuzhnov.workcontrol.core.models.Discipline
+import com.nuzhnov.workcontrol.core.models.util.LoadResult
+import com.nuzhnov.workcontrol.core.models.util.OperationResult
 import kotlinx.coroutines.flow.Flow
 
 internal interface LessonRepository {
@@ -16,17 +17,17 @@ internal interface LessonRepository {
 
     fun getDisciplineFinishedLessonsFlow(discipline: Discipline): Flow<List<Lesson>>
 
-    suspend fun loadFinishedLessons(): LoadResult<List<Lesson>>
+    suspend fun refreshFinishedLessons(): LoadResult
 
-    suspend fun loadDisciplineFinishedLessons(discipline: Discipline): LoadResult<List<Lesson>>
+    suspend fun refreshDisciplineFinishedLessons(discipline: Discipline): LoadResult
 
-    suspend fun addLesson(lesson: Lesson): Result<Unit>
+    suspend fun addLesson(lesson: Lesson): OperationResult
 
-    suspend fun updateLesson(lesson: Lesson): Result<Unit>
+    suspend fun updateLesson(lesson: Lesson): OperationResult
 
-    suspend fun removeLesson(lesson: Lesson): Result<Unit>
+    suspend fun removeLesson(lesson: Lesson): OperationResult
 
-    suspend fun startLesson(lesson: Lesson): Result<Unit>
+    suspend fun startLesson(lesson: Lesson): OperationResult
 
-    suspend fun finishLesson(lesson: Lesson): Result<Unit>
+    suspend fun finishLesson(lesson: Lesson): OperationResult
 }

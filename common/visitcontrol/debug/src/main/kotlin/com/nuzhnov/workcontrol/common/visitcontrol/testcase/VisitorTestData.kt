@@ -8,7 +8,7 @@ internal data class VisitorTestData(
     val delayTimeMillis: Long,
     val interruptionsCount: Int
 ) {
-    override fun toString(): String =
+    override fun toString() =
         "Visitor#$id test data:\n" +
         "\tWork time in millis: $workTimeMillis;\n" +
         "\tDelay time in millis: $delayTimeMillis;\n" +

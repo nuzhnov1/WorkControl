@@ -1,30 +1,30 @@
 package com.nuzhnov.workcontrol.core.statistics.domen.repository
 
-import com.nuzhnov.workcontrol.core.model.Statistics
-import com.nuzhnov.workcontrol.core.model.Department
-import com.nuzhnov.workcontrol.core.model.Group
-import com.nuzhnov.workcontrol.core.model.Student
-import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import com.nuzhnov.workcontrol.core.models.Statistics
+import com.nuzhnov.workcontrol.core.models.Department
+import com.nuzhnov.workcontrol.core.models.Group
+import com.nuzhnov.workcontrol.core.models.Student
+import com.nuzhnov.workcontrol.core.models.util.LoadResult
 import kotlinx.coroutines.flow.Flow
 
 internal interface StatisticsRepository {
-    fun getUniversityStatisticsFlow(): Flow<LoadResult<Statistics>>
+    fun getUniversityStatisticsFlow(): Flow<Statistics?>
 
-    fun getDepartmentStatisticsFlow(department: Department): Flow<LoadResult<Statistics>>
+    fun getDepartmentStatisticsFlow(department: Department): Flow<Statistics?>
 
-    fun getGroupStatisticsFlow(group: Group): Flow<LoadResult<Statistics>>
+    fun getGroupStatisticsFlow(group: Group): Flow<Statistics?>
 
-    fun getStudentStatisticsFlow(student: Student): Flow<LoadResult<Statistics>>
+    fun getStudentStatisticsFlow(student: Student): Flow<Statistics?>
 
-    fun getCurrentStudentStatisticsFlow(): Flow<LoadResult<Statistics>>
+    fun getCurrentStudentStatisticsFlow(): Flow<Statistics?>
 
-    suspend fun loadUniversityStatistics(): LoadResult<Statistics>
+    suspend fun refreshUniversityStatistics(): LoadResult
 
-    suspend fun loadDepartmentStatistics(department: Department): LoadResult<Statistics>
+    suspend fun refreshDepartmentStatistics(department: Department): LoadResult
 
-    suspend fun loadGroupStatistics(group: Group): LoadResult<Statistics>
+    suspend fun refreshGroupStatistics(group: Group): LoadResult
 
-    suspend fun loadStudentStatistics(student: Student): LoadResult<Statistics>
+    suspend fun refreshStudentStatistics(student: Student): LoadResult
 
-    suspend fun loadCurrentStudentStatistics(): LoadResult<Statistics>
+    suspend fun refreshCurrentStudentStatistics(): LoadResult
 }

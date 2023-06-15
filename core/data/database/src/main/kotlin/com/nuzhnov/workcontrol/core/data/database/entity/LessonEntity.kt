@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.data.database.entity
 
-import com.nuzhnov.workcontrol.core.model.Lesson
+import com.nuzhnov.workcontrol.core.models.Lesson
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ForeignKey

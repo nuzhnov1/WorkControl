@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.visitservice.studentservice.domen.controller
 
-import com.nuzhnov.workcontrol.core.model.Student
+import com.nuzhnov.workcontrol.core.models.Student
 import kotlin.reflect.KClass
 
 internal interface StudentServiceController {

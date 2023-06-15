@@ -6,15 +6,16 @@ import com.nuzhnov.workcontrol.core.session.data.mapper.toSession
 import com.nuzhnov.workcontrol.core.session.data.mapper.unwrap
 import com.nuzhnov.workcontrol.core.session.domen.repository.SessionRepository
 import com.nuzhnov.workcontrol.core.session.domen.model.LoginResult
-import com.nuzhnov.workcontrol.core.session.domen.model.UserData
+import com.nuzhnov.workcontrol.core.session.domen.exception.SessionException
 import com.nuzhnov.workcontrol.core.data.api.util.Response
 import com.nuzhnov.workcontrol.core.data.mapper.toLoadResult
+import com.nuzhnov.workcontrol.core.data.mapper.toOperationResult
 import com.nuzhnov.workcontrol.core.data.mapper.unwrap
-import com.nuzhnov.workcontrol.core.model.util.LoadResult
+import com.nuzhnov.workcontrol.core.models.util.LoadResult
 import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import com.nuzhnov.workcontrol.core.util.coroutines.di.annotation.IODispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
@@ -27,67 +28,58 @@ internal class SessionRepositoryImpl @Inject constructor(
     @IODispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : SessionRepository {
 
-    override suspend fun login(
-        login: String,
-        password: String,
-        isLoginSave: Boolean
-    ): LoginResult = safeExecute(context = coroutineDispatcher) {
-        when (val authorizationResponse = sessionRemoteDataSource.login(login, password)) {
-            is Response.Success -> {
-                val session = authorizationResponse.value.toSession()
+    override suspend fun login(login: String, password: String, isLoginSave: Boolean) =
+        safeExecute(context = coroutineDispatcher) {
+            when (val authorizationResponse = sessionRemoteDataSource.login(login, password)) {
+                is Response.Success -> {
+                    val session = authorizationResponse.value.toSession()
 
-                sessionLocalDataSource.saveSession(session).getOrThrow()
+                    sessionLocalDataSource.saveSession(session)
 
-                if (isLoginSave) {
-                    loginLocalDataSource.saveLogin(login).getOrThrow()
+                    if (isLoginSave) {
+                        loginLocalDataSource.saveLogin(login)
+                    }
+
+                    when (refreshUserData()) {
+                        is LoadResult.Success -> LoginResult.Success
+                        else -> throw SessionException("failed to load the user data")
+                    }
                 }
 
-                when (val userDataLoadResult = loadUserData()) {
-                    is LoadResult.Success -> LoginResult.Success(userDataLoadResult.data)
-                    else -> throw IllegalStateException("failed to load user data")
-                }
+                is Response.Failure -> authorizationResponse.toFailureLoginResult()
             }
-
-            is Response.Failure -> authorizationResponse.toFailureLoginResult()
-        }
-    }
-        .onFailure {
+        }.onFailure {
             safeExecute(context = coroutineDispatcher) {
-                userLocalDataSource.removeUserData().getOrThrow()
-                sessionLocalDataSource.removeSession().getOrThrow()
-                loginLocalDataSource.removeLogin().getOrThrow()
+                userLocalDataSource.removeUserData()
+                sessionLocalDataSource.removeSession()
+                loginLocalDataSource.removeLogin()
             }
-        }
-        .unwrap()
+        }.unwrap()
 
-    override suspend fun logout(): Result<Unit> = safeExecute(context = coroutineDispatcher) {
-        userLocalDataSource.removeUserData().getOrThrow()
-        sessionLocalDataSource.removeSession().getOrThrow()
-    }
+    override suspend fun logout() = safeExecute(context = coroutineDispatcher) {
+        userLocalDataSource.removeUserData()
+        sessionLocalDataSource.removeSession()
+    }.toOperationResult()
 
-    override fun getUserDataFlow(): Flow<UserData?> = userLocalDataSource
+    override fun getUserDataFlow() = userLocalDataSource
         .getUserDataFlow()
         .flowOn(context = coroutineDispatcher)
 
-    override fun getSavedLoginFlow(): Flow<String?> = loginLocalDataSource
+    override fun getSavedLoginFlow() = loginLocalDataSource
         .getSavedLoginFlow()
         .flowOn(context = coroutineDispatcher)
 
-    override suspend fun loadUserData(): LoadResult<UserData> =
-        safeExecute(context = coroutineDispatcher) {
-            val session = sessionLocalDataSource
-                .getSession()
-                .getOrThrow() ?: throw IllegalStateException("unauthorized")
+    override suspend fun refreshUserData() = withContext(context = coroutineDispatcher) {
+        val session = sessionLocalDataSource.getSession() ?: throw SessionException("unauthorized")
 
-            val sessionRole = session.role
-            val getUserDataResponse = userRemoteDataSource.getUserData(sessionRole)
+        safeExecute {
+            val response = userRemoteDataSource.getUserData(session.role)
 
-            if (getUserDataResponse is Response.Success) {
-                userLocalDataSource
-                    .saveUserData(userData = getUserDataResponse.value)
-                    .getOrThrow()
+            if (response is Response.Success) {
+                userLocalDataSource.saveUserData(userData = response.value)
             }
 
-            getUserDataResponse.toLoadResult()
+            response.toLoadResult()
         }.unwrap()
+    }
 }

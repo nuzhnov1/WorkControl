@@ -1,7 +1,7 @@
 package com.nuzhnov.workcontrol.core.data.mapper
 
-import com.nuzhnov.workcontrol.core.model.Lesson
-import com.nuzhnov.workcontrol.core.model.Group
+import com.nuzhnov.workcontrol.core.models.Lesson
+import com.nuzhnov.workcontrol.core.models.Group
 import com.nuzhnov.workcontrol.core.data.api.dto.lesson.LessonDTO
 import com.nuzhnov.workcontrol.core.data.api.dto.lesson.NewLessonDTO
 import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupModelDTO
@@ -11,21 +11,7 @@ import com.nuzhnov.workcontrol.core.data.database.entity.model.GroupModel
 import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
 
 
-fun LessonDTO.toLesson(): Lesson = Lesson(
-    id = id,
-    discipline = disciplineDTO.toDiscipline(),
-    teacher = teacherDTO.toTeacher(),
-    room = roomModelDTO.toRoom(),
-    associatedGroups = groupModelDTOList.map(GroupModelDTO::toGroup),
-    theme = theme,
-    type = type,
-    startTime = startTime?.toDateTimeTz(),
-    plannedDuration = plannedDuration.toTimeSpan(),
-    actualDuration = actualDuration?.toTimeSpan(),
-    state = Lesson.State.FINISHED
-)
-
-fun LessonDTO.toLessonEntity(): LessonEntity = LessonEntity(
+fun LessonDTO.toLessonEntity() = LessonEntity(
     id = id,
     disciplineID = disciplineDTO.id,
     teacherID = teacherDTO.id,
@@ -39,7 +25,7 @@ fun LessonDTO.toLessonEntity(): LessonEntity = LessonEntity(
     isSynchronised = true
 )
 
-fun LessonDTO.toLessonModel(): LessonModel = LessonModel(
+fun LessonDTO.toLessonModel() = LessonModel(
     lessonEntity = this.toLessonEntity(),
     groupModelList = groupModelDTOList.map(GroupModelDTO::toGroupModel),
     teacherEntity = teacherDTO.toTeacherEntity(),
@@ -47,7 +33,7 @@ fun LessonDTO.toLessonModel(): LessonModel = LessonModel(
     roomModel = roomModelDTO.toRoomModel()
 )
 
-fun LessonModel.toLesson(): Lesson = Lesson(
+fun LessonModel.toLesson() = Lesson(
     id = lessonEntity.id,
     discipline = disciplineEntity.toDiscipline(),
     teacher = teacherEntity.toTeacher(),
@@ -61,7 +47,7 @@ fun LessonModel.toLesson(): Lesson = Lesson(
     state = lessonEntity.state
 )
 
-fun Lesson.toLessonEntity(): LessonEntity = LessonEntity(
+fun Lesson.toLessonEntity() = LessonEntity(
     id = id,
     disciplineID = discipline.id,
     teacherID = teacher.id,
@@ -75,7 +61,7 @@ fun Lesson.toLessonEntity(): LessonEntity = LessonEntity(
     isSynchronised = false
 )
 
-fun Lesson.toLessonModel(): LessonModel = LessonModel(
+fun Lesson.toLessonModel() = LessonModel(
     lessonEntity = this.toLessonEntity(),
     groupModelList = associatedGroups.map(Group::toGroupModel),
     teacherEntity = teacher.toTeacherEntity(),
@@ -83,7 +69,7 @@ fun Lesson.toLessonModel(): LessonModel = LessonModel(
     roomModel = room.toRoomModel()
 )
 
-fun Pair<LessonEntity, Iterable<ParticipantEntity>>.toNewLessonDTO(): NewLessonDTO =
+fun Pair<LessonEntity, Iterable<ParticipantEntity>>.toNewLessonDTO() =
     let { (lessonEntity, associatedParticipants) ->
         NewLessonDTO(
             disciplineID = lessonEntity.disciplineID,

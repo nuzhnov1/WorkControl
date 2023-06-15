@@ -2,7 +2,6 @@ package com.nuzhnov.workcontrol.core.data.preferences
 
 import com.nuzhnov.workcontrol.core.data.preferences.model.Session
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -25,11 +24,11 @@ class AppPreferences @Inject internal constructor(
     )
 
 
-    suspend fun getSession(): Session? = getSessionFlow().firstOrNull()
+    suspend fun getSession() = getSessionFlow().firstOrNull()
 
-    fun getSessionSync(): Session? = runBlocking { getSession() }
+    fun getSessionSync() = runBlocking { getSession() }
 
-    fun getSessionFlow(): Flow<Session?> = context.dataStore
+    fun getSessionFlow() = context.dataStore
         .data
         .map { preferences -> preferences[sessionPreferencesKey] }
         .map { jsonString -> jsonString?.run { sessionAdapter.fromJson(/* string = */ this) } }
@@ -46,7 +45,7 @@ class AppPreferences @Inject internal constructor(
         }
     }
 
-    fun getLoginFlow(): Flow<String?> = context.dataStore
+    fun getLoginFlow() = context.dataStore
         .data
         .map { preferences -> preferences[sessionPreferencesKey] }
 

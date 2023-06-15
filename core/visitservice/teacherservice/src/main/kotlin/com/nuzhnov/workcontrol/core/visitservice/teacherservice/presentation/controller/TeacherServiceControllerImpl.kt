@@ -4,7 +4,7 @@ import com.nuzhnov.workcontrol.core.visitservice.teacherservice.presentation.ser
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.controller.TeacherServiceController
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.usecase.internal.UpdateTeacherServiceNameUseCase
 import com.nuzhnov.workcontrol.core.visitservice.teacherservice.domen.usecase.internal.UpdateLessonIdUseCase
-import com.nuzhnov.workcontrol.core.model.Lesson
+import com.nuzhnov.workcontrol.core.models.Lesson
 import kotlin.reflect.KClass
 import javax.inject.Inject
 import android.content.Context
@@ -53,7 +53,7 @@ internal class TeacherServiceControllerImpl @Inject constructor(
     )
 
 
-    companion object {
+    private companion object {
         const val MIN_SERVICE_ID = 1
         const val MAX_SERVICE_ID = 100
     }

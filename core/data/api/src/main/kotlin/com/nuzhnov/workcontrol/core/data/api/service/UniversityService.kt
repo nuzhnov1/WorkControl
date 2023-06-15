@@ -2,7 +2,7 @@ package com.nuzhnov.workcontrol.core.data.api.service
 
 import com.nuzhnov.workcontrol.core.data.api.dto.university.*
 import com.nuzhnov.workcontrol.core.data.api.annotation.PermittedTo
-import com.nuzhnov.workcontrol.core.model.Role
+import com.nuzhnov.workcontrol.core.models.Role
 import retrofit2.http.*
 
 interface UniversityService {

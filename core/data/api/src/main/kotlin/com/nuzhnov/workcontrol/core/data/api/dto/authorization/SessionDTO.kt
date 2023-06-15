@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.data.api.dto.authorization
 
-import com.nuzhnov.workcontrol.core.model.Role
+import com.nuzhnov.workcontrol.core.models.Role
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
