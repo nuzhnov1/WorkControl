@@ -3,18 +3,18 @@ package com.nuzhnov.workcontrol.core.data.mapper
 import com.nuzhnov.workcontrol.core.models.Participant
 import com.nuzhnov.workcontrol.core.models.Lesson
 import com.nuzhnov.workcontrol.core.models.Student
-import com.nuzhnov.workcontrol.core.data.api.dto.lesson.ParticipantModelDTO
-import com.nuzhnov.workcontrol.core.data.api.dto.lesson.ParticipantLessonModelDTO
+import com.nuzhnov.workcontrol.core.data.api.dto.lesson.ParticipantDTOModel
+import com.nuzhnov.workcontrol.core.data.api.dto.lesson.ParticipantLessonDTOModel
 import com.nuzhnov.workcontrol.core.data.api.dto.lesson.NewParticipantDTO
 import com.nuzhnov.workcontrol.core.data.api.dto.lesson.UpdatedParticipantDTO
 import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
-import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantModel
-import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantLessonModel
-import com.nuzhnov.workcontrol.core.data.database.entity.model.update.ParticipantUpdatableModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantEntityModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.ParticipantWithLessonEntityModel
+import com.nuzhnov.workcontrol.core.data.database.entity.partial.ParticipantPartialEntity
 
 
-fun ParticipantModelDTO.toParticipantEntity(lessonID: Long) = ParticipantEntity(
-    studentID = studentModelDTO.studentDTO.id,
+fun ParticipantDTOModel.toParticipantEntity(lessonID: Long) = ParticipantEntity(
+    studentID = studentDTOModel.studentDTO.id,
     lessonID = lessonID,
     isActive = false,
     lastVisit = null,
@@ -30,7 +30,7 @@ fun ParticipantModelDTO.toParticipantEntity(lessonID: Long) = ParticipantEntity(
     isSynchronized = true
 )
 
-fun ParticipantLessonModelDTO.toParticipantEntity(studentID: Long) = ParticipantEntity(
+fun ParticipantLessonDTOModel.toParticipantEntity(studentID: Long) = ParticipantEntity(
     studentID = studentID,
     lessonID = lessonDTO.id,
     isActive = false,
@@ -74,8 +74,8 @@ fun ParticipantEntity.toUpdatedParticipantDTO() = UpdatedParticipantDTO(
     note = note
 )
 
-fun ParticipantModel.toParticipant(lesson: Lesson) = Participant(
-    student = studentModel.toStudent(),
+fun ParticipantEntityModel.toParticipant(lesson: Lesson) = Participant(
+    student = studentEntityModel.toStudent(),
     lesson = lesson,
     isActive = participantEntity.isActive,
     totalVisitDuration = participantEntity.totalVisitDuration.toTimeSpan(),
@@ -89,9 +89,9 @@ fun ParticipantModel.toParticipant(lesson: Lesson) = Participant(
     note = participantEntity.note
 )
 
-fun ParticipantLessonModel.toParticipant(student: Student) = Participant(
+fun ParticipantWithLessonEntityModel.toParticipant(student: Student) = Participant(
     student = student,
-    lesson = lessonModel.toLesson(),
+    lesson = lessonEntityModel.toLesson(),
     isActive = participantEntity.isActive,
     totalVisitDuration = participantEntity.totalVisitDuration.toTimeSpan(),
     isMarked = participantEntity.isMarked,
@@ -104,7 +104,7 @@ fun ParticipantLessonModel.toParticipant(student: Student) = Participant(
     note = participantEntity.note
 )
 
-fun Participant.toParticipantUpdatableModel() = ParticipantUpdatableModel(
+fun Participant.toParticipantPartialEntity() = ParticipantPartialEntity(
     studentID = student.id,
     lessonID = lesson.id,
     isMarked = isMarked,

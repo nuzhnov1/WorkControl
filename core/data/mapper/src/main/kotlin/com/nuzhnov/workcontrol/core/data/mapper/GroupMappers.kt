@@ -3,9 +3,9 @@ package com.nuzhnov.workcontrol.core.data.mapper
 import com.nuzhnov.workcontrol.core.models.Group
 import com.nuzhnov.workcontrol.core.models.Department
 import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupDTO
-import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupModelDTO
+import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupDTOModel
 import com.nuzhnov.workcontrol.core.data.database.entity.GroupEntity
-import com.nuzhnov.workcontrol.core.data.database.entity.model.GroupModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.GroupEntityModel
 
 
 fun GroupDTO.toGroupEntity(departmentID: Long) = GroupEntity(
@@ -15,19 +15,19 @@ fun GroupDTO.toGroupEntity(departmentID: Long) = GroupEntity(
     departmentID = departmentID
 )
 
-fun GroupModelDTO.toGroup() = Group(
+fun GroupDTOModel.toGroup() = Group(
     id = groupDTO.id,
     name = groupDTO.name,
     course = groupDTO.course,
     department = departmentDTO.toDepartment()
 )
 
-fun GroupModelDTO.toGroupModel() = GroupModel(
+fun GroupDTOModel.toGroupEntityModel() = GroupEntityModel(
     groupEntity = this.toGroupEntity(),
     departmentEntity = departmentDTO.toDepartmentEntity()
 )
 
-fun GroupModelDTO.toGroupEntity() = GroupEntity(
+fun GroupDTOModel.toGroupEntity() = GroupEntity(
     id = groupDTO.id,
     name = groupDTO.name,
     course = groupDTO.course,
@@ -41,7 +41,7 @@ fun GroupEntity.toGroup(department: Department) = Group(
     department = department
 )
 
-fun GroupModel.toGroup() = Group(
+fun GroupEntityModel.toGroup() = Group(
     id = groupEntity.id,
     name = groupEntity.name,
     course = groupEntity.course,
@@ -55,7 +55,7 @@ fun Group.toGroupEntity() = GroupEntity(
     departmentID = department.id
 )
 
-fun Group.toGroupModel() = GroupModel(
+fun Group.toGroupEntityModel() = GroupEntityModel(
     groupEntity = this.toGroupEntity(),
     departmentEntity = department.toDepartmentEntity()
 )

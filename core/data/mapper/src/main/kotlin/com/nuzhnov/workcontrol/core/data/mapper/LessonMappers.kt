@@ -4,10 +4,10 @@ import com.nuzhnov.workcontrol.core.models.Lesson
 import com.nuzhnov.workcontrol.core.models.Group
 import com.nuzhnov.workcontrol.core.data.api.dto.lesson.LessonDTO
 import com.nuzhnov.workcontrol.core.data.api.dto.lesson.NewLessonDTO
-import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupModelDTO
+import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupDTOModel
 import com.nuzhnov.workcontrol.core.data.database.entity.LessonEntity
-import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonModel
-import com.nuzhnov.workcontrol.core.data.database.entity.model.GroupModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.LessonEntityModel
+import com.nuzhnov.workcontrol.core.data.database.entity.model.GroupEntityModel
 import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
 
 
@@ -15,7 +15,7 @@ fun LessonDTO.toLessonEntity() = LessonEntity(
     id = id,
     disciplineID = disciplineDTO.id,
     teacherID = teacherDTO.id,
-    roomID = roomModelDTO.roomDTO.id,
+    roomID = roomDTOModel.roomDTO.id,
     theme = theme,
     type = type,
     startTime = startTime,
@@ -25,20 +25,20 @@ fun LessonDTO.toLessonEntity() = LessonEntity(
     isSynchronised = true
 )
 
-fun LessonDTO.toLessonModel() = LessonModel(
+fun LessonDTO.toLessonEntityModel() = LessonEntityModel(
     lessonEntity = this.toLessonEntity(),
-    groupModelList = groupModelDTOList.map(GroupModelDTO::toGroupModel),
+    groupEntityModelList = groupDTOModelList.map(GroupDTOModel::toGroupEntityModel),
     teacherEntity = teacherDTO.toTeacherEntity(),
     disciplineEntity = disciplineDTO.toDisciplineEntity(),
-    roomModel = roomModelDTO.toRoomModel()
+    roomEntityModel = roomDTOModel.toRoomEntityModel()
 )
 
-fun LessonModel.toLesson() = Lesson(
+fun LessonEntityModel.toLesson() = Lesson(
     id = lessonEntity.id,
     discipline = disciplineEntity.toDiscipline(),
     teacher = teacherEntity.toTeacher(),
-    room = roomModel.toRoom(),
-    associatedGroups = groupModelList.map(GroupModel::toGroup),
+    room = roomEntityModel.toRoom(),
+    associatedGroups = groupEntityModelList.map(GroupEntityModel::toGroup),
     theme = lessonEntity.theme,
     type = lessonEntity.type,
     startTime = lessonEntity.startTime?.toDateTimeTz(),
@@ -61,12 +61,12 @@ fun Lesson.toLessonEntity() = LessonEntity(
     isSynchronised = false
 )
 
-fun Lesson.toLessonModel() = LessonModel(
+fun Lesson.toLessonEntityModel() = LessonEntityModel(
     lessonEntity = this.toLessonEntity(),
-    groupModelList = associatedGroups.map(Group::toGroupModel),
+    groupEntityModelList = associatedGroups.map(Group::toGroupEntityModel),
     teacherEntity = teacher.toTeacherEntity(),
     disciplineEntity = discipline.toDisciplineEntity(),
-    roomModel = room.toRoomModel()
+    roomEntityModel = room.toRoomEntityModel()
 )
 
 fun Pair<LessonEntity, Iterable<ParticipantEntity>>.toNewLessonDTO() =
