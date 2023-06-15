@@ -2,8 +2,8 @@ package com.nuzhnov.workcontrol.core.data.api.dto.lesson
 
 import com.nuzhnov.workcontrol.core.data.api.dto.university.DisciplineDTO
 import com.nuzhnov.workcontrol.core.data.api.dto.university.TeacherDTO
-import com.nuzhnov.workcontrol.core.data.api.dto.university.RoomModelDTO
-import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupModelDTO
+import com.nuzhnov.workcontrol.core.data.api.dto.university.RoomDTOModel
+import com.nuzhnov.workcontrol.core.data.api.dto.university.GroupDTOModel
 import com.nuzhnov.workcontrol.core.models.Lesson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -76,8 +76,8 @@ data class LessonDTO(
     val id: Long,
     @Json(name = "discipline") val disciplineDTO: DisciplineDTO,
     @Json(name = "teacher") val teacherDTO: TeacherDTO,
-    @Json(name = "room") val roomModelDTO: RoomModelDTO,
-    @Json(name = "groups") val groupModelDTOList: List<GroupModelDTO>,
+    @Json(name = "room") val roomDTOModel: RoomDTOModel,
+    @Json(name = "groups") val groupDTOModelList: List<GroupDTOModel>,
     val theme: String,
     val type: Lesson.Type,
     @Json(name = "start_time") val startTime: Long?,

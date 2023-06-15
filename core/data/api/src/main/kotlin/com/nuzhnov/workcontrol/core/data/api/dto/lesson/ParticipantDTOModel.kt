@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.data.api.dto.lesson
 
-import com.nuzhnov.workcontrol.core.data.api.dto.user.StudentModelDTO
+import com.nuzhnov.workcontrol.core.data.api.dto.user.StudentDTOModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -40,8 +40,8 @@ import com.squareup.moshi.JsonClass
  * }
  */
 @JsonClass(generateAdapter = true)
-data class ParticipantModelDTO(
-    @Json(name = "student") val studentModelDTO: StudentModelDTO,
+data class ParticipantDTOModel(
+    @Json(name = "student") val studentDTOModel: StudentDTOModel,
     @Json(name = "total_visit_duration") val totalVisitDuration: Double,
     @Json(name = "is_marked") val isMarked: Boolean,
     @Json(name = "theory_assessment") val theoryAssessment: Byte?,

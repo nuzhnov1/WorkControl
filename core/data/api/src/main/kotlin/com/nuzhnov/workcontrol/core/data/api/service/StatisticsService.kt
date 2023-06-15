@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface StatisticsService {
-    @[GET("/stat?all") PermittedTo(Role.TEACHER)]
+    @[GET("/stat") PermittedTo(Role.TEACHER)]
     suspend fun getUniversityStatistics(): StatisticsDTO
 
     @[GET("/stat") PermittedTo(Role.TEACHER)]

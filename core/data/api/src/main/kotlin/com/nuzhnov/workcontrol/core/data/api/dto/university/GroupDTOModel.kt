@@ -19,7 +19,7 @@ import com.squareup.moshi.JsonClass
  * }
  */
 @JsonClass(generateAdapter = true)
-data class GroupModelDTO(
+data class GroupDTOModel(
     @Json(name = "group") val groupDTO: GroupDTO,
     @Json(name = "department") val departmentDTO: DepartmentDTO
 )

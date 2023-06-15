@@ -18,7 +18,7 @@ import com.squareup.moshi.JsonClass
  * }
  */
 @JsonClass(generateAdapter = true)
-data class RoomModelDTO(
+data class RoomDTOModel(
     @Json(name = "room") val roomDTO: RoomDTO,
     @Json(name = "building") val buildingDTO: BuildingDTO
 )

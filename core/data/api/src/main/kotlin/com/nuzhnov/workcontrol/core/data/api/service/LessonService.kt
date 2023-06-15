@@ -30,18 +30,18 @@ interface LessonService {
     @[GET("/participants") PermittedTo(Role.TEACHER)]
     suspend fun getParticipantsOfFinishedTeacherLesson(
         @Query("lesson_id") lessonID: Long
-    ): List<ParticipantModelDTO>
+    ): List<ParticipantDTOModel>
 
     // Примечание: информация о посещениях указанного студента извлекается только относительно
     // занятий данного преподавателя по его токену
     @[GET("/participants") PermittedTo(Role.TEACHER)]
     suspend fun getStudentParticipationOfFinishedTeacherLessons(
         @Query("student_id") studentID: Long
-    ): List<ParticipantLessonModelDTO>
+    ): List<ParticipantLessonDTOModel>
 
     // Примечание: id студента извлекается на основе токена в заголовке пакета
     @[GET("/participants") PermittedTo(Role.STUDENT)]
-    suspend fun getStudentParticipationOfFinishedLessons(): List<ParticipantLessonModelDTO>
+    suspend fun getStudentParticipationOfFinishedLessons(): List<ParticipantLessonDTOModel>
 
     // Примечание: на сервере должна осуществляться проверка на то, что участники могут обновляться
     // только для занятий данного преподавателя
