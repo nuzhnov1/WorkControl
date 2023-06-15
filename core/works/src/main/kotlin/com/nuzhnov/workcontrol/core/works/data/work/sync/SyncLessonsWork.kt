@@ -1,6 +1,6 @@
 package com.nuzhnov.workcontrol.core.works.data.work.sync
 
-import com.nuzhnov.workcontrol.core.data.api.service.SyncService
+import com.nuzhnov.workcontrol.core.data.api.service.LessonService
 import com.nuzhnov.workcontrol.core.data.database.dao.LessonDAO
 import com.nuzhnov.workcontrol.core.data.database.dao.ParticipantDAO
 import com.nuzhnov.workcontrol.core.data.database.entity.ParticipantEntity
@@ -12,7 +12,7 @@ import com.nuzhnov.workcontrol.core.util.coroutines.util.safeExecute
 import javax.inject.Inject
 
 internal class SyncLessonsWork @Inject constructor(
-    private val syncService: SyncService,
+    private val lessonService: LessonService,
     private val lessonDAO: LessonDAO,
     private val participantDAO: ParticipantDAO,
     private val appPreferences: AppPreferences
@@ -40,7 +40,7 @@ internal class SyncLessonsWork @Inject constructor(
 
             entityList
                 .map(ParticipantEntity::toUpdatedParticipantDTO)
-                .let { dtoList -> syncService.postUpdatedParticipants(dtoList) }
+                .let { dtoList -> lessonService.postUpdatedParticipants(dtoList) }
 
             entityList
                 .map { entity -> entity.copy(isSynchronized = true) }
@@ -56,17 +56,17 @@ internal class SyncLessonsWork @Inject constructor(
                 return@let
             }
 
-            val lessonEntityIDList = entityList.map { entity -> entity.id }
-            val participantEntityList = participantDAO.getEntities(lessonEntityIDList)
+            val idList = entityList.map { entity -> entity.id }
+            val participantEntityList = participantDAO.getEntities(idList)
 
             entityList
                 .map { lessonEntity ->
                     participantEntityList
-                        .filter { participantEntity -> participantEntity.lessonID == lessonEntity.id }
+                        .filter { entity -> entity.lessonID == lessonEntity.id }
                         .let { associatedParticipants -> lessonEntity to associatedParticipants }
                         .toNewLessonDTO()
                 }
-                .let { dtoList -> syncService.postNewLessons(newLessonDTOList = dtoList) }
+                .let { dtoList -> lessonService.postNewLessons(dtoList) }
 
             entityList
                 .map { entity -> entity.copy(isSynchronised = true) }
