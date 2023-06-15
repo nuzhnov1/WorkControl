@@ -3,6 +3,7 @@ package com.nuzhnov.workcontrol.core.models
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.TimeSpan
 import com.soywiz.klock.hours
+import com.soywiz.klock.minutes
 
 data class Lesson(
     val id: Long,
@@ -24,6 +25,7 @@ data class Lesson(
 
     private fun checkConstraints() {
         checkThemeConstraints()
+        checkPlannedDurationConstraints()
     }
 
     private fun checkThemeConstraints() {
@@ -31,6 +33,14 @@ data class Lesson(
             throw IllegalArgumentException(
                 "the length of the theme isn't in the range " +
                 "[${THEME_LENGTH_RANGE.first}:${THEME_LENGTH_RANGE.last}]"
+            )
+        }
+    }
+
+    private fun checkPlannedDurationConstraints() {
+        if (plannedDuration < MIN_PLANNED_DURATION) {
+            throw IllegalArgumentException(
+                "the planned duration of the lesson is less than $MIN_PLANNED_DURATION"
             )
         }
     }
@@ -52,5 +62,6 @@ data class Lesson(
     companion object {
         val THEME_LENGTH_RANGE = 1..150
         val DEFAULT_PLANNED_DURATION = 1.5.hours
+        val MIN_PLANNED_DURATION = 30.minutes
     }
 }
